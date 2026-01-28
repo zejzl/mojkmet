@@ -1,6 +1,3 @@
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-
 export default function AboutPage() {
   const values = [
     {
@@ -47,10 +44,7 @@ export default function AboutPage() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      
-      <main className="flex-grow">
+    <main className="flex-grow">
         {/* Hero Section */}
         <section className="bg-gradient-to-r from-green-600 to-green-700 text-white py-16">
           <div className="container mx-auto px-4 text-center">
@@ -163,8 +157,5 @@ export default function AboutPage() {
           </div>
         </section>
       </main>
-
-      <Footer />
-    </div>
   );
 }
