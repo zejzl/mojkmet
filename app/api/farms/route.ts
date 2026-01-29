@@ -1,8 +1,9 @@
 import { sql } from '@vercel/postgres';
 import { NextResponse } from 'next/server';
 
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-export const maxDuration = 10; // Timeout after 10 seconds
+export const maxDuration = 10;
 
 export async function GET() {
   try {
