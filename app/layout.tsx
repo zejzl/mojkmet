@@ -4,6 +4,7 @@ import './globals.css'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import CookieNotice from '@/components/CookieNotice'
+import SessionProvider from '@/components/SessionProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -21,10 +22,12 @@ export default function RootLayout({
   return (
     <html lang="sl">
       <body className={inter.className}>
-        <Header />
-        {children}
-        <Footer />
-        <CookieNotice />
+        <SessionProvider>
+          <Header />
+          {children}
+          <Footer />
+          <CookieNotice />
+        </SessionProvider>
       </body>
     </html>
   )

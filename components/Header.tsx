@@ -2,9 +2,11 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { useSession, signOut } from 'next-auth/react'
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { data: session, status } = useSession()
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -36,18 +38,40 @@ export default function Header() {
 
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link 
-              href="/login" 
-              className="text-gray-700 hover:text-green-600 transition"
-            >
-              Prijava
-            </Link>
-            <Link 
-              href="/register" 
-              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
-            >
-              Registracija
-            </Link>
+            {status === 'loading' ? (
+              <div className="text-gray-500">Nalaganje...</div>
+            ) : session ? (
+              <div className="flex items-center space-x-4">
+                <span className="text-gray-700">Pozdravljeni, {session.user?.name || session.user?.email}</span>
+                <Link
+                  href="/dashboard"
+                  className="text-gray-700 hover:text-green-600 transition"
+                >
+                  Nadzorna plošča
+                </Link>
+                <button
+                  onClick={() => signOut()}
+                  className="text-gray-700 hover:text-green-600 transition"
+                >
+                  Odjava
+                </button>
+              </div>
+            ) : (
+              <>
+                <Link 
+                  href="/login" 
+                  className="text-gray-700 hover:text-green-600 transition"
+                >
+                  Prijava
+                </Link>
+                <Link 
+                  href="/register" 
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+                >
+                  Registracija
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -81,15 +105,31 @@ export default function Header() {
               <Link href="/about" className="text-gray-700 hover:text-green-600 transition">
                 O nas
               </Link>
-              <Link href="/login" className="text-gray-700 hover:text-green-600 transition">
-                Prijava
-              </Link>
-              <Link 
-                href="/register" 
-                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-center"
-              >
-                Registracija
-              </Link>
+              {session ? (
+                <>
+                  <Link href="/dashboard" className="text-gray-700 hover:text-green-600 transition">
+                    Nadzorna plošča
+                  </Link>
+                  <button
+                    onClick={() => signOut()}
+                    className="text-left text-gray-700 hover:text-green-600 transition"
+                  >
+                    Odjava
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" className="text-gray-700 hover:text-green-600 transition">
+                    Prijava
+                  </Link>
+                  <Link 
+                    href="/register" 
+                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-center"
+                  >
+                    Registracija
+                  </Link>
+                </>
+              )}
             </nav>
           </div>
         )}
