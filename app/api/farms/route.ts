@@ -1,34 +1,32 @@
-import { sql } from '@vercel/postgres';
+import { neon } from '@neondatabase/serverless';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 10;
 
+const sql = neon(process.env.DATABASE_URL!);
+
 export async function GET() {
   try {
     // Check if database URL is configured
-    if (!process.env.POSTGRES_URL) {
+    if (!process.env.DATABASE_URL) {
       return NextResponse.json(
-        { error: 'Database not configured. Set POSTGRES_URL environment variable.' },
+        { error: 'Database not configured. Set DATABASE_URL environment variable.' },
         { status: 500 }
       );
     }
 
-    const { rows } = await sql`
+    const rows = await sql`
       SELECT 
         id,
         name,
-        slug,
         description,
         city,
-        rating,
-        total_reviews,
-        is_verified,
-        is_active
+        verified,
+        "createdAt"
       FROM farms
-      WHERE is_active = true AND is_verified = true
-      ORDER BY rating DESC, total_reviews DESC
+      ORDER BY "createdAt" DESC
     `;
     
     return NextResponse.json({ farms: rows });
@@ -38,7 +36,7 @@ export async function GET() {
       { 
         error: 'Failed to fetch farms',
         details: error instanceof Error ? error.message : 'Unknown error',
-        env_check: !!process.env.POSTGRES_URL
+        env_check: !!process.env.DATABASE_URL
       },
       { status: 500 }
     );
