@@ -8,7 +8,7 @@
 ## What I Did:
 
 ### 1. ✅ Updated Database Credentials
-- Updated `.env.local` with correct Neon password: `npg_biZp82eKaEvc`
+- Updated `.env.local` with correct Neon password from Neon dashboard
 - Added `channel_binding=require` parameter (but removed it as it's not needed)
 - Tested connection: **✅ SUCCESS**
 
@@ -65,8 +65,10 @@ Pushed to GitHub → Will auto-deploy to Vercel
 
 **Value:**
 ```
-postgresql://neondb_owner:npg_biZp82eKaEvc@ep-little-dust-ag4wbjxz-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require
+postgresql://neondb_owner:YOUR_NEON_PASSWORD@ep-little-dust-ag4wbjxz-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require
 ```
+
+**Get your password from:** Neon dashboard → Select your database → Connection Details
 
 5. Select **all environments** (Production, Preview, Development)
 6. Click **Save**

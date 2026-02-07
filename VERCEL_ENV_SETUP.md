@@ -17,8 +17,10 @@ https://vercel.com/dashboard
 
 **Value:**
 ```
-postgresql://neondb_owner:npg_biZp82eKaEvc@ep-little-dust-ag4wbjxz-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require
+postgresql://neondb_owner:YOUR_NEON_PASSWORD@ep-little-dust-ag4wbjxz-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require
 ```
+
+**⚠️ SECURITY:** Replace `YOUR_NEON_PASSWORD` with your actual Neon database password from the Neon dashboard.
 
 **Database Endpoint:** `ep-little-dust-ag4wbjxz`  
 **Branch:** `br-mute-thunder-ag8jjk1n`
