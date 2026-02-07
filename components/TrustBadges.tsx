@@ -1,9 +1,9 @@
 export default function TrustBadges() {
   const stats = [
-    { value: '100+', label: 'Kmetij', icon: '🏡' },
-    { value: '500+', label: 'Srečnih strank', icon: '😊' },
-    { value: '1000+', label: 'Dostavljenih naročil', icon: '📦' },
-    { value: '4.9', label: 'Povprečna ocena', icon: '⭐' },
+    { value: '10+', label: 'Kmetij', icon: '🏡' },
+    { value: 'Kmalu', label: 'Odpiramo', icon: '🚀' },
+    { value: '100%', label: 'Svežina', icon: '✨' },
+    { value: 'Lokalno', label: 'Slovenski kmetje', icon: '🇸🇮' },
   ]
 
   const features = [
