@@ -1,38 +1,67 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
+interface Farm {
+  id: string
+  name: string
+  description: string | null
+  city: string
+  verified: boolean
+}
+
 export default function FeaturedFarms() {
-  const farms = [
-    {
-      id: 1,
-      name: 'Kmetija Novak',
-      location: 'Kranj, Gorenjska',
-      products: 'Mleko, sir, jogurt',
-      rating: 4.9,
-      reviews: 42,
-      verified: true,
-      deliveryTime: '1-2 dni',
-    },
-    {
-      id: 2,
-      name: 'Ekološka kmetija Zupan',
-      location: 'Maribor, Štajerska',
-      products: 'Zelenjava, sadje, jajca',
-      rating: 4.8,
-      reviews: 38,
-      verified: true,
-      deliveryTime: '1 dan',
-    },
-    {
-      id: 3,
-      name: 'Čebelarstvo Košir',
-      location: 'Ljubljana, Osrednjeslovenska',
-      products: 'Med, matični mleček, propolis',
-      rating: 5.0,
-      reviews: 67,
-      verified: true,
-      deliveryTime: '2-3 dni',
-    },
-  ]
+  const [farms, setFarms] = useState<Farm[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    fetch('/api/farms')
+      .then(res => res.json())
+      .then(data => {
+        if (data.farms && data.farms.length > 0) {
+          setFarms(data.farms.slice(0, 3)) // Show max 3 farms
+        } else {
+          // Fallback to mock data if no real farms
+          setFarms([{
+            id: 'mock-1',
+            name: 'Kmalu',
+            description: 'Kmalu bomo dodali prve kmetije',
+            city: 'Slovenija',
+            verified: false,
+          }])
+        }
+        setLoading(false)
+      })
+      .catch(err => {
+        console.error('Failed to fetch farms:', err)
+        setError('Napaka pri nalaganju kmetij')
+        setLoading(false)
+      })
+  }, [])
+
+  if (loading) {
+    return (
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="text-4xl mb-4">⏳</div>
+          <p className="text-gray-600">Nalagam kmetije...</p>
+        </div>
+      </section>
+    )
+  }
+
+  if (error) {
+    return (
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="text-4xl mb-4">😔</div>
+          <p className="text-gray-600">{error}</p>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section className="py-20 bg-gray-50">
@@ -87,23 +116,24 @@ export default function FeaturedFarms() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  {farm.location}
+                  {farm.city}
                 </div>
 
-                <p className="text-sm text-gray-600 mb-4">
-                  {farm.products}
-                </p>
+                {farm.description && (
+                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                    {farm.description}
+                  </p>
+                )}
 
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <span className="text-yellow-400 mr-1">★</span>
-                    <span className="font-semibold text-gray-900">{farm.rating}</span>
-                    <span className="text-sm text-gray-500 ml-1">({farm.reviews})</span>
+                {farm.verified ? (
+                  <div className="text-sm text-green-600 font-semibold">
+                    Verificirana kmetija ✓
                   </div>
-                  <div className="text-sm text-gray-600">
-                    {farm.deliveryTime}
+                ) : (
+                  <div className="text-sm text-amber-600 font-semibold">
+                    Kmalu dostopna
                   </div>
-                </div>
+                )}
               </div>
             </Link>
           ))}
