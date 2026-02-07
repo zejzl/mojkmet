@@ -19,14 +19,18 @@ export async function GET() {
 
     const rows = await sql`
       SELECT 
-        id,
-        name,
-        description,
-        city,
-        verified,
-        "createdAt"
-      FROM farms
-      ORDER BY "createdAt" DESC
+        f.id,
+        f.name,
+        f.description,
+        f.city,
+        f.verified as is_verified,
+        f."createdAt",
+        COALESCE(AVG(r.rating), 0)::numeric(3,1) as rating,
+        COUNT(r.id)::integer as total_reviews
+      FROM farms f
+      LEFT JOIN reviews r ON f.id = r."farmId"
+      GROUP BY f.id, f.name, f.description, f.city, f.verified, f."createdAt"
+      ORDER BY f."createdAt" DESC
     `;
     
     return NextResponse.json({ farms: rows });
