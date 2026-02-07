@@ -47,10 +47,20 @@ export async function POST(request: Request) {
         role: user.role,
       }
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Registration error:', error)
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      meta: error.meta,
+    })
+    
+    // Return more specific error for debugging
     return NextResponse.json(
-      { error: 'Something went wrong' },
+      { 
+        error: 'Something went wrong',
+        debug: process.env.NODE_ENV === 'development' ? error.message : undefined
+      },
       { status: 500 }
     )
   }
