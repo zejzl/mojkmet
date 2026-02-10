@@ -55,12 +55,13 @@ export async function POST(request: Request) {
       meta: error.meta,
     })
     
-    // Return more specific error for debugging
+    // Return error with enough detail to debug
+    const errorMessage = error.code === 'P2002'
+      ? 'Ta email je ze v uporabi'
+      : `Napaka pri registraciji: ${error.message || 'Unknown error'}`
+
     return NextResponse.json(
-      { 
-        error: 'Something went wrong',
-        debug: process.env.NODE_ENV === 'development' ? error.message : undefined
-      },
+      { error: errorMessage, code: error.code || 'UNKNOWN' },
       { status: 500 }
     )
   }
