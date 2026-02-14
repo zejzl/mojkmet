@@ -3,6 +3,8 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { useCart } from '@/lib/cart-context'
+import Toast from '@/components/Toast'
 
 interface Product {
   id: string
@@ -47,6 +49,24 @@ function ProductsContent() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState(searchQuery || '')
+  const [showToast, setShowToast] = useState(false)
+  const [toastMessage, setToastMessage] = useState('')
+  
+  const { addItem } = useCart()
+
+  function handleAddToCart(product: Product) {
+    addItem({
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      unit: product.unit,
+      farmName: product.farm_name,
+      categoryIcon: product.category_icon,
+      stock: product.stock,
+    })
+    setToastMessage('Dodano v košarico!')
+    setShowToast(true)
+  }
 
   useEffect(() => {
     async function fetchProducts() {
@@ -82,7 +102,9 @@ function ProductsContent() {
   }
 
   return (
-    <main className="flex-grow">
+    <>
+      <Toast message={toastMessage} show={showToast} onClose={() => setShowToast(false)} />
+      <main className="flex-grow">
       {/* Hero */}
       <section className="bg-gradient-to-r from-green-600 to-green-700 text-white py-12">
         <div className="container mx-auto px-4 text-center">
@@ -182,14 +204,18 @@ function ProductsContent() {
                   key={product.id}
                   className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition border border-gray-100"
                 >
-                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 h-40 flex items-center justify-center text-7xl">
-                    {product.category_icon}
-                  </div>
+                  <Link href={`/products/${product.id}`} className="block">
+                    <div className="bg-gradient-to-br from-gray-50 to-gray-100 h-40 flex items-center justify-center text-7xl">
+                      {product.category_icon}
+                    </div>
+                  </Link>
                   <div className="p-5">
                     <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-bold text-gray-900 text-lg leading-tight">
-                        {product.name}
-                      </h3>
+                      <Link href={`/products/${product.id}`} className="flex-1">
+                        <h3 className="font-bold text-gray-900 text-lg leading-tight hover:text-green-700 transition">
+                          {product.name}
+                        </h3>
+                      </Link>
                       <div className="text-green-700 font-bold text-lg whitespace-nowrap ml-3">
                         {product.price.toFixed(2)} EUR
                         <span className="text-xs text-gray-500 font-normal">/{product.unit}</span>
@@ -220,10 +246,11 @@ function ProductsContent() {
                         {product.stock > 10 ? 'Na zalogi' : product.stock > 0 ? `Se ${product.stock} na zalogi` : 'Razprodano'}
                       </span>
                       <button
-                        className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition disabled:opacity-50"
+                        onClick={() => handleAddToCart(product)}
+                        className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={product.stock === 0}
                       >
-                        V kosarco
+                        V košarico
                       </button>
                     </div>
                   </div>
@@ -234,5 +261,6 @@ function ProductsContent() {
         </div>
       </section>
     </main>
+    </>
   )
 }
