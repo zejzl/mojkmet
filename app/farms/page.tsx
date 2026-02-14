@@ -101,9 +101,12 @@ export default function FarmsPage() {
                         <span className="text-green-600 text-sm font-medium">✓ Verificirano</span>
                       )}
                     </div>
-                    <button className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition mt-4">
+                    <a
+                      href={`/farms/${farm.id}`}
+                      className="block w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition mt-4 text-center"
+                    >
                       Obišči kmetijo
-                    </button>
+                    </a>
                   </div>
                 </div>
               ))}

@@ -1,11 +1,36 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+
+interface Stats {
+  farmCount: number
+  productCount: number
+  orderCount: number
+}
 
 export default function Hero() {
   const [searchQuery, setSearchQuery] = useState('')
   const [location, setLocation] = useState('')
+  const [stats, setStats] = useState<Stats | null>(null)
+  const [statsLoading, setStatsLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const response = await fetch('/api/stats')
+        if (!response.ok) throw new Error('Failed to fetch stats')
+        const data = await response.json()
+        setStats(data)
+      } catch (error) {
+        console.error('Error fetching stats:', error)
+      } finally {
+        setStatsLoading(false)
+      }
+    }
+    
+    fetchStats()
+  }, [])
 
   return (
     <section className="relative bg-gradient-to-br from-green-50 via-blue-50 to-amber-50 py-20 overflow-hidden">
@@ -88,12 +113,16 @@ export default function Hero() {
             
             {/* Floating Stats Cards */}
             <div className="absolute -bottom-6 -left-6 bg-white rounded-xl shadow-lg p-4">
-              <div className="text-3xl font-bold text-green-600">100+</div>
+              <div className="text-3xl font-bold text-green-600">
+                {statsLoading ? '...' : `${stats?.farmCount || 0}+`}
+              </div>
               <div className="text-sm text-gray-600">Kmetij</div>
             </div>
             
             <div className="absolute -top-6 -right-6 bg-white rounded-xl shadow-lg p-4">
-              <div className="text-3xl font-bold text-amber-600">500+</div>
+              <div className="text-3xl font-bold text-amber-600">
+                {statsLoading ? '...' : `${stats?.orderCount || 0}+`}
+              </div>
               <div className="text-sm text-gray-600">Dostav</div>
             </div>
           </div>

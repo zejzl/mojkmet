@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -22,6 +23,12 @@ export default function RootLayout({
   return (
     <html lang="sl">
       <body className={inter.className}>
+        <Script
+          defer
+          data-domain="mojkmet.eu"
+          src="https://plausible.io/js/script.js"
+          strategy="afterInteractive"
+        />
         <SessionProvider>
           <Header />
           {children}
