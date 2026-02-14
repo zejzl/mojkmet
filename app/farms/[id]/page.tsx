@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { useCart } from '@/lib/cart-context';
+import Toast from '@/components/Toast';
 
 interface Farm {
   id: string;
@@ -21,7 +23,19 @@ interface Product {
   price: number;
   unit: string;
   category: string;
+  category_icon?: string;
   available: boolean;
+  stock?: number;
+}
+
+const CATEGORY_ICONS: { [key: string]: string } = {
+  'mleko': '🥛',
+  'jajca': '🥚',
+  'zelenjava': '🥬',
+  'meso': '🥩',
+  'med': '🍯',
+  'sadje': '🍎',
+  'zita': '🌾',
 }
 
 export default function FarmDetailPage() {
@@ -32,6 +46,26 @@ export default function FarmDetailPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  
+  const { addItem } = useCart();
+
+  function handleAddToCart(product: Product) {
+    if (!farm) return;
+    
+    addItem({
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      unit: product.unit,
+      farmName: farm.name,
+      categoryIcon: product.category_icon || CATEGORY_ICONS[product.category] || '🌾',
+      stock: product.stock || 999, // Default to high stock if not specified
+    });
+    setToastMessage('Dodano v košarico!');
+    setShowToast(true);
+  }
 
   useEffect(() => {
     async function fetchFarmDetails() {
@@ -89,7 +123,9 @@ export default function FarmDetailPage() {
   }
 
   return (
-    <main className="flex-grow">
+    <>
+      <Toast message={toastMessage} show={showToast} onClose={() => setShowToast(false)} />
+      <main className="flex-grow">
       {/* Farm Header */}
       <section className="bg-gradient-to-br from-green-50 to-amber-50 py-12">
         <div className="container mx-auto px-4">
@@ -209,8 +245,11 @@ export default function FarmDetailPage() {
                       </div>
                       
                       {product.available && (
-                        <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-semibold">
-                          Dodaj
+                        <button
+                          onClick={() => handleAddToCart(product)}
+                          className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-semibold"
+                        >
+                          V košarico
                         </button>
                       )}
                     </div>
@@ -237,5 +276,6 @@ export default function FarmDetailPage() {
         </div>
       </section>
     </main>
+    </>
   );
 }

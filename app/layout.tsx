@@ -6,6 +6,7 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import CookieNotice from '@/components/CookieNotice'
 import SessionProvider from '@/components/SessionProvider'
+import { CartProvider } from '@/lib/cart-context'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -30,10 +31,12 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
         <SessionProvider>
-          <Header />
-          {children}
-          <Footer />
-          <CookieNotice />
+          <CartProvider>
+            <Header />
+            {children}
+            <Footer />
+            <CookieNotice />
+          </CartProvider>
         </SessionProvider>
       </body>
     </html>

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { useSession, signOut } from 'next-auth/react'
+import CartButton from './CartButton'
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -38,6 +39,7 @@ export default function Header() {
 
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center space-x-4">
+            <CartButton />
             {status === 'loading' ? (
               <div className="text-gray-500">Nalaganje...</div>
             ) : session ? (
@@ -93,6 +95,9 @@ export default function Header() {
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200">
             <nav className="flex flex-col space-y-4">
+              <Link href="/cart" className="text-gray-700 hover:text-green-600 transition flex items-center gap-2">
+                <span className="text-xl">🛒</span> Košarica
+              </Link>
               <Link href="/products" className="text-gray-700 hover:text-green-600 transition">
                 Proizvodi
               </Link>
