@@ -49,19 +49,19 @@ export default function FarmDetailPage() {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   
-  const { addItem } = useCart();
+  const { addToCart } = useCart();
 
   function handleAddToCart(product: Product) {
     if (!farm) return;
     
-    addItem({
+    addToCart({
       productId: product.id,
       name: product.name,
       price: product.price,
       unit: product.unit,
       farmName: farm.name,
       categoryIcon: product.category_icon || CATEGORY_ICONS[product.category] || '🌾',
-      stock: product.stock || 999, // Default to high stock if not specified
+      maxStock: product.stock || 999, // Default to high stock if not specified
     });
     setToastMessage('Dodano v košarico!');
     setShowToast(true);
