@@ -3,8 +3,8 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 import { useCart } from '@/lib/cart-context'
-import Toast from '@/components/Toast'
 
 interface Product {
   id: string
@@ -44,29 +44,17 @@ function ProductsContent() {
   const categorySlug = searchParams.get('category')
   const searchQuery = searchParams.get('search')
 
+  const { data: session } = useSession()
+  const { addToCart } = useCart()
+
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState(searchQuery || '')
-  const [showToast, setShowToast] = useState(false)
-  const [toastMessage, setToastMessage] = useState('')
-  
-  const { addItem } = useCart()
-
-  function handleAddToCart(product: Product) {
-    addItem({
-      productId: product.id,
-      name: product.name,
-      price: product.price,
-      unit: product.unit,
-      farmName: product.farm_name,
-      categoryIcon: product.category_icon,
-      stock: product.stock,
-    })
-    setToastMessage('Dodano v košarico!')
-    setShowToast(true)
-  }
+  const [favorites, setFavorites] = useState<Set<string>>(new Set())
+  const [togglingFav, setTogglingFav] = useState<string | null>(null)
+  const [addedToCart, setAddedToCart] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchProducts() {
@@ -90,6 +78,18 @@ function ProductsContent() {
     fetchProducts()
   }, [categorySlug, searchQuery])
 
+  useEffect(() => {
+    if (!session) return
+    fetch('/api/favorites')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.favorites) {
+          setFavorites(new Set(data.favorites))
+        }
+      })
+      .catch(() => {})
+  }, [session])
+
   const activeCategory = categories.find(c => c.slug === categorySlug)
 
   function handleSearch(e: React.FormEvent) {
@@ -101,10 +101,53 @@ function ProductsContent() {
     }
   }
 
+  function handleAddToCart(product: Product) {
+    addToCart({
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      unit: product.unit,
+      farmName: product.farm_name,
+      categoryIcon: product.category_icon,
+      maxStock: product.stock,
+    })
+    setAddedToCart(product.id)
+    setTimeout(() => setAddedToCart(null), 1500)
+  }
+
+  async function handleToggleFavorite(productId: string) {
+    if (!session) {
+      window.location.href = '/login?redirect=/products'
+      return
+    }
+    setTogglingFav(productId)
+    try {
+      const res = await fetch('/api/favorites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setFavorites((prev) => {
+          const next = new Set(prev)
+          if (data.favorited) {
+            next.add(productId)
+          } else {
+            next.delete(productId)
+          }
+          return next
+        })
+      }
+    } catch {
+      // ignore
+    } finally {
+      setTogglingFav(null)
+    }
+  }
+
   return (
-    <>
-      <Toast message={toastMessage} show={showToast} onClose={() => setShowToast(false)} />
-      <main className="flex-grow">
+    <main className="flex-grow">
       {/* Hero */}
       <section className="bg-gradient-to-r from-green-600 to-green-700 text-white py-12">
         <div className="container mx-auto px-4 text-center">
@@ -189,7 +232,7 @@ function ProductsContent() {
 
           {!loading && !error && products.length === 0 && (
             <div className="text-center text-gray-500 py-16">
-              <div className="text-6xl mb-4">🔍</div>
+              <p className="text-4xl mb-4">?</p>
               <p className="text-xl">Ni najdenih izdelkov</p>
               <Link href="/products" className="text-green-600 hover:underline mt-2 inline-block">
                 Poglej vse izdelke
@@ -204,18 +247,37 @@ function ProductsContent() {
                   key={product.id}
                   className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition border border-gray-100"
                 >
-                  <Link href={`/products/${product.id}`} className="block">
-                    <div className="bg-gradient-to-br from-gray-50 to-gray-100 h-40 flex items-center justify-center text-7xl">
-                      {product.category_icon}
-                    </div>
-                  </Link>
+                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 h-40 flex items-center justify-center text-7xl relative">
+                    {product.category_icon}
+                    {/* Favorite button */}
+                    <button
+                      onClick={() => handleToggleFavorite(product.id)}
+                      disabled={togglingFav === product.id}
+                      className="absolute top-2 right-2 p-1.5 rounded-full bg-white shadow hover:shadow-md transition"
+                      title={favorites.has(product.id) ? 'Odstrani iz priljubljenih' : 'Dodaj med priljubljene'}
+                    >
+                      <svg
+                        className={`w-5 h-5 transition-colors ${
+                          favorites.has(product.id) ? 'text-red-500 fill-red-500' : 'text-gray-400'
+                        }`}
+                        fill={favorites.has(product.id) ? 'currentColor' : 'none'}
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                        />
+                      </svg>
+                    </button>
+                  </div>
                   <div className="p-5">
                     <div className="flex items-start justify-between mb-2">
-                      <Link href={`/products/${product.id}`} className="flex-1">
-                        <h3 className="font-bold text-gray-900 text-lg leading-tight hover:text-green-700 transition">
-                          {product.name}
-                        </h3>
-                      </Link>
+                      <h3 className="font-bold text-gray-900 text-lg leading-tight">
+                        {product.name}
+                      </h3>
                       <div className="text-green-700 font-bold text-lg whitespace-nowrap ml-3">
                         {product.price.toFixed(2)} EUR
                         <span className="text-xs text-gray-500 font-normal">/{product.unit}</span>
@@ -227,10 +289,10 @@ function ProductsContent() {
                       </p>
                     )}
                     <div className="flex items-center text-sm text-gray-500 mb-3">
-                      <span className="mr-1">🌾</span>
+                      <span className="mr-1 text-base">*</span>
                       <span>{product.farm_name}</span>
                       {product.farm_verified && (
-                        <span className="ml-1 text-green-600" title="Verificirana kmetija">✓</span>
+                        <span className="ml-1 text-green-600 font-bold" title="Verificirana kmetija">v</span>
                       )}
                       <span className="mx-1">-</span>
                       <span>{product.farm_city}</span>
@@ -243,14 +305,22 @@ function ProductsContent() {
                           ? 'bg-yellow-50 text-yellow-700'
                           : 'bg-red-50 text-red-700'
                       }`}>
-                        {product.stock > 10 ? 'Na zalogi' : product.stock > 0 ? `Se ${product.stock} na zalogi` : 'Razprodano'}
+                        {product.stock > 10
+                          ? 'Na zalogi'
+                          : product.stock > 0
+                          ? `Se ${product.stock} na zalogi`
+                          : 'Razprodano'}
                       </span>
                       <button
                         onClick={() => handleAddToCart(product)}
-                        className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={product.stock === 0}
+                        disabled={product.stock === 0 || addedToCart === product.id}
+                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed ${
+                          addedToCart === product.id
+                            ? 'bg-green-700 text-white'
+                            : 'bg-green-600 text-white hover:bg-green-700'
+                        }`}
                       >
-                        V košarico
+                        {addedToCart === product.id ? 'Dodano!' : 'V kosarco'}
                       </button>
                     </div>
                   </div>
@@ -261,6 +331,5 @@ function ProductsContent() {
         </div>
       </section>
     </main>
-    </>
   )
 }
