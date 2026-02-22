@@ -1,52 +1,62 @@
+import Link from 'next/link';
+
 export default function CategoriesPage() {
   const categories = [
     {
       name: 'Sadje',
+      slug: 'sadje',
       icon: '🍎',
-      description: 'Sveže in sezonsko sadje neposredno iz sadovnjakov',
-      examples: 'Jabolka, hruške, češnje, jagode, borovnice',
+      description: 'Sveže sezonsko sadje slovenskih sadjarjev',
+      color: 'from-red-500 to-orange-500'
     },
     {
       name: 'Zelenjava',
-      icon: '🥬',
-      description: 'Lokalno pridelana zelenjava polna vitaminov',
-      examples: 'Solata, paradižnik, kumara, paprika, korenje',
+      slug: 'zelenjava',
+      icon: '🥕',
+      description: 'Zelenjava direktno iz vrta na vašo mizo',
+      color: 'from-green-500 to-emerald-500'
     },
     {
       name: 'Mlečni izdelki',
-      icon: '🧀',
-      description: 'Tradicionalni mlečni izdelki iz lokalnih kmetij',
-      examples: 'Mleko, sir, jogurt, skuta, maslo',
+      slug: 'mlecni-izdelki',
+      icon: '🥛',
+      description: 'Mleko, jogurt, sir in skuta iz lokalnih mlekarn',
+      color: 'from-blue-400 to-cyan-400'
     },
     {
       name: 'Meso',
+      slug: 'meso',
       icon: '🥩',
-      description: 'Kakovostno meso iz etične reje',
-      examples: 'Govedina, svinjina, piščanec, divjačina',
+      description: 'Kakovostno meso z domačih kmetij',
+      color: 'from-red-600 to-pink-600'
     },
     {
       name: 'Pekovsko',
-      icon: '🍞',
-      description: 'Sveže pečen kruh in pecivo vsak dan',
-      examples: 'Domač kruh, pecivo, pite, potica',
+      slug: 'pekovsko',
+      icon: '🥖',
+      description: 'Domač kruh, pecivo in testenine',
+      color: 'from-amber-600 to-yellow-600'
     },
     {
       name: 'Med',
+      slug: 'med',
       icon: '🍯',
-      description: 'Naravni slovenski med iz čebeljih panjev',
-      examples: 'Cvetlični, kostanjev, gozdni, akacijev med',
+      description: 'Pravi slovenski med iz slovenskih panjev',
+      color: 'from-yellow-500 to-orange-400'
     },
     {
       name: 'Vino',
+      slug: 'vino',
       icon: '🍷',
-      description: 'Izbrana vina slovenskih vinogradov',
-      examples: 'Belo, rdeče, rose, penina',
+      description: 'Vrhunska vina slovenskih vinogradnikov',
+      color: 'from-purple-600 to-red-600'
     },
     {
       name: 'Olja',
+      slug: 'olja',
       icon: '🫒',
-      description: 'Hladno stiskana olja in druge specialitete',
-      examples: 'Bučno olje, olivno olje, oreškova olja',
+      description: 'Bučno, olivno in druga domača olja',
+      color: 'from-green-700 to-lime-600'
     },
   ];
 
@@ -57,7 +67,7 @@ export default function CategoriesPage() {
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Kategorije izdelkov</h1>
           <p className="text-xl max-w-2xl mx-auto">
-            Raziščite pestro ponudbo lokalnih kmetijskih izdelkov
+            Raziščite našo ponudbo svežih kmetijskih pridelkov iz vseh slovenskih regij
           </p>
         </div>
       </section>
@@ -65,95 +75,61 @@ export default function CategoriesPage() {
       {/* Categories Grid */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
             {categories.map((category) => (
-              <div 
-                key={category.name} 
-                className="bg-white rounded-xl p-8 shadow-md hover:shadow-lg transition cursor-pointer border border-gray-200"
+              <Link
+                key={category.slug}
+                href={`/products?category=${category.slug}`}
+                className="group"
               >
-                <div className="text-6xl mb-4 text-center">{category.icon}</div>
-                <h3 className="text-2xl font-bold mb-3 text-center">{category.name}</h3>
-                <p className="text-gray-600 mb-4 text-center">{category.description}</p>
-                <div className="pt-4 border-t border-gray-200">
-                  <p className="text-sm text-gray-500 text-center">
-                    <span className="font-semibold">Primeri:</span> {category.examples}
-                  </p>
+                <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden h-full">
+                  <div className={`bg-gradient-to-br ${category.color} p-8 text-center transition-transform group-hover:scale-105`}>
+                    <div className="text-6xl mb-2">{category.icon}</div>
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold mb-2 text-gray-900 group-hover:text-green-600 transition">
+                      {category.name}
+                    </h3>
+                    <p className="text-gray-600 text-sm">
+                      {category.description}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* How to Browse Section */}
+      {/* Info Section */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold mb-8 text-center">Kako iskati izdelke</h2>
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="bg-green-600 text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-                  1
-                </div>
-                <h3 className="text-xl font-bold mb-3">Izberite kategorijo</h3>
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl font-bold mb-6">Zakaj kupovati po kategorijah?</h2>
+            <div className="grid md:grid-cols-3 gap-8 mt-12">
+              <div className="bg-white rounded-xl p-6 shadow-md">
+                <div className="text-4xl mb-4">🎯</div>
+                <h3 className="text-lg font-bold mb-2">Hitra navigacija</h3>
                 <p className="text-gray-600">
-                  Kliknite na kategorijo, ki vas zanima
+                  Hitro najdite točno tisto, kar potrebujete
                 </p>
               </div>
-              <div className="text-center">
-                <div className="bg-green-600 text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-                  2
-                </div>
-                <h3 className="text-xl font-bold mb-3">Filtrirajte rezultate</h3>
+              <div className="bg-white rounded-xl p-6 shadow-md">
+                <div className="text-4xl mb-4">🌱</div>
+                <h3 className="text-lg font-bold mb-2">Sezonska ponudba</h3>
                 <p className="text-gray-600">
-                  Uporabite filtre za regijo, ceno ali kmetijo
+                  Odkrijte, kaj je ravno v sezoni
                 </p>
               </div>
-              <div className="text-center">
-                <div className="bg-green-600 text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-                  3
-                </div>
-                <h3 className="text-xl font-bold mb-3">Dodajte v košarico</h3>
+              <div className="bg-white rounded-xl p-6 shadow-md">
+                <div className="text-4xl mb-4">👨‍🌾</div>
+                <h3 className="text-lg font-bold mb-2">Lokalni kmeti</h3>
                 <p className="text-gray-600">
-                  Izberite želene izdelke in naročite
+                  Spoznajte pridelovalce za vsakim izdelkom
                 </p>
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Seasonal Highlight */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto bg-green-50 rounded-xl p-8 border-2 border-green-200">
-            <div className="text-center mb-6">
-              <span className="text-4xl">🌿</span>
-            </div>
-            <h2 className="text-3xl font-bold mb-4 text-center">Sezonski izdelki</h2>
-            <p className="text-lg text-gray-700 text-center mb-6">
-              Vsak mesec poudarjamo najboljše sezonske izdelke. 
-              Sezonska hrana je najbolj sveža, okusna in cenovno dostopna.
-            </p>
-            <div className="text-center">
-              <button className="bg-green-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 transition">
-                Oglejte si ponudbe meseca
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-16 bg-green-600 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-6">Začnite iskati lokalne izdelke</h2>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
-            Več kot 150 kmetij čaka, da odkrijete njihove izdelke
-          </p>
-          <button className="bg-white text-green-600 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition">
-            Raziskujte vse izdelke
-          </button>
         </div>
       </section>
     </main>

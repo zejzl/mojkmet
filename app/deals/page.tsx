@@ -1,59 +1,78 @@
+import Link from 'next/link';
+
 export default function DealsPage() {
-  const currentDeals = [
+  const seasonalDeals = [
     {
-      title: 'Pomladne jagode',
+      title: 'Pomladna zelenjava',
       discount: '20%',
-      description: 'Sveže pobrane jagode iz Štajerske',
-      validUntil: '30. maj 2026',
-      icon: '🍓',
-      farm: 'Kmetija Novak',
-    },
-    {
-      title: 'Kozji sir',
-      discount: '15%',
-      description: 'Tradicionalni kozji sir iz Gorenjske',
-      validUntil: '15. maj 2026',
-      icon: '🧀',
-      farm: 'Kmetija Horvat',
-    },
-    {
-      title: 'Ekološka zelenjava',
-      discount: '25%',
-      description: 'Paket sveže zelenjave za štiri osebe',
-      validUntil: '20. maj 2026',
+      description: 'Sveža špinača, radič in solata iz Prekmurja',
+      validUntil: '30. marec 2026',
       icon: '🥬',
-      farm: 'Bio kmetija Zupan',
+      color: 'from-green-500 to-emerald-600'
     },
     {
-      title: 'Domač kruh',
+      title: 'Kranjska klobasa',
+      discount: '15%',
+      description: 'Tradicionalna slovenška klobasa iz domačih kmetij',
+      validUntil: '15. marec 2026',
+      icon: '🌭',
+      color: 'from-red-500 to-orange-600'
+    },
+    {
+      title: 'Slovenski med',
+      discount: '25%',
+      description: 'Akacijev in gozdni med letošnje letine',
+      validUntil: '31. marec 2026',
+      icon: '🍯',
+      color: 'from-yellow-500 to-amber-500'
+    },
+    {
+      title: 'Jajca iz proste reje',
       discount: '10%',
-      description: 'Sveže pečen kruh iz žitaric z naše njive',
-      validUntil: '31. maj 2026',
-      icon: '🍞',
-      farm: 'Pekarna Kovač',
+      description: 'Sveža jajca iz Štajerske - paket 30 kosov',
+      validUntil: '25. marec 2026',
+      icon: '🥚',
+      color: 'from-orange-400 to-yellow-500'
+    },
+    {
+      title: 'Bučno olje',
+      discount: '30%',
+      description: 'Prekmursko bučno olje - hladno stiskano',
+      validUntil: '20. marec 2026',
+      icon: '🫒',
+      color: 'from-green-700 to-lime-600'
+    },
+    {
+      title: 'Domači kruh',
+      discount: '12%',
+      description: 'Polnozrnati kruh z ajdo in orehi',
+      validUntil: '28. marec 2026',
+      icon: '🥖',
+      color: 'from-amber-600 to-yellow-600'
     },
   ];
 
-  const seasonalDeals = [
+  const bundleDeals = [
     {
-      season: 'Pomlad',
-      items: 'Jagode, špargljii, črevi, mladi krompir',
-      icon: '🌸',
+      name: 'Zajtrk paket',
+      price: '24.99€',
+      originalPrice: '32.00€',
+      items: ['Mleko 2L', 'Jajca 10 kosov', 'Domač kruh', 'Maslo 250g'],
+      icon: '🍳'
     },
     {
-      season: 'Poletje',
-      items: 'Paradižnik, paprika, maline, breskvee',
-      icon: '☀️',
+      name: 'Zelenjava paket',
+      price: '18.99€',
+      originalPrice: '25.00€',
+      items: ['Solata', 'Paradižnik 1kg', 'Kumare 5 kosov', 'Paprika 500g'],
+      icon: '🥗'
     },
     {
-      season: 'Jesen',
-      items: 'Jabolka, grozdje, buče, orehi',
-      icon: '🍂',
-    },
-    {
-      season: 'Zima',
-      items: 'Zelje, korenček, repo, shranjena zelenjava',
-      icon: '❄️',
+      name: 'Mesni paket',
+      price: '45.99€',
+      originalPrice: '59.00€',
+      items: ['Piščanec 1.5kg', 'Goveja zarebrnica 1kg', 'Svinjska krača 1kg'],
+      icon: '🥩'
     },
   ];
 
@@ -62,135 +81,91 @@ export default function DealsPage() {
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-green-600 to-green-700 text-white py-16">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Posebne ponudbe</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Sezonske ponudbe</h1>
           <p className="text-xl max-w-2xl mx-auto">
-            Odkrijte tedenske popuste in sezonske akcije naših kmetij
+            Najboljše cene za sveže kmetijske izdelke - samo še ta teden!
           </p>
         </div>
       </section>
 
-      {/* Current Deals */}
+      {/* Seasonal Deals */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold mb-12 text-center">Trenutne akcije</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-            {currentDeals.map((deal) => (
-              <div 
-                key={deal.title} 
-                className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition border border-gray-200 relative"
-              >
-                <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                  -{deal.discount}
+          <h2 className="text-3xl font-bold mb-8 text-center">Akcijske ponudbe tedna</h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+            {seasonalDeals.map((deal, index) => (
+              <div key={index} className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden">
+                <div className={`bg-gradient-to-br ${deal.color} p-6 relative`}>
+                  <div className="absolute top-4 right-4 bg-white text-green-700 font-bold px-4 py-2 rounded-full text-lg shadow-lg">
+                    -{deal.discount}
+                  </div>
+                  <div className="text-6xl mb-2">{deal.icon}</div>
                 </div>
-                <div className="text-5xl mb-4 text-center">{deal.icon}</div>
-                <h3 className="text-xl font-bold mb-2">{deal.title}</h3>
-                <p className="text-gray-600 mb-4">{deal.description}</p>
-                <div className="border-t border-gray-200 pt-4 mt-4">
-                  <p className="text-sm text-green-600 font-semibold mb-2">{deal.farm}</p>
-                  <p className="text-sm text-gray-500">
-                    Velja do: <span className="font-semibold">{deal.validUntil}</span>
-                  </p>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold mb-2">{deal.title}</h3>
+                  <p className="text-gray-600 mb-4">{deal.description}</p>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-500">Velja do: {deal.validUntil}</span>
+                  </div>
+                  <Link href="/products" className="mt-4 block w-full bg-green-600 text-white text-center py-3 rounded-lg hover:bg-green-700 transition font-semibold">
+                    Poglej ponudbo
+                  </Link>
                 </div>
-                <button className="w-full mt-4 bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition">
-                  Poglej ponudbo
-                </button>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Seasonal Offers */}
+      {/* Bundle Deals */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold mb-8 text-center">Sezonske ponudbe</h2>
-          <p className="text-lg text-gray-600 text-center mb-12 max-w-3xl mx-auto">
-            Vsaka sezona prinaša svoje posebnosti. Sezonski izdelki so najbolj sveži in okusni.
-          </p>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-            {seasonalDeals.map((season) => (
-              <div 
-                key={season.season} 
-                className="bg-white rounded-xl p-8 text-center shadow-md"
-              >
-                <div className="text-6xl mb-4">{season.icon}</div>
-                <h3 className="text-xl font-bold mb-3">{season.season}</h3>
-                <p className="text-gray-600">{season.items}</p>
+          <h2 className="text-3xl font-bold mb-8 text-center">Paketi s popustom</h2>
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {bundleDeals.map((bundle, index) => (
+              <div key={index} className="bg-white rounded-xl shadow-md p-6">
+                <div className="text-5xl mb-4 text-center">{bundle.icon}</div>
+                <h3 className="text-xl font-bold mb-3 text-center">{bundle.name}</h3>
+                <div className="text-center mb-4">
+                  <span className="text-3xl font-bold text-green-600">{bundle.price}</span>
+                  <span className="text-gray-400 line-through ml-2">{bundle.originalPrice}</span>
+                </div>
+                <ul className="space-y-2 mb-6">
+                  {bundle.items.map((item, idx) => (
+                    <li key={idx} className="flex items-center text-gray-700">
+                      <span className="text-green-500 mr-2">✓</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/products" className="block w-full bg-green-600 text-white text-center py-3 rounded-lg hover:bg-green-700 transition font-semibold">
+                  Dodaj v košarico
+                </Link>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Newsletter Section */}
+      {/* Newsletter CTA */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto bg-green-50 rounded-xl p-8 border-2 border-green-200 text-center">
-            <div className="text-5xl mb-4">📧</div>
-            <h2 className="text-3xl font-bold mb-4">Bodite obveščeni o novih akcijah</h2>
-            <p className="text-lg text-gray-700 mb-6">
-              Prijavite se na naše obvestilo in kot prvi izveste za nove popuste in posebne ponudbe.
+          <div className="bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl p-8 md:p-12 text-center max-w-4xl mx-auto shadow-xl">
+            <h2 className="text-3xl font-bold mb-4">Ne zamudite nobene akcije!</h2>
+            <p className="text-lg mb-6">
+              Prijavite se na naše obvestilo in bodite prvi obveščeni o novih ponudbah in popustih.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <input 
-                type="email" 
-                placeholder="Vaš e-naslov"
-                className="flex-grow px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-600"
+            <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <input
+                type="email"
+                placeholder="Vaš e-mail naslov"
+                className="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-white"
               />
-              <button className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition whitespace-nowrap">
+              <button className="bg-white text-green-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
                 Prijavi se
               </button>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold mb-12 text-center">Kako delujejo popusti?</h2>
-          <div className="max-w-4xl mx-auto grid md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="bg-green-600 text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-                1
-              </div>
-              <h3 className="text-xl font-bold mb-3">Izberite akcijo</h3>
-              <p className="text-gray-600">
-                Prebrskajte trenutne popuste in posebne ponudbe
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-green-600 text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-                2
-              </div>
-              <h3 className="text-xl font-bold mb-3">Dodajte v košarico</h3>
-              <p className="text-gray-600">
-                Popust se samodejno uporabi pri nakupu
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-green-600 text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-                3
-              </div>
-              <h3 className="text-xl font-bold mb-3">Prihranite</h3>
-              <p className="text-gray-600">
-                Uživajte v kakovostnih izdelkih po nižji ceni
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-16 bg-green-600 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-6">Ne zamudite odličnih ponudb!</h2>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
-            Nove akcije dodajamo vsak teden
-          </p>
-          <button className="bg-white text-green-600 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition">
-            Raziščite vse izdelke
-          </button>
         </div>
       </section>
     </main>

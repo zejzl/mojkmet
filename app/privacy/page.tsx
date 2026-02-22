@@ -1,97 +1,4 @@
 export default function PrivacyPage() {
-  const sections = [
-    {
-      title: '1. Zbiranje podatkov',
-      icon: '📋',
-      content: [
-        'Osebne podatke zbiramo samo, ko jih prostovoljno posredujete pri registraciji, naročilu ali kontaktu.',
-        'Zbiramo: ime, priimek, e-naslov, telefonsko številko, naslov dostave, plačilne podatke.',
-        'Tehnične podatke: IP naslov, tip naprave, brskalnik, čas obiska (za izboljšanje storitev).',
-      ],
-    },
-    {
-      title: '2. Uporaba podatkov',
-      icon: '🔧',
-      content: [
-        'Obdelava naročil in dostava izdelkov',
-        'Komunikacija o naročilih, dostavi in spremembah',
-        'Izboljšanje naših storitev in uporabniške izkušnje',
-        'Pošiljanje novicobvestil (samo z vašim soglasjem)',
-        'Preprečevanje goljufij in zagotavljanje varnosti',
-      ],
-    },
-    {
-      title: '3. Deljenje podatkov',
-      icon: '🤝',
-      content: [
-        'Vaših podatkov NIKOLI ne prodajamo tretjim osebam.',
-        'Delimo jih samo s partnerji, ki so potrebni za izvedbo storitve:',
-        '- Kmetijami (ime, naslov dostave, telefonska številka)',
-        '- Dostavljavci (ime, naslov, telefonska številka)',
-        '- Plačilnimi procesorji (samo podatki potrebni za plačilo)',
-        'Vsi partnerji so zavezani k varovanju vaših podatkov.',
-      ],
-    },
-    {
-      title: '4. Piškotki',
-      icon: '🍪',
-      content: [
-        'Uporabljamo piškotke za delovanje spletne strani in analitiko.',
-        'Nujni piškotki: potrebni za delovanje (prijava, košarica)',
-        'Analitični piškotki: pomagajo nam razumeti, kako uporabljate spletno stran',
-        'Marketinški piškotki: samo z vašim soglasjem',
-        'Piškotke lahko onemogočite v nastavitvah brskalnika.',
-      ],
-    },
-    {
-      title: '5. Vaše pravice (GDPR)',
-      icon: '⚖️',
-      content: [
-        'Pravica do dostopa: lahko zahtevate kopijo svojih podatkov',
-        'Pravica do popravka: popravite napačne ali zastarele podatke',
-        'Pravica do izbrisa: zahtevate izbris vaših podatkov',
-        'Pravica do omejitve: omejite obdelavo vaših podatkov',
-        'Pravica do prenosljivosti: prenos podatkov k drugemu ponudniku',
-        'Pravica do ugovora: ugovarjate marketinškim sporočilom',
-        'Za uveljavitev pravic pišite na: privacy@mojkmet.eu',
-      ],
-    },
-    {
-      title: '6. Hranjenje podatkov',
-      icon: '🗄️',
-      content: [
-        'Vaše podatke hranimo toliko časa, kot je potrebno za izvedbo storitev.',
-        'Podatke o naročilih hranimo 5 let (zakonska zahteva za računovodstvo).',
-        'Marketinške podatke hranimo do preklica soglasja.',
-        'Po izbrisu računa so vaši podatki anonimizirani ali izbrisani v 30 dneh.',
-      ],
-    },
-    {
-      title: '7. Varnost',
-      icon: '🔒',
-      content: [
-        'Uporabljamo šifrirano povezavo SSL za zaščito prenosa podatkov.',
-        'Gesla so shranjena kot hash (ne shranjujemo jih v berljivi obliki).',
-        'Dostop do podatkov imajo samo pooblaščeni zaposleni.',
-        'Redno izvajamo varnostne preglede in posodobitve.',
-        'V primeru kršitve varnosti vas bomo obvestili v 72 urah.',
-      ],
-    },
-    {
-      title: '8. Tretje osebe',
-      icon: '🔗',
-      content: [
-        'Naša spletna stran lahko vsebuje povezave do zunanjih spletnih strani.',
-        'Nismo odgovorni za politiko zasebnosti teh strani.',
-        'Uporabljamo naslednje tretje storitve:',
-        '- Google Analytics (analitika)',
-        '- Stripe / PayPal (plačila)',
-        '- SendGrid (e-pošta)',
-        'Vse te storitve so skladne z GDPR.',
-      ],
-    },
-  ];
-
   return (
     <main className="flex-grow">
       {/* Hero Section */}
@@ -99,206 +6,244 @@ export default function PrivacyPage() {
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Politika zasebnosti</h1>
           <p className="text-xl max-w-2xl mx-auto">
-            Vaša zasebnost je naša prioriteta. Tukaj je vse, kar morate vedeti.
+            Kako varujemo in uporabljamo vaše osebne podatke v skladu z GDPR
           </p>
-          <p className="mt-4 text-sm opacity-90">
-            Nazadnje posodobljeno: 22. februar 2026
-          </p>
-        </div>
-      </section>
-
-      {/* GDPR Badge */}
-      <section className="py-12 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto bg-white rounded-xl p-8 shadow-md text-center border-2 border-green-200">
-            <div className="text-5xl mb-4">🇪🇺</div>
-            <h2 className="text-2xl font-bold mb-3">Skladni z GDPR</h2>
-            <p className="text-gray-700">
-              Naša politika zasebnosti je v celoti skladna z Splošno uredbo o varstvu podatkov (GDPR) 
-              Evropske unije in slovensko zakonodajo o varstvu osebnih podatkov.
-            </p>
-          </div>
+          <p className="text-sm mt-4 opacity-90">Zadnja posodobitev: 22. februar 2026</p>
         </div>
       </section>
 
       {/* Main Content */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto space-y-12">
-            {/* Introduction */}
-            <div className="prose prose-lg max-w-none">
-              <p className="text-lg text-gray-700 leading-relaxed">
-                Mojkmet.eu, s.p. (v nadaljevanju "mi", "nas", "naš") spoštuje vašo zasebnost in se zavezuje 
-                k zaščiti vaših osebnih podatkov. Ta politika zasebnosti pojasnjuje, kako zbiramo, uporabljamo, 
-                shranjujemo in ščitimo vaše osebne podatke v skladu z veljavno zakonodajo.
-              </p>
-            </div>
-
-            {/* Sections */}
-            {sections.map((section, index) => (
-              <div 
-                key={index} 
-                className="bg-white rounded-xl p-8 shadow-md border border-gray-200"
-              >
-                <div className="flex items-start gap-4 mb-6">
-                  <div className="text-4xl">{section.icon}</div>
-                  <h2 className="text-2xl font-bold">{section.title}</h2>
-                </div>
-                <ul className="space-y-3">
-                  {section.content.map((item, itemIndex) => (
-                    <li 
-                      key={itemIndex} 
-                      className="flex items-start text-gray-700 leading-relaxed"
-                    >
-                      <span className="text-green-600 mr-3 mt-1">•</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Children's Privacy */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto bg-white rounded-xl p-8 shadow-md">
-            <div className="flex items-start gap-4 mb-6">
-              <div className="text-4xl">👶</div>
-              <h2 className="text-2xl font-bold">9. Zasebnost otrok</h2>
-            </div>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              Naše storitve niso namenjene osebam, mlajšim od 16 let. Zavestno ne zbiramo osebnih 
-              podatkov otrok, mlajših od 16 let.
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              Če ugotovimo, da smo zbrali podatke otroka brez soglasja staršev, bomo te podatke takoj izbrisali. 
-              Če menite, da lahko imamo podatke otroka, nas prosimo kontaktirajte.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* International Transfers */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto bg-white rounded-xl p-8 shadow-md border border-gray-200">
-            <div className="flex items-start gap-4 mb-6">
-              <div className="text-4xl">🌍</div>
-              <h2 className="text-2xl font-bold">10. Mednarodni prenosi podatkov</h2>
-            </div>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              Vaši podatki se shranjujejo na strežnikih v Evropski uniji. Nekateri naši partnerji 
-              (npr. plačilni procesorji) lahko imajo strežnike izven EU.
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              V takih primerih zagotavljamo, da so podatki zaščiteni z ustreznimi varnostnimi ukrepi 
-              in pogodbami v skladu z GDPR (npr. standardne pogodbene klavzule).
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Changes to Policy */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto bg-white rounded-xl p-8 shadow-md">
-            <div className="flex items-start gap-4 mb-6">
-              <div className="text-4xl">📝</div>
-              <h2 className="text-2xl font-bold">11. Spremembe politike</h2>
-            </div>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              Pridržujemo si pravico do posodobitve te politike zasebnosti. O pomembnih spremembah 
-              vas bomo obvestili po e-pošti ali z obvestilom na spletni strani.
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              Datum zadnje posodobitve je vedno naveden na vrhu te strani. Priporočamo, da občasno 
-              pregledate to politiko, da ostanete obveščeni o tem, kako varujemo vaše podatke.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Section */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold mb-8 text-center">Kontakt za varstvo podatkov</h2>
-            <div className="bg-green-50 rounded-xl p-8 border-2 border-green-200">
-              <p className="text-lg text-gray-700 mb-6 text-center">
-                Če imate vprašanja o tej politiki zasebnosti ali želite uveljavljati svoje pravice, 
-                nas lahko kontaktirate:
-              </p>
-              <div className="grid md:grid-cols-3 gap-6">
-                <div className="text-center">
-                  <div className="text-3xl mb-2">📧</div>
-                  <div className="font-semibold">E-pošta</div>
-                  <div className="text-green-600">privacy@mojkmet.eu</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl mb-2">📞</div>
-                  <div className="font-semibold">Telefon</div>
-                  <div className="text-green-600">+386 1 234 5678</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl mb-2">📍</div>
-                  <div className="font-semibold">Naslov</div>
-                  <div className="text-green-600">Dunajska 123, Ljubljana</div>
-                </div>
-              </div>
-              <div className="mt-8 pt-8 border-t border-green-200">
-                <p className="text-sm text-gray-600 text-center">
-                  <strong>Pooblaščena oseba za varstvo podatkov:</strong> Ana Kovač
-                  <br />
-                  E-pošta: dpo@mojkmet.eu
+            
+            {/* Introduction */}
+            <div className="bg-white rounded-xl shadow-md p-8 mb-8">
+              <h2 className="text-2xl font-bold mb-4">Uvod</h2>
+              <div className="prose prose-lg max-w-none text-gray-700 space-y-4">
+                <p>
+                  Mojkmet.eu, ki ga upravlja podjetje Mojkmet d.o.o. (v nadaljevanju "mi", "nas" ali "Mojkmet"), 
+                  spoštuje vašo zasebnost in je zavezano k zaščiti vaših osebnih podatkov. Ta politika zasebnosti 
+                  vas obvešča, kako ravnamo z vašimi osebnimi podatki, ko obiščete našo spletno stran in nam 
+                  poveste o vaših pravicah glede zasebnosti.
+                </p>
+                <p>
+                  Ta politika zasebnosti je v skladu z Splošno uredbo o varstvu podatkov (GDPR - EU 2016/679) 
+                  in slovensko zakonodajo o varstvu osebnih podatkov.
                 </p>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Supervisory Authority */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto bg-white rounded-xl p-8 shadow-md">
-            <h2 className="text-2xl font-bold mb-6 text-center">Nadzorni organ</h2>
-            <p className="text-gray-700 mb-6 text-center">
-              Če menite, da nismo primerno ravnali z vašimi podatki, imate pravico vložiti pritožbo 
-              pri nadzornem organu:
-            </p>
-            <div className="bg-gray-50 rounded-lg p-6 text-center">
-              <p className="font-semibold mb-2">Informacijski pooblaščenec Republike Slovenije</p>
-              <p className="text-sm text-gray-600">Dunajska cesta 22, 1000 Ljubljana</p>
-              <p className="text-sm text-gray-600">Telefon: 01 230 97 30</p>
-              <p className="text-sm text-gray-600">
-                Splet:{' '}
-                <a 
-                  href="https://www.ip-rs.si" 
-                  className="text-green-600 hover:underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  www.ip-rs.si
-                </a>
-              </p>
+            {/* Data Controller */}
+            <div className="bg-white rounded-xl shadow-md p-8 mb-8">
+              <h2 className="text-2xl font-bold mb-4">1. Upravljavec podatkov</h2>
+              <div className="text-gray-700 space-y-3">
+                <p><strong>Mojkmet d.o.o.</strong></p>
+                <p>Slovenska cesta 54, 1000 Ljubljana, Slovenija</p>
+                <p>Matična številka: 1234567000</p>
+                <p>Davčna številka: SI12345678</p>
+                <p>E-pošta: <a href="mailto:privacy@mojkmet.eu" className="text-green-600 hover:underline">privacy@mojkmet.eu</a></p>
+                <p>Telefon: +386 1 234 5678</p>
+              </div>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* CTA Section */}
-      <section className="py-16 bg-green-600 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-6">Imate vprašanja o zasebnosti?</h2>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
-            Radi bomo odgovorili na vsa vaša vprašanja
-          </p>
-          <button className="bg-white text-green-600 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition">
-            Kontaktirajte nas
-          </button>
+            {/* Data Collection */}
+            <div className="bg-white rounded-xl shadow-md p-8 mb-8">
+              <h2 className="text-2xl font-bold mb-4">2. Katere podatke zbiramo</h2>
+              <div className="text-gray-700 space-y-4">
+                <div>
+                  <h3 className="font-bold text-lg mb-2">2.1 Podatki, ki jih vi posredujete</h3>
+                  <ul className="list-disc pl-6 space-y-2">
+                    <li><strong>Podatki za registracijo:</strong> ime, priimek, e-poštni naslov, telefonska številka</li>
+                    <li><strong>Podatki za dostavo:</strong> naslov dostave, poštna številka, kraj</li>
+                    <li><strong>Plačilni podatki:</strong> način plačila (plačilne podatke shranjujejo plačilni procesorji, ne mi)</li>
+                    <li><strong>Komunikacija:</strong> vsebina vaših sporočil, povratnih informacij ali pritožb</li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg mb-2">2.2 Podatki, ki jih zbiramo samodejno</h3>
+                  <ul className="list-disc pl-6 space-y-2">
+                    <li><strong>Tehnični podatki:</strong> IP naslov, tip brskalnika, operacijski sistem</li>
+                    <li><strong>Podatki o uporabi:</strong> obiskane strani, čas obiska, klikni vzorci</li>
+                    <li><strong>Piškotki:</strong> podatki shranjeni preko piškotkov (glej našo politiko piškotkov)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Data Usage */}
+            <div className="bg-white rounded-xl shadow-md p-8 mb-8">
+              <h2 className="text-2xl font-bold mb-4">3. Kako uporabljamo vaše podatke</h2>
+              <div className="text-gray-700">
+                <p className="mb-4">Vaše osebne podatke uporabljamo za naslednje namene:</p>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <span className="text-green-600 font-bold">✓</span>
+                    <div>
+                      <strong>Obdelava naročil:</strong> za procesiranje, pakiranje in dostavo vaših naročil
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-green-600 font-bold">✓</span>
+                    <div>
+                      <strong>Komunikacija:</strong> za odgovarjanje na vprašanja in zagotavljanje podpore strankam
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-green-600 font-bold">✓</span>
+                    <div>
+                      <strong>Izboljšave storitve:</strong> za analizo uporabe in izboljšanje uporabniške izkušnje
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-green-600 font-bold">✓</span>
+                    <div>
+                      <strong>Marketing:</strong> pošiljanje ponudb in novosti (samo s vašo privolitvijo)
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-green-600 font-bold">✓</span>
+                    <div>
+                      <strong>Pravne obveznosti:</strong> izpolnjevanje zakonskih zahtev (npr. izdaja računov)
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Legal Basis */}
+            <div className="bg-white rounded-xl shadow-md p-8 mb-8">
+              <h2 className="text-2xl font-bold mb-4">4. Pravna podlaga za obdelavo</h2>
+              <div className="text-gray-700 space-y-3">
+                <p>Vaše podatke obdelujemo na podlagi:</p>
+                <ul className="list-disc pl-6 space-y-2">
+                  <li><strong>Pogodba:</strong> za izvedbo naročila in dostave (člen 6(1)(b) GDPR)</li>
+                  <li><strong>Privolitev:</strong> za marketinška sporočila in piškotke (člen 6(1)(a) GDPR)</li>
+                  <li><strong>Zakonske obveznosti:</strong> za davčne in računovodske namene (člen 6(1)(c) GDPR)</li>
+                  <li><strong>Legitimni interes:</strong> za preprečevanje goljufij in izboljšave storitev (člen 6(1)(f) GDPR)</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Data Sharing */}
+            <div className="bg-white rounded-xl shadow-md p-8 mb-8">
+              <h2 className="text-2xl font-bold mb-4">5. Posredovanje podatkov tretjim osebam</h2>
+              <div className="text-gray-700 space-y-3">
+                <p>Vaše podatke lahko posredujemo naslednjim kategorijam prejemnikov:</p>
+                <ul className="list-disc pl-6 space-y-2">
+                  <li><strong>Kmeti:</strong> podatke za dostavo (ime, naslov, telefon) za izvedbo naročila</li>
+                  <li><strong>Kurirske službe:</strong> podatke potrebne za dostavo paketov</li>
+                  <li><strong>Plačilni procesorji:</strong> za procesiranje plačil (npr. Stripe, PayPal)</li>
+                  <li><strong>IT ponudniki:</strong> za gostovanje strežnikov in tehnično podporo</li>
+                  <li><strong>Analitični orodja:</strong> anonimni podatki za analitiko (Google Analytics)</li>
+                </ul>
+                <p className="mt-4">
+                  <strong>Ne prodajamo</strong> vaših osebnih podatkov tretjim osebam za marketinške namene.
+                </p>
+              </div>
+            </div>
+
+            {/* Data Retention */}
+            <div className="bg-white rounded-xl shadow-md p-8 mb-8">
+              <h2 className="text-2xl font-bold mb-4">6. Hramba podatkov</h2>
+              <div className="text-gray-700 space-y-3">
+                <p>Vaše podatke hranimo za naslednja obdobja:</p>
+                <ul className="list-disc pl-6 space-y-2">
+                  <li><strong>Podatki naročil:</strong> 5 let (zakonska obveznost za davčne namene)</li>
+                  <li><strong>Računi uporabnikov:</strong> dokler je račun aktiven + 2 leti po izbrimu</li>
+                  <li><strong>Marketinška privolitev:</strong> do preklica ali 3 leta neaktivnosti</li>
+                  <li><strong>Tehnični podatki (piškotki):</strong> do 12 mesecev</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Your Rights */}
+            <div className="bg-white rounded-xl shadow-md p-8 mb-8">
+              <h2 className="text-2xl font-bold mb-4">7. Vaše pravice</h2>
+              <div className="text-gray-700 space-y-3">
+                <p>V skladu z GDPR imate naslednje pravice:</p>
+                <div className="grid md:grid-cols-2 gap-4 mt-4">
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h4 className="font-bold mb-2">🔍 Pravica do dostopa</h4>
+                    <p className="text-sm">Pravica do kopije vaših osebnih podatkov</p>
+                  </div>
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h4 className="font-bold mb-2">✏️ Pravica do popravka</h4>
+                    <p className="text-sm">Popravite netočne ali nepopolne podatke</p>
+                  </div>
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h4 className="font-bold mb-2">🗑️ Pravica do izbrisa</h4>
+                    <p className="text-sm">Zahtevajte izbris vaših podatkov</p>
+                  </div>
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h4 className="font-bold mb-2">⛔ Pravica do omejitve</h4>
+                    <p className="text-sm">Omejite obdelavo vaših podatkov</p>
+                  </div>
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h4 className="font-bold mb-2">📦 Pravica do prenosljivosti</h4>
+                    <p className="text-sm">Prenesite svoje podatke drugam</p>
+                  </div>
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h4 className="font-bold mb-2">🚫 Pravica do ugovora</h4>
+                    <p className="text-sm">Ugovarjajte določenim obdelavam</p>
+                  </div>
+                </div>
+                <p className="mt-4">
+                  Za uveljavljanje pravic nas kontaktirajte na <a href="mailto:privacy@mojkmet.eu" className="text-green-600 hover:underline">privacy@mojkmet.eu</a>
+                </p>
+              </div>
+            </div>
+
+            {/* Security */}
+            <div className="bg-white rounded-xl shadow-md p-8 mb-8">
+              <h2 className="text-2xl font-bold mb-4">8. Varnost podatkov</h2>
+              <div className="text-gray-700 space-y-3">
+                <p>Vaše podatke varujemo z naslednjimi ukrepi:</p>
+                <ul className="list-disc pl-6 space-y-2">
+                  <li>SSL/TLS šifriranje za vse prenose podatkov</li>
+                  <li>Varna shramba podatkov na šifriranih strežnikih</li>
+                  <li>Dostop do podatkov imajo samo pooblaščeni zaposleni</li>
+                  <li>Redne varnostne revizije in posodobitve</li>
+                  <li>Dvopostopkovna avtentikacija za dostop do sistemov</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Cookies */}
+            <div className="bg-white rounded-xl shadow-md p-8 mb-8">
+              <h2 className="text-2xl font-bold mb-4">9. Piškotki</h2>
+              <div className="text-gray-700 space-y-3">
+                <p>
+                  Naša spletna stran uporablja piškotke za izboljšanje uporabniške izkušnje. Uporabljamo:
+                </p>
+                <ul className="list-disc pl-6 space-y-2">
+                  <li><strong>Nujno potrebni piškotki:</strong> za delovanje spletne strani (npr. košarica)</li>
+                  <li><strong>Analitični piškotki:</strong> za razumevanje uporabe strani (Google Analytics)</li>
+                  <li><strong>Marketinški piškotki:</strong> za prikaz relevantnih oglasov (samo s privolitvijo)</li>
+                </ul>
+                <p className="mt-3">
+                  Piškotke lahko upravljate v nastavitvah brskalnika ali preko našega bannerja za piškotke.
+                </p>
+              </div>
+            </div>
+
+            {/* Contact */}
+            <div className="bg-green-50 border border-green-200 rounded-xl p-8">
+              <h2 className="text-2xl font-bold mb-4">10. Kontakt</h2>
+              <div className="text-gray-700 space-y-3">
+                <p>Za vprašanja o tej politiki zasebnosti nas kontaktirajte:</p>
+                <p>E-pošta: <a href="mailto:privacy@mojkmet.eu" className="text-green-600 hover:underline font-semibold">privacy@mojkmet.eu</a></p>
+                <p>Telefon: +386 1 234 5678</p>
+                <p>Naslov: Slovenska cesta 54, 1000 Ljubljana</p>
+                <p className="mt-4">
+                  <strong>Informacijski pooblaščenec Republike Slovenije:</strong><br />
+                  Če menite, da kršimo vašo zasebnost, imate pravico do pritožbe pri nadzornem organu:<br />
+                  <a href="https://www.ip-rs.si" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:underline">www.ip-rs.si</a>
+                </p>
+              </div>
+            </div>
+
+          </div>
         </div>
       </section>
     </main>
