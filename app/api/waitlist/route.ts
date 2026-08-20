@@ -1,15 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import nodemailer from 'nodemailer'
-
-const transporter = nodemailer.createTransport({
-  host: process.env.MOJKMET_EMAIL_SERVER || 'mail.mojkmet.eu',
-  port: parseInt(process.env.MOJKMET_SMTP_PORT || '465'),
-  secure: true,
-  auth: {
-    user: process.env.MOJKMET_EMAIL_USER || 'info@mojkmet.eu',
-    pass: process.env.MOJKMET_EMAIL_PASS || '',
-  },
-})
+import { sendMail } from '@/lib/mailer'
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,8 +16,7 @@ export async function POST(request: NextRequest) {
 
     // 1. Notify info@mojkmet.eu about new signup
     try {
-      await transporter.sendMail({
-        from: '"mojkmet.eu" <info@mojkmet.eu>',
+      await sendMail({
         to: 'info@mojkmet.eu',
         subject: `Nova prijava na seznam cakanja: ${email}`,
         text: `Nova prijava na seznam cakanja:\n\nE-naslov: ${email}\nDatum: ${now}\n\n---\nmojkmet.eu waitlist`,
@@ -39,8 +28,7 @@ export async function POST(request: NextRequest) {
 
     // 2. Send welcome email to the subscriber
     try {
-      await transporter.sendMail({
-        from: '"mojkmet.eu" <info@mojkmet.eu>',
+      await sendMail({
         to: email,
         subject: 'Dobrodosli na mojkmet.eu!',
         text: `Pozdravljeni!\n\nHvala, da ste se prijavili na seznam cakanja za mojkmet.eu - slovensko trznico za sveze, lokalne pridelke.\n\nObvestili vas bomo, ko bo platforma pripravljena za uporabo.\n\nLep pozdrav,\nEkipa mojkmet.eu\nhttps://mojkmet.eu`,
