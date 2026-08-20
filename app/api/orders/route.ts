@@ -24,6 +24,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Kosarca je prazna' }, { status: 400 })
     }
 
+    // Validacija kolicin - pozitivna celo stevila, razumen zgornji limit
+    for (const item of items) {
+      if (
+        !item.productId ||
+        !Number.isInteger(item.quantity) ||
+        item.quantity < 1 ||
+        item.quantity > 999
+      ) {
+        return NextResponse.json(
+          { error: 'Neveljavna kolicina' },
+          { status: 400 }
+        )
+      }
+    }
+
     // Preveri zaloge in pridobi aktualne cene iz DB
     const productIds = items.map((i: any) => i.productId)
     const products = await prisma.product.findMany({

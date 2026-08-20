@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Trenutno geslo ni pravilno' }, { status: 400 })
     }
 
-    const hashed = await bcrypt.hash(newPassword, 10)
+    const hashed = await bcrypt.hash(newPassword, 12)
     await prisma.user.update({
       where: { id: session!.user!.id },
       data: { password: hashed },

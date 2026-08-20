@@ -2,28 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
-
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
-
-function rateLimit(ip: string, max = 10, windowMs = 15 * 60 * 1000): boolean {
-  const now = Date.now()
-  const entry = rateLimitMap.get(ip)
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + windowMs })
-    return true
-  }
-  entry.count++
-  return entry.count <= max
-}
+import { rateLimit, tooManyRequests } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
   try {
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
-    if (!rateLimit(ip)) {
-      return NextResponse.json(
-        { error: 'Prevec zahtevkov. Poskusite ponovno pozneje.' },
-        { status: 429 }
-      )
+    if (!rateLimit(request, 'reset-password', 10, 15 * 60 * 1000)) {
+      return tooManyRequests()
     }
 
     const { email, token, password } = await request.json()

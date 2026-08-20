@@ -1,9 +1,17 @@
 import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
+import { rateLimit, tooManyRequests } from '@/lib/rate-limit'
+
+const VALID_ROLES = ['CONSUMER', 'FARMER']
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function POST(request: Request) {
   try {
+    if (!rateLimit(request, 'register', 5, 15 * 60 * 1000)) {
+      return tooManyRequests()
+    }
+
     const body = await request.json()
     const { email, password, name, role } = body
 
@@ -14,9 +22,27 @@ export async function POST(request: Request) {
       )
     }
 
+    if (typeof email !== 'string' || !EMAIL_REGEX.test(email) || email.length > 254) {
+      return NextResponse.json(
+        { error: 'Veljaven e-postni naslov je obvezen' },
+        { status: 400 }
+      )
+    }
+
+    if (typeof password !== 'string' || password.length < 8 || password.length > 128) {
+      return NextResponse.json(
+        { error: 'Geslo mora biti dolgo vsaj 8 znakov' },
+        { status: 400 }
+      )
+    }
+
+    const normalizedEmail = email.toLowerCase().trim()
+    const safeRole = VALID_ROLES.includes(role) ? role : 'CONSUMER'
+    const safeName = typeof name === 'string' && name.trim() ? name.trim().slice(0, 100) : null
+
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email }
+      where: { email: normalizedEmail }
     })
 
     if (existingUser) {
@@ -32,10 +58,10 @@ export async function POST(request: Request) {
     // Create user
     const user = await prisma.user.create({
       data: {
-        email,
+        email: normalizedEmail,
         password: hashedPassword,
-        name,
-        role: role || 'CONSUMER',
+        name: safeName,
+        role: safeRole,
       }
     })
 
@@ -54,11 +80,10 @@ export async function POST(request: Request) {
       code: error.code,
       meta: error.meta,
     })
-    
-    // Return error with enough detail to debug
+
     const errorMessage = error.code === 'P2002'
       ? 'Ta email je ze v uporabi'
-      : `Napaka pri registraciji: ${error.message || 'Unknown error'}`
+      : 'Napaka pri registraciji'
 
     return NextResponse.json(
       { error: errorMessage, code: error.code || 'UNKNOWN' },
