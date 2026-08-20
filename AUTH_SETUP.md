@@ -45,13 +45,13 @@ Full authentication system implemented using NextAuth.js v5 with Prisma and Post
 
 ## Environment Variables
 
-Added to `.env.local`:
+Set in `.env.local` (never commit real values):
 ```env
-NEXTAUTH_SECRET="mojkmet-super-secret-key-change-in-production-2026"
+NEXTAUTH_SECRET="<generate with: openssl rand -base64 32>"
 NEXTAUTH_URL="http://localhost:3000"
 ```
 
-⚠️ **Important:** Change `NEXTAUTH_SECRET` in production to a secure random string.
+⚠️ **Important:** Use a secure random string in production. Never commit secrets to the repo.
 
 ## Tech Stack
 - **NextAuth.js v5** - Authentication library

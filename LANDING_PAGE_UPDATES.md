@@ -88,9 +88,7 @@ Each category has hover effects and gradient backgrounds.
 - Test with `GET /api/farms`
 
 **Neon Database:**
-```
-DATABASE_URL="postgresql://neondb_owner:npg_SVqfBoIn9sv8@ep-little-dust-ag4wbjxz-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require"
-```
+Connection string is stored in `.env.local` as `DATABASE_URL` — never hardcode or commit it.
 
 **Next Steps:**
 1. Run `npx prisma db push` to sync schema

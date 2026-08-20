@@ -37,14 +37,14 @@ postgresql://neondb_owner:YOUR_NEON_PASSWORD@ep-little-dust-ag4wbjxz-pooler.c-2.
 
 **Value:**
 ```
-mojkmet-super-secret-key-change-in-production-2026
+<generate with: openssl rand -base64 32>
 ```
 
 **Environments:** All (Production, Preview, Development)
 
 **Purpose:** Secures NextAuth sessions and JWT tokens
 
-**⚠️ Security Note:** Change this to a random string in production! Generate with:
+**⚠️ Security Note:** Use a random string and never commit it! Generate with:
 ```bash
 openssl rand -base64 32
 ```

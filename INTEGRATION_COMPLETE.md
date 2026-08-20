@@ -27,7 +27,7 @@
 ```
 
 ### 2. Deployed Database to Neon ✅
-- **Connection:** `ep-divine-butterfly-ag8zjgu3-pooler.c-2.eu-central-1.aws.neon.tech`
+- **Connection:** Neon pooler endpoint (see `.env.local` — retired `ep-divine-butterfly` instance, now on `ep-little-dust`)
 - **Database:** `neondb`
 - **Data seeded:**
   - 15 users (consumers, farmers, admin)
@@ -41,8 +41,8 @@
 
 #### `.env.local` (new)
 ```env
-DATABASE_URL="postgresql://neondb_owner:npg_9mH6KzYMkcQN@..."
-POSTGRES_URL="postgresql://neondb_owner:npg_9mH6KzYMkcQN@..."
+DATABASE_URL="postgresql://... (stored locally, never committed)"
+POSTGRES_URL="postgresql://... (stored locally, never committed)"
 ```
 
 #### `app/api/farms/route.ts` (new)
@@ -103,7 +103,7 @@ curl http://localhost:3000/api/farms
 1. Go to Vercel dashboard
 2. Add environment variable:
    - Key: `POSTGRES_URL`
-   - Value: `postgresql://neondb_owner:npg_9mH6KzYMkcQN@...`
+   - Value: your Neon connection string from `.env.local`
 3. Redeploy the app
 4. Visit https://mojkmet.eu/farms
 
