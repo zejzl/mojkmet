@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from 'next/link'
 
 export default function DealsPage() {
   const seasonalDeals = [
@@ -8,7 +8,7 @@ export default function DealsPage() {
       description: 'Sveža špinača, radič in solata iz Prekmurja',
       validUntil: '30. marec 2026',
       icon: '🥬',
-      color: 'from-green-500 to-emerald-600'
+      color: 'from-green-500 to-emerald-600',
     },
     {
       title: 'Kranjska klobasa',
@@ -16,7 +16,7 @@ export default function DealsPage() {
       description: 'Tradicionalna slovenška klobasa iz domačih kmetij',
       validUntil: '15. marec 2026',
       icon: '🌭',
-      color: 'from-red-500 to-orange-600'
+      color: 'from-red-500 to-orange-600',
     },
     {
       title: 'Slovenski med',
@@ -24,7 +24,7 @@ export default function DealsPage() {
       description: 'Akacijev in gozdni med letošnje letine',
       validUntil: '31. marec 2026',
       icon: '🍯',
-      color: 'from-yellow-500 to-amber-500'
+      color: 'from-yellow-500 to-amber-500',
     },
     {
       title: 'Jajca iz proste reje',
@@ -32,7 +32,7 @@ export default function DealsPage() {
       description: 'Sveža jajca iz Štajerske - paket 30 kosov',
       validUntil: '25. marec 2026',
       icon: '🥚',
-      color: 'from-orange-400 to-yellow-500'
+      color: 'from-orange-400 to-yellow-500',
     },
     {
       title: 'Bučno olje',
@@ -40,7 +40,7 @@ export default function DealsPage() {
       description: 'Prekmursko bučno olje - hladno stiskano',
       validUntil: '20. marec 2026',
       icon: '🫒',
-      color: 'from-green-700 to-lime-600'
+      color: 'from-green-700 to-lime-600',
     },
     {
       title: 'Domači kruh',
@@ -48,9 +48,9 @@ export default function DealsPage() {
       description: 'Polnozrnati kruh z ajdo in orehi',
       validUntil: '28. marec 2026',
       icon: '🥖',
-      color: 'from-amber-600 to-yellow-600'
+      color: 'from-amber-600 to-yellow-600',
     },
-  ];
+  ]
 
   const bundleDeals = [
     {
@@ -58,23 +58,23 @@ export default function DealsPage() {
       price: '24.99€',
       originalPrice: '32.00€',
       items: ['Mleko 2L', 'Jajca 10 kosov', 'Domač kruh', 'Maslo 250g'],
-      icon: '🍳'
+      icon: '🍳',
     },
     {
       name: 'Zelenjava paket',
       price: '18.99€',
       originalPrice: '25.00€',
       items: ['Solata', 'Paradižnik 1kg', 'Kumare 5 kosov', 'Paprika 500g'],
-      icon: '🥗'
+      icon: '🥗',
     },
     {
       name: 'Mesni paket',
       price: '45.99€',
       originalPrice: '59.00€',
       items: ['Piščanec 1.5kg', 'Goveja zarebrnica 1kg', 'Svinjska krača 1kg'],
-      icon: '🥩'
+      icon: '🥩',
     },
-  ];
+  ]
 
   return (
     <main className="flex-grow">
@@ -94,7 +94,10 @@ export default function DealsPage() {
           <h2 className="text-3xl font-bold mb-8 text-center">Akcijske ponudbe tedna</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
             {seasonalDeals.map((deal, index) => (
-              <div key={index} className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden">
+              <div
+                key={index}
+                className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden"
+              >
                 <div className={`bg-gradient-to-br ${deal.color} p-6 relative`}>
                   <div className="absolute top-4 right-4 bg-white text-green-700 font-bold px-4 py-2 rounded-full text-lg shadow-lg">
                     -{deal.discount}
@@ -107,7 +110,10 @@ export default function DealsPage() {
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-500">Velja do: {deal.validUntil}</span>
                   </div>
-                  <Link href="/products" className="mt-4 block w-full bg-green-600 text-white text-center py-3 rounded-lg hover:bg-green-700 transition font-semibold">
+                  <Link
+                    href="/products"
+                    className="mt-4 block w-full bg-green-600 text-white text-center py-3 rounded-lg hover:bg-green-700 transition font-semibold"
+                  >
                     Poglej ponudbo
                   </Link>
                 </div>
@@ -138,7 +144,10 @@ export default function DealsPage() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/products" className="block w-full bg-green-600 text-white text-center py-3 rounded-lg hover:bg-green-700 transition font-semibold">
+                <Link
+                  href="/products"
+                  className="block w-full bg-green-600 text-white text-center py-3 rounded-lg hover:bg-green-700 transition font-semibold"
+                >
                   Dodaj v košarico
                 </Link>
               </div>
@@ -169,5 +178,5 @@ export default function DealsPage() {
         </div>
       </section>
     </main>
-  );
+  )
 }

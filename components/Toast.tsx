@@ -13,6 +13,7 @@ export default function Toast({ message, show, onClose }: ToastProps) {
 
   useEffect(() => {
     if (show) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setVisible(true)
       const timer = setTimeout(() => {
         setVisible(false)

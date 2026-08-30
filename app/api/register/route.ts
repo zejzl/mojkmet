@@ -16,24 +16,15 @@ export async function POST(request: Request) {
     const { email, password, name, role } = body
 
     if (!email || !password) {
-      return NextResponse.json(
-        { error: 'Email and password are required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 })
     }
 
     if (typeof email !== 'string' || !EMAIL_REGEX.test(email) || email.length > 254) {
-      return NextResponse.json(
-        { error: 'Veljaven e-postni naslov je obvezen' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Veljaven e-poštni naslov je obvezen' }, { status: 400 })
     }
 
     if (typeof password !== 'string' || password.length < 8 || password.length > 128) {
-      return NextResponse.json(
-        { error: 'Geslo mora biti dolgo vsaj 8 znakov' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Geslo mora biti dolgo vsaj 8 znakov' }, { status: 400 })
     }
 
     const normalizedEmail = email.toLowerCase().trim()
@@ -42,14 +33,11 @@ export async function POST(request: Request) {
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email: normalizedEmail }
+      where: { email: normalizedEmail },
     })
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: 'User already exists' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'User already exists' }, { status: 400 })
     }
 
     // Hash password
@@ -62,7 +50,7 @@ export async function POST(request: Request) {
         password: hashedPassword,
         name: safeName,
         role: safeRole,
-      }
+      },
     })
 
     return NextResponse.json({
@@ -71,22 +59,22 @@ export async function POST(request: Request) {
         email: user.email,
         name: user.name,
         role: user.role,
-      }
+      },
     })
-  } catch (error: any) {
+  } catch (error) {
+    const prismaError = error as { message?: string; code?: string; meta?: unknown }
     console.error('Registration error:', error)
     console.error('Error details:', {
-      message: error.message,
-      code: error.code,
-      meta: error.meta,
+      message: prismaError.message,
+      code: prismaError.code,
+      meta: prismaError.meta,
     })
 
-    const errorMessage = error.code === 'P2002'
-      ? 'Ta email je ze v uporabi'
-      : 'Napaka pri registraciji'
+    const errorMessage =
+      prismaError.code === 'P2002' ? 'Ta email je ze v uporabi' : 'Napaka pri registraciji'
 
     return NextResponse.json(
-      { error: errorMessage, code: error.code || 'UNKNOWN' },
+      { error: errorMessage, code: prismaError.code || 'UNKNOWN' },
       { status: 500 }
     )
   }

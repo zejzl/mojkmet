@@ -1,10 +1,12 @@
 'use client'
 
+import { getErrorMessage } from '@/lib/errors'
 import { useState, useEffect } from 'react'
 import PageHeader from '@/components/dashboard/PageHeader'
+import type { UserProfile } from '@/types/api'
 
 export default function SettingsPage() {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState({ type: '', text: '' })
@@ -47,8 +49,8 @@ export default function SettingsPage() {
 
       setUser(data.user)
       setMessage({ type: 'success', text: 'Profil uspesno posodobljen!' })
-    } catch (error: any) {
-      setMessage({ type: 'error', text: error.message || 'Napaka pri shranjevanju' })
+    } catch (error) {
+      setMessage({ type: 'error', text: getErrorMessage(error, 'Napaka pri shranjevanju') })
     } finally {
       setSaving(false)
     }
@@ -84,8 +86,8 @@ export default function SettingsPage() {
 
       setPasswordMessage({ type: 'success', text: 'Geslo je bilo uspesno spremenjeno!' })
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
-    } catch (error: any) {
-      setPasswordMessage({ type: 'error', text: error.message || 'Napaka pri spremembi gesla' })
+    } catch (error) {
+      setPasswordMessage({ type: 'error', text: getErrorMessage(error, 'Napaka pri spremembi gesla') })
     } finally {
       setChangingPassword(false)
     }
@@ -116,11 +118,13 @@ export default function SettingsPage() {
           <h2 className="text-base font-semibold text-gray-900">Osebni podatki</h2>
 
           {message.text && (
-            <div className={`px-4 py-3 rounded text-sm ${
-              message.type === 'success'
-                ? 'bg-green-50 border border-green-200 text-green-700'
-                : 'bg-red-50 border border-red-200 text-red-600'
-            }`}>
+            <div
+              className={`px-4 py-3 rounded text-sm ${
+                message.type === 'success'
+                  ? 'bg-green-50 border border-green-200 text-green-700'
+                  : 'bg-red-50 border border-red-200 text-red-600'
+              }`}
+            >
               {message.text}
             </div>
           )}
@@ -155,10 +159,14 @@ export default function SettingsPage() {
           <div>
             <label className="block text-sm font-medium text-gray-700">Vloga</label>
             <p className="mt-1 text-sm text-gray-900">
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                user?.role === 'FARMER' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
-              }`}>
-                {roleLabels[user?.role] || user?.role}
+              <span
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  user?.role === 'FARMER'
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-blue-100 text-blue-800'
+                }`}
+              >
+                {user?.role ? roleLabels[user.role] || user.role : ''}
               </span>
             </p>
           </div>
@@ -166,11 +174,12 @@ export default function SettingsPage() {
           <div>
             <label className="block text-sm font-medium text-gray-700">Clan od</label>
             <p className="mt-1 text-sm text-gray-900">
-              {user?.createdAt && new Date(user.createdAt).toLocaleDateString('sl-SI', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-              })}
+              {user?.createdAt &&
+                new Date(user.createdAt).toLocaleDateString('sl-SI', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                })}
             </p>
           </div>
 
@@ -186,15 +195,20 @@ export default function SettingsPage() {
         </form>
 
         {/* Password change form */}
-        <form onSubmit={handlePasswordChange} className="bg-white rounded-xl shadow-md p-6 space-y-6">
+        <form
+          onSubmit={handlePasswordChange}
+          className="bg-white rounded-xl shadow-md p-6 space-y-6"
+        >
           <h2 className="text-base font-semibold text-gray-900">Sprememba gesla</h2>
 
           {passwordMessage.text && (
-            <div className={`px-4 py-3 rounded text-sm ${
-              passwordMessage.type === 'success'
-                ? 'bg-green-50 border border-green-200 text-green-700'
-                : 'bg-red-50 border border-red-200 text-red-600'
-            }`}>
+            <div
+              className={`px-4 py-3 rounded text-sm ${
+                passwordMessage.type === 'success'
+                  ? 'bg-green-50 border border-green-200 text-green-700'
+                  : 'bg-red-50 border border-red-200 text-red-600'
+              }`}
+            >
               {passwordMessage.text}
             </div>
           )}
@@ -208,7 +222,9 @@ export default function SettingsPage() {
               type="password"
               required
               value={passwordForm.currentPassword}
-              onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+              onChange={(e) =>
+                setPasswordForm({ ...passwordForm, currentPassword: e.target.value })
+              }
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500"
             />
           </div>
@@ -238,7 +254,9 @@ export default function SettingsPage() {
               type="password"
               required
               value={passwordForm.confirmPassword}
-              onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+              onChange={(e) =>
+                setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })
+              }
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500"
             />
           </div>

@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@/lib/errors'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrError } from '@/lib/auth-helpers'
@@ -14,9 +15,9 @@ export async function GET() {
     })
 
     return NextResponse.json({ farm })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Farm GET error:', error)
-    return NextResponse.json({ error: error.message || 'Napaka' }, { status: 500 })
+    return NextResponse.json({ error: getErrorMessage(error, 'Napaka') }, { status: 500 })
   }
 }
 
@@ -33,7 +34,10 @@ export async function PUT(request: Request) {
     const { name, description, address, city, postalCode, phone, website } = body
 
     if (!name || !address || !city || !postalCode) {
-      return NextResponse.json({ error: 'Ime, naslov, mesto in postna stevilka so obvezni' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Ime, naslov, mesto in postna stevilka so obvezni' },
+        { status: 400 }
+      )
     }
 
     const existingFarm = await prisma.farm.findUnique({
@@ -62,8 +66,8 @@ export async function PUT(request: Request) {
     }
 
     return NextResponse.json({ farm })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Farm PUT error:', error)
-    return NextResponse.json({ error: error.message || 'Napaka pri shranjevanju' }, { status: 500 })
+    return NextResponse.json({ error: getErrorMessage(error, 'Napaka pri shranjevanju') }, { status: 500 })
   }
 }

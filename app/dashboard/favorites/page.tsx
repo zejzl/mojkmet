@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import PageHeader from '@/components/dashboard/PageHeader'
 import { useCart } from '@/lib/cart-context'
+import type { Favorite } from '@/types/api'
 
 export default function FavoritesPage() {
-  const [favorites, setFavorites] = useState<any[]>([])
+  const [favorites, setFavorites] = useState<Favorite[]>([])
   const [loading, setLoading] = useState(true)
   const [removingId, setRemovingId] = useState<string | null>(null)
   const [addedToCart, setAddedToCart] = useState<string | null>(null)
@@ -42,7 +43,7 @@ export default function FavoritesPage() {
     }
   }
 
-  function handleAddToCart(fav: any) {
+  function handleAddToCart(fav: Favorite) {
     addToCart({
       productId: fav.product.id,
       name: fav.product.name,
@@ -76,8 +77,18 @@ export default function FavoritesPage() {
       {favorites.length === 0 ? (
         <div className="bg-white rounded-xl shadow-md p-12 text-center">
           <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            <svg
+              className="w-8 h-8 text-red-300"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+              />
             </svg>
           </div>
           <h3 className="text-lg font-semibold text-gray-900">Se nimate priljubljenih izdelkov</h3>
@@ -91,7 +102,7 @@ export default function FavoritesPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {favorites.map((fav: any) => (
+          {favorites.map((fav) => (
             <div
               key={fav.id}
               className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition border border-gray-100"
@@ -123,7 +134,9 @@ export default function FavoritesPage() {
 
               <div className="p-4">
                 <h3 className="font-semibold text-gray-900 mb-0.5">{fav.product?.name}</h3>
-                <p className="text-sm text-gray-500 mb-3">{fav.product?.farmName} &middot; {fav.product?.farmCity}</p>
+                <p className="text-sm text-gray-500 mb-3">
+                  {fav.product?.farmName} &middot; {fav.product?.farmCity}
+                </p>
 
                 <div className="flex items-center justify-between">
                   <span className="text-green-700 font-bold">
@@ -133,7 +146,11 @@ export default function FavoritesPage() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleAddToCart(fav)}
-                      disabled={!fav.product?.available || fav.product?.stock === 0 || addedToCart === fav.productId}
+                      disabled={
+                        !fav.product?.available ||
+                        fav.product?.stock === 0 ||
+                        addedToCart === fav.productId
+                      }
                       className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed ${
                         addedToCart === fav.productId
                           ? 'bg-green-700 text-white'
@@ -143,8 +160,8 @@ export default function FavoritesPage() {
                       {addedToCart === fav.productId
                         ? 'Dodano!'
                         : fav.product?.stock === 0
-                        ? 'Razprodano'
-                        : 'V kosarco'}
+                          ? 'Razprodano'
+                          : 'V košarico'}
                     </button>
                     <button
                       onClick={() => handleRemoveFavorite(fav.productId)}

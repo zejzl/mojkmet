@@ -12,7 +12,7 @@ async function main() {
 
   // Create test user (consumer)
   const hashedPassword = await bcrypt.hash('password123', 10)
-  
+
   const user = await prisma.user.upsert({
     where: { email: 'marko.novak@gmail.com' },
     update: {},
@@ -69,7 +69,7 @@ async function main() {
     },
   })
 
-  const zelenjava = await prisma.category.upsert({
+  await prisma.category.upsert({
     where: { slug: 'zelenjava' },
     update: {},
     create: {
@@ -91,7 +91,7 @@ async function main() {
       categoryId: mlecniIzdelki.id,
       name: 'Polnomastno kravje mleko',
       description: 'Sveže kravje mleko z lastne kmetije',
-      price: 1.80,
+      price: 1.8,
       unit: 'L',
       stock: 50,
       available: true,
@@ -107,7 +107,7 @@ async function main() {
       categoryId: mlecniIzdelki.id,
       name: 'Domači sir',
       description: 'Tradicionalni slovenski sir',
-      price: 7.50,
+      price: 7.5,
       unit: '200g',
       stock: 30,
       available: true,

@@ -1,14 +1,16 @@
 'use client'
 
+import { getErrorMessage } from '@/lib/errors'
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import PageHeader from '@/components/dashboard/PageHeader'
+import type { CategoryOption } from '@/types/api'
 
 export default function NewProductPage() {
   const { data: session } = useSession()
   const router = useRouter()
-  const [categories, setCategories] = useState<any[]>([])
+  const [categories, setCategories] = useState<CategoryOption[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -56,14 +58,16 @@ export default function NewProductPage() {
       if (!res.ok) throw new Error(data.error)
 
       router.push('/dashboard/farmer/products')
-    } catch (error: any) {
-      setError(error.message || 'Napaka pri dodajanju izdelka')
+    } catch (error) {
+      setError(getErrorMessage(error, 'Napaka pri dodajanju izdelka'))
     } finally {
       setSaving(false)
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
@@ -78,7 +82,7 @@ export default function NewProductPage() {
 
   return (
     <div>
-      <PageHeader title="Dodaj izdelek" description="Dodajte nov izdelek na vaso kmetijo" />
+      <PageHeader title="Dodaj izdelek" description="Dodajte nov izdelek na vašo kmetijo" />
 
       <div className="max-w-2xl">
         <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-md p-6 space-y-6">
@@ -131,7 +135,7 @@ export default function NewProductPage() {
               onChange={handleChange}
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500"
             >
-              {categories.map((cat: any) => (
+              {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}
                 </option>

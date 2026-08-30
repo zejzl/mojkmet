@@ -7,10 +7,7 @@ export const maxDuration = 10
 
 const sql = neon(process.env.DATABASE_URL!)
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     if (!process.env.DATABASE_URL) {
       return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
@@ -57,7 +54,10 @@ export async function GET(
   } catch (error) {
     console.error('Product detail API error:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch product', details: error instanceof Error ? error.message : 'Unknown error' },
+      {
+        error: 'Failed to fetch product',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     )
   }

@@ -4,50 +4,54 @@ export default function ReturnsPage() {
       icon: '🥬',
       title: 'Izdelek ni svež',
       description: 'Če izdelek ni svež ali ni kakovosti, kot je bila opisana',
-      refund: 'Celotno vračilo ali zamenjava'
+      refund: 'Celotno vračilo ali zamenjava',
     },
     {
       icon: '📦',
       title: 'Poškodovan paket',
       description: 'Paket je bil poškodovan med transportom',
-      refund: 'Celotno vračilo ali zamenjava'
+      refund: 'Celotno vračilo ali zamenjava',
     },
     {
       icon: '❌',
       title: 'Napačen izdelek',
       description: 'Prejeli ste napačen izdelek ali manjka del naročila',
-      refund: 'Celotno vračilo ali zamenjava'
+      refund: 'Celotno vračilo ali zamenjava',
     },
     {
       icon: '🕐',
       title: 'Zamuda dostave',
       description: 'Izdelek je bil dostavljen prepozno in ni več svež',
-      refund: 'Celotno vračilo'
+      refund: 'Celotno vračilo',
     },
-  ];
+  ]
 
   const returnSteps = [
     {
       step: '1',
       title: 'Kontaktirajte nas',
-      description: 'V 24 urah po dostavi nas kontaktirajte na podpora@mojkmet.eu ali pokličite +386 1 234 5678. Opišite problem in pripnite fotografije izdelka.'
+      description:
+        'V 24 urah po dostavi nas kontaktirajte na podpora@mojkmet.eu. Opišite problem in pripnite fotografije izdelka.',
     },
     {
       step: '2',
       title: 'Odobritev vračila',
-      description: 'Naša ekipa bo pregledala vašo zahtevo in jo običajno odobri v 12 urah. Prejmete navodila za vračilo izdelka.'
+      description:
+        'Naša ekipa bo pregledala vašo zahtevo in jo običajno odobri v 12 urah. Prejmete navodila za vračilo izdelka.',
     },
     {
       step: '3',
       title: 'Vračilo izdelka',
-      description: 'Za pokvarljive izdelke vračilo ni potrebno. Za druge izdelke vam pošljemo povratno nalepko za brezplačno vračilo.'
+      description:
+        'Za pokvarljive izdelke vračilo ni potrebno. Za druge izdelke vam pošljemo povratno nalepko za brezplačno vračilo.',
     },
     {
       step: '4',
       title: 'Prejemite povračilo',
-      description: 'Ko odobrimo zahtevo, prejmete povračilo v 3-5 delovnih dneh na originalni način plačila ali kot kredit za naslednjo naročilo.'
+      description:
+        'Ko odobrimo zahtevo, prejmete povračilo v 3-5 delovnih dneh na originalni način plačila ali kot kredit za naslednjo naročilo.',
     },
-  ];
+  ]
 
   return (
     <main className="flex-grow">
@@ -69,16 +73,17 @@ export default function ReturnsPage() {
               <h2 className="text-3xl font-bold mb-6">Naša garancija</h2>
               <div className="prose prose-lg max-w-none text-gray-700 space-y-4">
                 <p>
-                  <strong>100% garancija svežine:</strong> Vsi naši izdelki so sveži in kakovostni. Če niste popolnoma zadovoljni,
-                  vam vrnemo denar ali zamenjamo izdelek. Brez vprašanj, brez zapletov.
+                  <strong>100% garancija svežine:</strong> Vsi naši izdelki so sveži in kakovostni.
+                  Če niste popolnoma zadovoljni, vam vrnemo denar ali zamenjamo izdelek. Brez
+                  vprašanj, brez zapletov.
                 </p>
                 <p>
-                  <strong>24-urni rok:</strong> Težavo morate prijaviti v 24 urah po prejemu dostave. To nam omogoča,
-                  da hitro rešimo problem in zagotovimo kakovost.
+                  <strong>24-urni rok:</strong> Težavo morate prijaviti v 24 urah po prejemu
+                  dostave. To nam omogoča, da hitro rešimo problem in zagotovimo kakovost.
                 </p>
                 <p>
-                  <strong>Fotografska dokumentacija:</strong> Za hitrejšo obravnavo prosimo, da ob prijavi priložite
-                  fotografije izdelka in embalaže.
+                  <strong>Fotografska dokumentacija:</strong> Za hitrejšo obravnavo prosimo, da ob
+                  prijavi priložite fotografije izdelka in embalaže.
                 </p>
               </div>
             </div>
@@ -175,7 +180,7 @@ export default function ReturnsPage() {
                 </li>
                 <li className="flex items-start">
                   <span className="text-red-500 mr-2">•</span>
-                  Osebne preference ("ni mi všeč okus")
+                  Osebne preference („ni mi všeč okus“)
                 </li>
               </ul>
             </div>
@@ -191,12 +196,16 @@ export default function ReturnsPage() {
             <div className="bg-white rounded-xl shadow-md p-6 text-center">
               <div className="text-5xl mb-4">💳</div>
               <h3 className="font-bold text-lg mb-2">Originalni način plačila</h3>
-              <p className="text-gray-600 text-sm">Vračilo na kartice ali PayPal v 3-5 delovnih dneh</p>
+              <p className="text-gray-600 text-sm">
+                Vračilo na kartice ali PayPal v 3-5 delovnih dneh
+              </p>
             </div>
             <div className="bg-white rounded-xl shadow-md p-6 text-center">
               <div className="text-5xl mb-4">🎁</div>
               <h3 className="font-bold text-lg mb-2">Kredit za nakupe</h3>
-              <p className="text-gray-600 text-sm">Takojšnji kredit + bonus 10% za naslednjo naročilo</p>
+              <p className="text-gray-600 text-sm">
+                Takojšnji kredit + bonus 10% za naslednjo naročilo
+              </p>
             </div>
             <div className="bg-white rounded-xl shadow-md p-6 text-center">
               <div className="text-5xl mb-4">🔄</div>
@@ -215,21 +224,15 @@ export default function ReturnsPage() {
             Naša ekipa za podporo je na voljo vsak delovni dan od 8:00 do 17:00
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a 
-              href="mailto:podpora@mojkmet.eu" 
+            <a
+              href="mailto:podpora@mojkmet.eu"
               className="bg-white text-green-600 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition"
             >
               E-pošta: podpora@mojkmet.eu
-            </a>
-            <a 
-              href="tel:+38612345678" 
-              className="bg-green-700 text-white px-8 py-4 rounded-lg font-semibold hover:bg-green-800 transition border-2 border-white"
-            >
-              Telefon: +386 1 234 5678
             </a>
           </div>
         </div>
       </section>
     </main>
-  );
+  )
 }

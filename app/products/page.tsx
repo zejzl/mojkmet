@@ -90,7 +90,7 @@ function ProductsContent() {
       .catch(() => {})
   }, [session])
 
-  const activeCategory = categories.find(c => c.slug === categorySlug)
+  const activeCategory = categories.find((c) => c.slug === categorySlug)
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
@@ -170,14 +170,14 @@ function ProductsContent() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Isci proizvode..."
+              placeholder="Išči proizvode..."
               className="flex-1 px-5 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-600"
             />
             <button
               type="submit"
               className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition"
             >
-              Isci
+              Išči
             </button>
           </form>
         </div>
@@ -254,7 +254,11 @@ function ProductsContent() {
                       onClick={() => handleToggleFavorite(product.id)}
                       disabled={togglingFav === product.id}
                       className="absolute top-2 right-2 p-1.5 rounded-full bg-white shadow hover:shadow-md transition"
-                      title={favorites.has(product.id) ? 'Odstrani iz priljubljenih' : 'Dodaj med priljubljene'}
+                      title={
+                        favorites.has(product.id)
+                          ? 'Odstrani iz priljubljenih'
+                          : 'Dodaj med priljubljene'
+                      }
                     >
                       <svg
                         className={`w-5 h-5 transition-colors ${
@@ -292,24 +296,31 @@ function ProductsContent() {
                       <span className="mr-1 text-base">*</span>
                       <span>{product.farm_name}</span>
                       {product.farm_verified && (
-                        <span className="ml-1 text-green-600 font-bold" title="Verificirana kmetija">v</span>
+                        <span
+                          className="ml-1 text-green-600 font-bold"
+                          title="Verificirana kmetija"
+                        >
+                          v
+                        </span>
                       )}
                       <span className="mx-1">-</span>
                       <span>{product.farm_city}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className={`text-xs px-2 py-1 rounded-full ${
-                        product.stock > 10
-                          ? 'bg-green-50 text-green-700'
-                          : product.stock > 0
-                          ? 'bg-yellow-50 text-yellow-700'
-                          : 'bg-red-50 text-red-700'
-                      }`}>
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full ${
+                          product.stock > 10
+                            ? 'bg-green-50 text-green-700'
+                            : product.stock > 0
+                              ? 'bg-yellow-50 text-yellow-700'
+                              : 'bg-red-50 text-red-700'
+                        }`}
+                      >
                         {product.stock > 10
                           ? 'Na zalogi'
                           : product.stock > 0
-                          ? `Se ${product.stock} na zalogi`
-                          : 'Razprodano'}
+                            ? `Se ${product.stock} na zalogi`
+                            : 'Razprodano'}
                       </span>
                       <button
                         onClick={() => handleAddToCart(product)}
@@ -320,7 +331,7 @@ function ProductsContent() {
                             : 'bg-green-600 text-white hover:bg-green-700'
                         }`}
                       >
-                        {addedToCart === product.id ? 'Dodano!' : 'V kosarco'}
+                        {addedToCart === product.id ? 'Dodano!' : 'V košarico'}
                       </button>
                     </div>
                   </div>

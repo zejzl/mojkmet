@@ -18,23 +18,25 @@ export default function FeaturedFarms() {
 
   useEffect(() => {
     fetch('/api/farms')
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         if (data.farms && data.farms.length > 0) {
           setFarms(data.farms.slice(0, 3)) // Show max 3 farms
         } else {
           // Fallback to mock data if no real farms
-          setFarms([{
-            id: 'mock-1',
-            name: 'Kmalu',
-            description: 'Kmalu bomo dodali prve kmetije',
-            city: 'Slovenija',
-            verified: false,
-          }])
+          setFarms([
+            {
+              id: 'mock-1',
+              name: 'Kmalu',
+              description: 'Kmalu bomo dodali prve kmetije',
+              city: 'Slovenija',
+              verified: false,
+            },
+          ])
         }
         setLoading(false)
       })
-      .catch(err => {
+      .catch((err) => {
         console.error('Failed to fetch farms:', err)
         setError('Napaka pri nalaganju kmetij')
         setLoading(false)
@@ -68,12 +70,8 @@ export default function FeaturedFarms() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-12">
           <div>
-            <h2 className="text-4xl font-bold text-gray-900 mb-2">
-              Priljubljene kmetije
-            </h2>
-            <p className="text-xl text-gray-600">
-              Odkrijte najboljše kmetije v vaši bližini
-            </p>
+            <h2 className="text-4xl font-bold text-gray-900 mb-2">Priljubljene kmetije</h2>
+            <p className="text-xl text-gray-600">Odkrijte najboljše kmetije v vaši bližini</p>
           </div>
           <Link
             href="/farms"
@@ -98,7 +96,11 @@ export default function FeaturedFarms() {
                 {farm.verified && (
                   <div className="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                     Verificirana
                   </div>
@@ -110,29 +112,38 @@ export default function FeaturedFarms() {
                 <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-green-600 transition">
                   {farm.name}
                 </h3>
-                
+
                 <div className="flex items-center text-sm text-gray-600 mb-3">
-                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <svg
+                    className="w-4 h-4 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
                   </svg>
                   {farm.city}
                 </div>
 
                 {farm.description && (
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                    {farm.description}
-                  </p>
+                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">{farm.description}</p>
                 )}
 
                 {farm.verified ? (
-                  <div className="text-sm text-green-600 font-semibold">
-                    Verificirana kmetija ✓
-                  </div>
+                  <div className="text-sm text-green-600 font-semibold">Verificirana kmetija ✓</div>
                 ) : (
-                  <div className="text-sm text-amber-600 font-semibold">
-                    Kmalu dostopna
-                  </div>
+                  <div className="text-sm text-amber-600 font-semibold">Kmalu dostopna</div>
                 )}
               </div>
             </Link>

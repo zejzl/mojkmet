@@ -8,7 +8,7 @@ import { signOut } from 'next-auth/react'
 
 const consumerLinks = [
   { href: '/dashboard', label: 'Pregled', icon: '📊' },
-  { href: '/dashboard/orders', label: 'Narocila', icon: '📦' },
+  { href: '/dashboard/orders', label: 'Naročila', icon: '📦' },
   { href: '/dashboard/favorites', label: 'Priljubljene', icon: '❤️' },
   { href: '/dashboard/settings', label: 'Nastavitve', icon: '⚙️' },
 ]
@@ -17,7 +17,7 @@ const farmerLinks = [
   { href: '/dashboard/farmer', label: 'Pregled', icon: '📊' },
   { href: '/dashboard/farmer/farm', label: 'Kmetija', icon: '🏡' },
   { href: '/dashboard/farmer/products', label: 'Izdelki', icon: '🥬' },
-  { href: '/dashboard/farmer/orders', label: 'Narocila', icon: '📦' },
+  { href: '/dashboard/farmer/orders', label: 'Naročila', icon: '📦' },
   { href: '/dashboard/settings', label: 'Nastavitve', icon: '⚙️' },
 ]
 
@@ -60,12 +60,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       )}
 
       {/* Sidebar */}
-      <aside className={`
+      <aside
+        className={`
         fixed lg:static inset-y-0 left-0 z-50
         w-64 bg-white border-r border-gray-200
         transform transition-transform duration-200 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-      `}>
+      `}
+      >
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="p-6 border-b border-gray-200">
@@ -79,10 +81,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           {/* User info */}
           <div className="p-4 border-b border-gray-200">
-            <p className="text-sm font-medium text-gray-900 truncate">{session.user?.name || session.user?.email}</p>
-            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-1 ${
-              isFarmer ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
-            }`}>
+            <p className="text-sm font-medium text-gray-900 truncate">
+              {session.user?.name || session.user?.email}
+            </p>
+            <span
+              className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-1 ${
+                isFarmer ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+              }`}
+            >
               {isFarmer ? 'Kmet' : 'Kupec'}
             </span>
           </div>
@@ -138,18 +144,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             className="text-gray-600 hover:text-gray-900"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
             </svg>
           </button>
-          <span className="text-sm font-medium text-gray-900">Nadzorna plosca</span>
+          <span className="text-sm font-medium text-gray-900">Nadzorna plošča</span>
           <div className="w-6" />
         </header>
 
         {/* Page content */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            {children}
-          </div>
+          <div className="max-w-7xl mx-auto">{children}</div>
         </main>
       </div>
     </div>

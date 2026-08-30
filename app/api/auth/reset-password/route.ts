@@ -13,17 +13,11 @@ export async function POST(request: NextRequest) {
     const { email, token, password } = await request.json()
 
     if (!email || !token || !password) {
-      return NextResponse.json(
-        { error: 'Manjkajo podatki za ponastavitev' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Manjkajo podatki za ponastavitev' }, { status: 400 })
     }
 
     if (typeof password !== 'string' || password.length < 8) {
-      return NextResponse.json(
-        { error: 'Geslo mora biti dolgo vsaj 8 znakov' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Geslo mora biti dolgo vsaj 8 znakov' }, { status: 400 })
     }
 
     const normalizedEmail = String(email).toLowerCase().trim()
@@ -53,10 +47,7 @@ export async function POST(request: NextRequest) {
     const user = await prisma.user.findUnique({ where: { email: normalizedEmail } })
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Racun ne obstaja' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Racun ne obstaja' }, { status: 400 })
     }
 
     const hashedPassword = await bcrypt.hash(password, 12)

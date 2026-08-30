@@ -11,7 +11,7 @@ export default function CartButton() {
     <Link
       href="/cart"
       className="relative text-gray-700 hover:text-green-600 transition"
-      title="Kosarco"
+      title="Košarico"
     >
       <span className="text-2xl">&#x1F6D2;</span>
       {totalItems > 0 && (

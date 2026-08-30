@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@/lib/errors'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrError } from '@/lib/auth-helpers'
@@ -42,8 +43,11 @@ export async function POST(request: Request) {
     })
 
     return NextResponse.json({ success: true })
-  } catch (err: any) {
+  } catch (err) {
     console.error('Change password error:', err)
-    return NextResponse.json({ error: err.message || 'Napaka pri spremembi gesla' }, { status: 500 })
+    return NextResponse.json(
+      { error: getErrorMessage(err, 'Napaka pri spremembi gesla') },
+      { status: 500 }
+    )
   }
 }

@@ -1,5 +1,6 @@
 'use client'
 
+import { getErrorMessage } from '@/lib/errors'
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
@@ -23,13 +24,13 @@ export default function CheckoutPage() {
 
   const total = getCartTotal()
 
-  // Ce kosarca je prazna, preusmeri
+  // Ce košarica je prazna, preusmeri
   if (items.length === 0 && status !== 'loading') {
     return (
       <main className="flex-grow bg-gray-50 py-16">
         <div className="max-w-lg mx-auto px-4 text-center">
           <div className="bg-white rounded-2xl shadow-md p-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Kosarca je prazna</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Košarica je prazna</h2>
             <Link
               href="/products"
               className="inline-block bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition"
@@ -77,16 +78,16 @@ export default function CheckoutPage() {
       const data = await res.json()
 
       if (!res.ok) {
-        throw new Error(data.error || 'Napaka pri oddaji narocila')
+        throw new Error(data.error || 'Napaka pri oddaji naročila')
       }
 
-      // PLACEHOLDER: Stripe placilo bi bilo tukaj
+      // PLACEHOLDER: Stripe plačilo bi bilo tukaj
       // await stripe.confirmPayment(...)
 
       clearCart()
       router.push(`/order-confirmation/${data.orderId}`)
-    } catch (err: any) {
-      setError(err.message || 'Napaka pri oddaji narocila')
+    } catch (err) {
+      setError(getErrorMessage(err, 'Napaka pri oddaji naročila'))
     } finally {
       setSubmitting(false)
     }
@@ -111,11 +112,14 @@ export default function CheckoutPage() {
             {!session && (
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
                 <p className="text-sm text-amber-800">
-                  Za dokoncanje narocila se morate{' '}
-                  <Link href="/login?redirect=/checkout" className="font-semibold underline hover:text-amber-900">
+                  Za dokončanje naročila se morate{' '}
+                  <Link
+                    href="/login?redirect=/checkout"
+                    className="font-semibold underline hover:text-amber-900"
+                  >
                     prijaviti
-                  </Link>
-                  {' '}ali{' '}
+                  </Link>{' '}
+                  ali{' '}
                   <Link href="/register" className="font-semibold underline hover:text-amber-900">
                     registrirati
                   </Link>
@@ -124,7 +128,10 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm p-6 space-y-6 border border-gray-100">
+            <form
+              onSubmit={handleSubmit}
+              className="bg-white rounded-xl shadow-sm p-6 space-y-6 border border-gray-100"
+            >
               <h2 className="text-lg font-semibold text-gray-900">Podatki za dostavo</h2>
 
               {error && (
@@ -134,7 +141,10 @@ export default function CheckoutPage() {
               )}
 
               <div>
-                <label htmlFor="deliveryAddress" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="deliveryAddress"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Naslov dostave *
                 </label>
                 <input
@@ -151,7 +161,10 @@ export default function CheckoutPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="deliveryCity" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="deliveryCity"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Mesto *
                   </label>
                   <input
@@ -166,7 +179,10 @@ export default function CheckoutPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="deliveryPostal" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="deliveryPostal"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Postna stevilka *
                   </label>
                   <input
@@ -217,7 +233,7 @@ export default function CheckoutPage() {
                 <div className="bg-gray-50 rounded-lg p-4 mb-4">
                   <p className="text-sm font-medium text-gray-700 mb-1">Nacin placila</p>
                   <p className="text-sm text-gray-500">
-                    Placilo ob dostavi
+                    Plačilo ob dostavi
                     {/* PLACEHOLDER: Stripe integracija bo dodana tukaj */}
                   </p>
                 </div>
@@ -228,10 +244,10 @@ export default function CheckoutPage() {
                   className="w-full bg-green-600 text-white py-3.5 rounded-xl font-bold hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed text-lg"
                 >
                   {submitting
-                    ? 'Oddajam narocilo...'
+                    ? 'Oddajam naročilo...'
                     : !session
-                    ? 'Prijavite se za nakup'
-                    : `Placaj ${total.toFixed(2)} EUR`}
+                      ? 'Prijavite se za nakup'
+                      : `Placaj ${total.toFixed(2)} EUR`}
                 </button>
               </div>
             </form>
@@ -240,7 +256,7 @@ export default function CheckoutPage() {
           {/* Order summary */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 sticky top-24">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Povzetek narocila</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Povzetek naročila</h2>
 
               <div className="space-y-3 mb-4">
                 {items.map((item) => (
@@ -281,7 +297,7 @@ export default function CheckoutPage() {
                   href="/cart"
                   className="text-sm text-gray-500 hover:text-green-600 transition"
                 >
-                  Uredi kosarco
+                  Uredi košarico
                 </Link>
               </div>
             </div>

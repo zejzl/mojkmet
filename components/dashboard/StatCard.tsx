@@ -21,11 +21,11 @@ export default function StatCard({ label, value, icon, trend, color = 'green' }:
         <div>
           <p className="text-sm text-gray-500">{label}</p>
           <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
-          {trend && (
-            <p className="text-xs text-gray-500 mt-1">{trend}</p>
-          )}
+          {trend && <p className="text-xs text-gray-500 mt-1">{trend}</p>}
         </div>
-        <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-2xl ${colorMap[color]}`}>
+        <div
+          className={`w-12 h-12 rounded-lg flex items-center justify-center text-2xl ${colorMap[color]}`}
+        >
           {icon}
         </div>
       </div>

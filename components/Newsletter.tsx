@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { getErrorMessage } from '@/lib/errors'
 
 export default function Newsletter() {
   const [email, setEmail] = useState('')
@@ -28,8 +29,8 @@ export default function Newsletter() {
 
       setSubscribed(true)
       setEmail('')
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err) {
+      setError(getErrorMessage(err, 'Napaka pri prijavi'))
     } finally {
       setLoading(false)
     }
@@ -44,8 +45,8 @@ export default function Newsletter() {
             Pridružite se listi čakanja
           </h2>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Bodite med prvimi, ki boste prejeli obvestilo o odprtju platforme. 
-            Ekskluzivne ponudbe za prve uporabnike! 🎁
+            Bodite med prvimi, ki boste prejeli obvestilo o odprtju platforme. Ekskluzivne ponudbe
+            za prve uporabnike! 🎁
           </p>
 
           {subscribed ? (
@@ -75,7 +76,7 @@ export default function Newsletter() {
                   </button>
                 </div>
               </form>
-              
+
               {error && (
                 <div className="bg-red-100 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
                   {error}
@@ -85,19 +86,31 @@ export default function Newsletter() {
               <div className="flex items-center justify-center gap-6 text-sm text-gray-600">
                 <div className="flex items-center gap-2">
                   <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                   Brez spam-a
                 </div>
                 <div className="flex items-center gap-2">
                   <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                   Ekskluzivne ugodnosti
                 </div>
                 <div className="flex items-center gap-2">
                   <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                   Zgodnji dostop
                 </div>

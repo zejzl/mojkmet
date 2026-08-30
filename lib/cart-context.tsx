@@ -32,9 +32,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const saved = localStorage.getItem('mojkmet-cart')
-      if (saved) {
-        setItems(JSON.parse(saved))
-      }
+if (saved) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          setItems(JSON.parse(saved))
+        }
     } catch {
       // ignore parse errors
     }

@@ -1,13 +1,11 @@
+import { getErrorMessage } from '@/lib/errors'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrError } from '@/lib/auth-helpers'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { session, error } = await getSessionOrError()
     if (error) return error
@@ -32,10 +30,10 @@ export async function GET(
     })
 
     if (!order) {
-      return NextResponse.json({ error: 'Narocilo ni najdeno' }, { status: 404 })
+      return NextResponse.json({ error: 'Naročilo ni najdeno' }, { status: 404 })
     }
 
-    // Preveri lastnistvo - samo lastnik narocila ga lahko vidi
+    // Preveri lastništvo - samo lastnik naročila ga lahko vidi
     if (order.userId !== session!.user!.id) {
       return NextResponse.json({ error: 'Dostop zavrnjen' }, { status: 403 })
     }
@@ -61,17 +59,14 @@ export async function GET(
         })),
       },
     })
-  } catch (err: any) {
+  } catch (err) {
     console.error('Order GET error:', err)
-    return NextResponse.json({ error: err.message || 'Napaka' }, { status: 500 })
+    return NextResponse.json({ error: getErrorMessage(err, 'Napaka') }, { status: 500 })
   }
 }
 
 // PATCH - posodobitev statusa (samo za kmete in admine)
-export async function PATCH(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { session, error } = await getSessionOrError()
     if (error) return error
@@ -85,7 +80,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Neveljaven status' }, { status: 400 })
     }
 
-    // Preveri, ce kmet ima pravico posodobiti to narocilo
+    // Preveri, ce kmet ima pravico posodobiti to naročilo
     if (session!.user!.role === 'FARMER') {
       const farm = await prisma.farm.findUnique({
         where: { userId: session!.user!.id },
@@ -104,7 +99,7 @@ export async function PATCH(
       })
 
       if (!orderItem) {
-        return NextResponse.json({ error: 'Narocilo ne vsebuje vasih izdelkov' }, { status: 403 })
+        return NextResponse.json({ error: 'Naročilo ne vsebuje vaših izdelkov' }, { status: 403 })
       }
     } else if (session!.user!.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Dostop zavrnjen' }, { status: 403 })
@@ -116,8 +111,8 @@ export async function PATCH(
     })
 
     return NextResponse.json({ order: updated })
-  } catch (err: any) {
+  } catch (err) {
     console.error('Order PATCH error:', err)
-    return NextResponse.json({ error: err.message || 'Napaka' }, { status: 500 })
+    return NextResponse.json({ error: getErrorMessage(err, 'Napaka') }, { status: 500 })
   }
 }

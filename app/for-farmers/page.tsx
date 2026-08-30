@@ -1,66 +1,66 @@
-import Link from 'next/link';
+import Link from 'next/link'
 
 export default function ForFarmersPage() {
   const benefits = [
     {
       title: 'Neposredna prodaja',
       icon: '💰',
-      description: 'Prodajajte neposredno kupcem brez posrednikov in obdržite večji del prihodkov.'
+      description: 'Prodajajte neposredno kupcem brez posrednikov in obdržite večji del prihodkov.',
     },
     {
       title: 'Večja vidnost',
       icon: '📈',
-      description: 'Dosežite tisoče kupcev po vsej Sloveniji preko naše platforme.'
+      description: 'Dosežite tisoče kupcev po vsej Sloveniji preko naše platforme.',
     },
     {
       title: 'Enostavna uporaba',
       icon: '📱',
-      description: 'Intuitivna platforma za upravljanje izdelkov, naročil in zalog.'
+      description: 'Intuitivna platforma za upravljanje izdelkov, naročil in zalog.',
     },
     {
       title: 'Hitro plačilo',
       icon: '⚡',
-      description: 'Prejemite plačila v 3-5 delovnih dneh po dostavi.'
+      description: 'Prejemite plačila v 3-5 delovnih dneh po dostavi.',
     },
     {
       title: 'Brezplačna podpora',
       icon: '🤝',
-      description: 'Naša ekipa vam pomaga pri vseh korakih - od registracije do prodaje.'
+      description: 'Naša ekipa vam pomaga pri vseh korakih - od registracije do prodaje.',
     },
     {
       title: 'Analitika prodaje',
       icon: '📊',
-      description: 'Sledite svojim prodajam, najboljšim izdelkom in kupcem v realnem času.'
+      description: 'Sledite svojim prodajam, najboljšim izdelkom in kupcem v realnem času.',
     },
-  ];
+  ]
 
   const steps = [
     {
       number: '1',
       title: 'Registracija',
-      description: 'Izpolnite preprost registracijski obrazec z osnovnimi podatki o kmetiji.'
+      description: 'Izpolnite preprost registracijski obrazec z osnovnimi podatki o kmetiji.',
     },
     {
       number: '2',
       title: 'Verifikacija',
-      description: 'Naša ekipa preveri vašo kmetijo in potrdi registracijo (1-2 dni).'
+      description: 'Naša ekipa preveri vašo kmetijo in potrdi registracijo (1-2 dni).',
     },
     {
       number: '3',
       title: 'Nastavitev profila',
-      description: 'Dodajte fotografije kmetije, opis in svoje zgodbe.'
+      description: 'Dodajte fotografije kmetije, opis in svoje zgodbe.',
     },
     {
       number: '4',
       title: 'Dodajanje izdelkov',
-      description: 'Naložite svoje izdelke s fotografijami, opisi in cenami.'
+      description: 'Naložite svoje izdelke s fotografijami, opisi in cenami.',
     },
     {
       number: '5',
       title: 'Začnite prodajati',
-      description: 'Vaši izdelki so takoj vidni kupcem po vsej Sloveniji!'
+      description: 'Vaši izdelki so takoj vidni kupcem po vsej Sloveniji!',
     },
-  ];
+  ]
 
   const pricing = [
     {
@@ -73,7 +73,7 @@ export default function ForFarmersPage() {
         'Osnovna podpora',
         'Statistika prodaje',
       ],
-      highlight: false
+      highlight: false,
     },
     {
       name: 'Standardni paket',
@@ -86,7 +86,7 @@ export default function ForFarmersPage() {
         'Napredna analitika',
         'Promocija na strani',
       ],
-      highlight: true
+      highlight: true,
     },
     {
       name: 'Premium paket',
@@ -99,9 +99,9 @@ export default function ForFarmersPage() {
         'Marketing podpora',
         'Lastna podstran',
       ],
-      highlight: false
+      highlight: false,
     },
-  ];
+  ]
 
   return (
     <main className="flex-grow">
@@ -112,7 +112,10 @@ export default function ForFarmersPage() {
           <p className="text-xl max-w-2xl mx-auto mb-8">
             Pridružite se platformi, ki povezuje slovenske kmete s kupci po vsej državi
           </p>
-          <Link href="/register" className="inline-block bg-white text-green-600 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition text-lg">
+          <Link
+            href="/register"
+            className="inline-block bg-white text-green-600 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition text-lg"
+          >
             Registriraj kmetijo
           </Link>
         </div>
@@ -124,7 +127,10 @@ export default function ForFarmersPage() {
           <h2 className="text-3xl font-bold mb-12 text-center">Zakaj izbrati Mojkmet.eu?</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {benefits.map((benefit, index) => (
-              <div key={index} className="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition">
+              <div
+                key={index}
+                className="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition"
+              >
                 <div className="text-5xl mb-4">{benefit.icon}</div>
                 <h3 className="text-xl font-bold mb-3">{benefit.title}</h3>
                 <p className="text-gray-600">{benefit.description}</p>
@@ -160,11 +166,11 @@ export default function ForFarmersPage() {
           <h2 className="text-3xl font-bold mb-12 text-center">Cenovna paketa</h2>
           <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {pricing.map((plan, index) => (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className={`rounded-xl shadow-md p-8 ${
-                  plan.highlight 
-                    ? 'bg-green-600 text-white ring-4 ring-green-300 transform scale-105' 
+                  plan.highlight
+                    ? 'bg-green-600 text-white ring-4 ring-green-300 transform scale-105'
                     : 'bg-white'
                 }`}
               >
@@ -175,11 +181,15 @@ export default function ForFarmersPage() {
                     </span>
                   </div>
                 )}
-                <h3 className={`text-2xl font-bold mb-2 ${plan.highlight ? 'text-white' : 'text-gray-900'}`}>
+                <h3
+                  className={`text-2xl font-bold mb-2 ${plan.highlight ? 'text-white' : 'text-gray-900'}`}
+                >
                   {plan.name}
                 </h3>
                 <div className="mb-6">
-                  <span className={`text-4xl font-bold ${plan.highlight ? 'text-white' : 'text-green-600'}`}>
+                  <span
+                    className={`text-4xl font-bold ${plan.highlight ? 'text-white' : 'text-green-600'}`}
+                  >
                     {plan.price}
                   </span>
                   <span className={`ml-2 ${plan.highlight ? 'text-green-100' : 'text-gray-500'}`}>
@@ -189,14 +199,18 @@ export default function ForFarmersPage() {
                 <ul className="space-y-3 mb-8">
                   {plan.features.map((feature, idx) => (
                     <li key={idx} className="flex items-start">
-                      <span className={`mr-2 ${plan.highlight ? 'text-green-200' : 'text-green-500'}`}>✓</span>
+                      <span
+                        className={`mr-2 ${plan.highlight ? 'text-green-200' : 'text-green-500'}`}
+                      >
+                        ✓
+                      </span>
                       <span className={plan.highlight ? 'text-green-50' : 'text-gray-700'}>
                         {feature}
                       </span>
                     </li>
                   ))}
                 </ul>
-                <Link 
+                <Link
                   href="/register"
                   className={`block w-full text-center py-3 rounded-lg font-semibold transition ${
                     plan.highlight
@@ -220,8 +234,8 @@ export default function ForFarmersPage() {
             <div className="bg-white rounded-xl shadow-md p-8">
               <div className="text-4xl mb-4">👨‍🌾</div>
               <p className="text-gray-700 italic mb-4">
-                "Od kar smo na Mojkmet.eu, se je naša prodaja podvojila. Končno lahko prodajamo neposredno 
-                kupcem brez posrednikov, ki bi nam vzeli večino dobička."
+                „Od kar smo na Mojkmet.eu, se je naša prodaja podvojila. Končno lahko prodajamo
+                neposredno kupcem brez posrednikov, ki bi nam vzeli večino dobička.“
               </p>
               <p className="font-bold">Franc Novak</p>
               <p className="text-sm text-gray-600">Ekološka kmetija Novak, Kranj</p>
@@ -229,8 +243,8 @@ export default function ForFarmersPage() {
             <div className="bg-white rounded-xl shadow-md p-8">
               <div className="text-4xl mb-4">👩‍🌾</div>
               <p className="text-gray-700 italic mb-4">
-                "Platforma je zelo enostavna za uporabo. V dveh dneh sem dodala vse izdelke in že prvi 
-                teden prejela 15 naročil. Odlična ekipa za podporo!"
+                „Platforma je zelo enostavna za uporabo. V dveh dneh sem dodala vse izdelke in že
+                prvi teden prejela 15 naročil. Odlična ekipa za podporo!“
               </p>
               <p className="font-bold">Marija Horvat</p>
               <p className="text-sm text-gray-600">Kmetija pri Mariji, Maribor</p>
@@ -248,10 +262,16 @@ export default function ForFarmersPage() {
               Registracija traja le 5 minut. Brez skritih stroškov. Brez obveznosti.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/register" className="bg-green-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-green-700 transition">
+              <Link
+                href="/register"
+                className="bg-green-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-green-700 transition"
+              >
                 Registriraj kmetijo zdaj
               </Link>
-              <Link href="/contact" className="bg-white border-2 border-green-600 text-green-600 px-8 py-4 rounded-lg font-semibold hover:bg-green-50 transition">
+              <Link
+                href="/contact"
+                className="bg-white border-2 border-green-600 text-green-600 px-8 py-4 rounded-lg font-semibold hover:bg-green-50 transition"
+              >
                 Kontaktiraj nas
               </Link>
             </div>
@@ -259,5 +279,5 @@ export default function ForFarmersPage() {
         </div>
       </section>
     </main>
-  );
+  )
 }

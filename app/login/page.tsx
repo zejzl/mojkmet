@@ -32,7 +32,7 @@ export default function LoginPage() {
         router.push('/')
         router.refresh()
       }
-    } catch (error) {
+    } catch {
       setError('Prišlo je do napake')
     } finally {
       setLoading(false)
@@ -42,9 +42,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="text-center text-3xl font-bold text-gray-900">
-          Prijava
-        </h2>
+        <h2 className="text-center text-3xl font-bold text-gray-900">Prijava</h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           Ali še nimaš računa?{' '}
           <Link href="/register" className="font-medium text-green-600 hover:text-green-500">
@@ -94,7 +92,10 @@ export default function LoginPage() {
 
             <div className="flex items-center justify-between">
               <div className="text-sm">
-                <Link href="/forgot-password" className="font-medium text-green-600 hover:text-green-500">
+                <Link
+                  href="/forgot-password"
+                  className="font-medium text-green-600 hover:text-green-500"
+                >
                   Pozabljeno geslo?
                 </Link>
               </div>

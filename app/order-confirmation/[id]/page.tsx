@@ -4,12 +4,13 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import OrderStatusBadge from '@/components/dashboard/OrderStatusBadge'
+import type { Order } from '@/types/api'
 
 export default function OrderConfirmationPage() {
   const params = useParams()
   const id = params?.id as string
 
-  const [order, setOrder] = useState<any>(null)
+  const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -38,13 +39,13 @@ export default function OrderConfirmationPage() {
       <main className="flex-grow bg-gray-50 py-16">
         <div className="max-w-lg mx-auto px-4 text-center">
           <div className="bg-white rounded-2xl shadow-md p-12">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Narocilo ni najdeno</h2>
-            <p className="text-gray-500 mb-6">{error || 'Prosimo, preverite svoja narocila.'}</p>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Naročilo ni najdeno</h2>
+            <p className="text-gray-500 mb-6">{error || 'Prosimo, preverite svoja naročila.'}</p>
             <Link
               href="/dashboard/orders"
               className="inline-block bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition"
             >
-              Moja narocila
+              Moja naročila
             </Link>
           </div>
         </div>
@@ -58,17 +59,27 @@ export default function OrderConfirmationPage() {
         {/* Success header */}
         <div className="bg-white rounded-2xl shadow-sm p-8 border border-gray-100 text-center mb-6">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <svg
+              className="w-8 h-8 text-green-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Narocilo je oddano!</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Naročilo je oddano!</h1>
           <p className="text-gray-500 mb-4">
-            Hvala za vase narocilo. Kmet bo prejel obvestilo in stopil v stik z vami.
+            Hvala za vaše naročilo. Kmet bo prejel obvestilo in stopil v stik z vami.
           </p>
           <div className="flex items-center justify-center gap-3">
             <span className="text-sm text-gray-500">
-              Narocilo #{order.id.slice(-8).toUpperCase()}
+              Naročilo #{order.id.slice(-8).toUpperCase()}
             </span>
             <OrderStatusBadge status={order.status} />
           </div>
@@ -76,19 +87,19 @@ export default function OrderConfirmationPage() {
 
         {/* Order details */}
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Podrobnosti narocila</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Podrobnosti naročila</h2>
 
           <table className="w-full">
             <thead>
               <tr className="text-left text-xs text-gray-500 uppercase">
                 <th className="pb-3">Izdelek</th>
                 <th className="pb-3">Kmetija</th>
-                <th className="pb-3 text-right">Kolicina</th>
+                <th className="pb-3 text-right">Količina</th>
                 <th className="pb-3 text-right">Cena</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {order.items?.map((item: any) => (
+              {order.items?.map((item) => (
                 <tr key={item.id}>
                   <td className="py-3 text-sm text-gray-900">{item.productName}</td>
                   <td className="py-3 text-sm text-gray-500">{item.farmName}</td>
@@ -103,7 +114,9 @@ export default function OrderConfirmationPage() {
             </tbody>
             <tfoot>
               <tr className="border-t border-gray-200">
-                <td colSpan={3} className="pt-3 text-sm font-semibold text-gray-900">Skupaj</td>
+                <td colSpan={3} className="pt-3 text-sm font-semibold text-gray-900">
+                  Skupaj
+                </td>
                 <td className="pt-3 text-right font-bold text-green-700">
                   {order.totalAmount.toFixed(2)} EUR
                 </td>
@@ -157,7 +170,7 @@ export default function OrderConfirmationPage() {
             href="/dashboard/orders"
             className="flex-1 bg-green-600 text-white text-center py-3 rounded-xl font-semibold hover:bg-green-700 transition"
           >
-            Moja narocila
+            Moja naročila
           </Link>
           <Link
             href="/products"

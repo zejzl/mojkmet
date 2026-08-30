@@ -1,39 +1,39 @@
-'use client';
+'use client'
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'
 
 interface Farm {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  city: string;
-  rating: number;
-  total_reviews: number;
-  is_verified: boolean;
+  id: string
+  name: string
+  slug: string
+  description: string
+  city: string
+  rating: number
+  total_reviews: number
+  is_verified: boolean
 }
 
 export default function FarmsPage() {
-  const [farms, setFarms] = useState<Farm[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [farms, setFarms] = useState<Farm[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchFarms() {
       try {
-        const response = await fetch('/api/farms');
-        if (!response.ok) throw new Error('Failed to fetch farms');
-        const data = await response.json();
-        setFarms(data.farms);
+        const response = await fetch('/api/farms')
+        if (!response.ok) throw new Error('Failed to fetch farms')
+        const data = await response.json()
+        setFarms(data.farms)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error');
+        setError(err instanceof Error ? err.message : 'Unknown error')
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
     }
-    
-    fetchFarms();
-  }, []);
+
+    fetchFarms()
+  }, [])
 
   return (
     <main className="flex-grow">
@@ -64,9 +64,7 @@ export default function FarmsPage() {
           )}
 
           {!loading && !error && farms.length === 0 && (
-            <div className="text-center text-gray-600">
-              Trenutno ni aktivnih kmetij.
-            </div>
+            <div className="text-center text-gray-600">Trenutno ni aktivnih kmetij.</div>
           )}
 
           {!loading && !error && farms.length > 0 && (
@@ -81,18 +79,14 @@ export default function FarmsPage() {
                   </div>
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-xl font-bold text-gray-900">
-                        {farm.name}
-                      </h3>
+                      <h3 className="text-xl font-bold text-gray-900">{farm.name}</h3>
                       <div className="flex items-center text-amber-500">
                         <span className="mr-1">⭐</span>
                         <span className="font-semibold">{Number(farm.rating).toFixed(1)}</span>
                       </div>
                     </div>
                     <p className="text-gray-600 mb-2">📍 {farm.city}</p>
-                    <p className="text-gray-700 text-sm mb-4 line-clamp-2">
-                      {farm.description}
-                    </p>
+                    <p className="text-gray-700 text-sm mb-4 line-clamp-2">{farm.description}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-500">
                         {farm.total_reviews} {farm.total_reviews === 1 ? 'ocena' : 'ocen'}
@@ -130,5 +124,5 @@ export default function FarmsPage() {
         </div>
       </section>
     </main>
-  );
+  )
 }

@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@/lib/errors'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrError } from '@/lib/auth-helpers'
@@ -28,9 +29,9 @@ export async function GET() {
     ])
 
     return NextResponse.json({ products, categories })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Products GET error:', error)
-    return NextResponse.json({ error: error.message || 'Napaka' }, { status: 500 })
+    return NextResponse.json({ error: getErrorMessage(error, 'Napaka') }, { status: 500 })
   }
 }
 
@@ -73,8 +74,11 @@ export async function POST(request: Request) {
     })
 
     return NextResponse.json({ product })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Products POST error:', error)
-    return NextResponse.json({ error: error.message || 'Napaka pri dodajanju izdelka' }, { status: 500 })
+    return NextResponse.json(
+      { error: getErrorMessage(error, 'Napaka pri dodajanju izdelka') },
+      { status: 500 }
+    )
   }
 }

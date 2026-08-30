@@ -5,82 +5,89 @@ export default function ShippingPage() {
       areas: ['Ljubljana', 'Domžale', 'Kamnik', 'Vrhnika', 'Grosuplje'],
       price: 'Brezplačno nad 30€',
       priceBellow: '2,50€',
-      time: '1-2 dni'
+      time: '1-2 dni',
     },
     {
       zone: 'Osrednja Slovenija',
       areas: ['Kranj', 'Jesenice', 'Škofja Loka', 'Trbovlje', 'Litija'],
       price: 'Brezplačno nad 35€',
       priceBellow: '3,50€',
-      time: '2-3 dni'
+      time: '2-3 dni',
     },
     {
       zone: 'Maribor z okolico',
       areas: ['Maribor', 'Ptuj', 'Slovenska Bistrica', 'Lenart', 'Ruše'],
       price: 'Brezplačno nad 35€',
       priceBellow: '3,50€',
-      time: '2-3 dni'
+      time: '2-3 dni',
     },
     {
       zone: 'Primorska',
       areas: ['Koper', 'Nova Gorica', 'Postojna', 'Sežana', 'Izola'],
       price: 'Brezplačno nad 40€',
       priceBellow: '4,50€',
-      time: '2-4 dni'
+      time: '2-4 dni',
     },
     {
       zone: 'Štajerska',
       areas: ['Celje', 'Velenje', 'Slovenj Gradec', 'Žalec', 'Laško'],
       price: 'Brezplačno nad 35€',
       priceBellow: '3,50€',
-      time: '2-3 dni'
+      time: '2-3 dni',
     },
     {
       zone: 'Ostale regije',
       areas: ['Murska Sobota', 'Novo mesto', 'Krško', 'Brežice', 'Črnomelj'],
       price: 'Brezplačno nad 40€',
       priceBellow: '4,50€',
-      time: '3-4 dni'
+      time: '3-4 dni',
     },
-  ];
+  ]
 
   const deliveryInfo = [
     {
       icon: '📦',
       title: 'Priprava naročila',
-      description: 'Kmet pripravi vaše naročilo v 24-48 urah po oddaji. Prejmete obvestilo, ko je pripravljeno za dostavo.'
+      description:
+        'Kmet pripravi vaše naročilo v 24-48 urah po oddaji. Prejmete obvestilo, ko je pripravljeno za dostavo.',
     },
     {
       icon: '🚚',
       title: 'Dostava na dom',
-      description: 'Pakete dostavljamo od ponedeljka do petka med 8:00 in 17:00. Za sobotno dostavo nas kontaktirajte.'
+      description:
+        'Pakete dostavljamo od ponedeljka do petka med 8:00 in 17:00. Za sobotno dostavo nas kontaktirajte.',
     },
     {
       icon: '📱',
       title: 'Sledenje paketu',
-      description: 'Ko je naročilo oddano v dostavo, prejmete sledilno številko za spremljanje v realnem času.'
+      description:
+        'Ko je naročilo oddano v dostavo, prejmete sledilno številko za spremljanje v realnem času.',
     },
     {
       icon: '❄️',
       title: 'Hlajenje',
-      description: 'Sveži in zamrznjeni izdelki so dostavljeni v izoliranih embalaža s hladilnimi elementi.'
+      description:
+        'Sveži in zamrznjeni izdelki so dostavljeni v izoliranih embalaža s hladilnimi elementi.',
     },
-  ];
+  ]
 
   const specialCases = [
     {
       title: 'Velika naročila',
-      content: 'Za naročila nad 200€ ali več kot 20kg nas kontaktirajte za dogovor o dostavi. Morda lahko organiziramo neposredno dostavo s strani kmeta.'
+      content:
+        'Za naročila nad 200€ ali več kot 20kg nas kontaktirajte za dogovor o dostavi. Morda lahko organiziramo neposredno dostavo s strani kmeta.',
     },
     {
       title: 'Oddaljene lokacije',
-      content: 'Če vaša lokacija ni na seznamu, nas kontaktirajte. Trudimo se dostavljati po vsej Sloveniji, morda bomo našli rešitev.'
+      content:
+        'Če vaša lokacija ni na seznamu, nas kontaktirajte. Trudimo se dostavljati po vsej Sloveniji, morda bomo našli rešitev.',
     },
     {
       title: 'Ponavljajoča naročila',
-      content: 'Želite redne tedenske ali mesečne dostave? Nastavite lahko avtomatsko dostavo in prihranite dodatnih 5% na stroških dostave.'
+      content:
+        'Želite redne tedenske ali mesečne dostave? Nastavite lahko avtomatsko dostavo in prihranite dodatnih 5% na stroških dostave.',
     },
-  ];
+  ]
 
   return (
     <main className="flex-grow">
@@ -122,11 +129,11 @@ export default function ShippingPage() {
                 <div>Cena dostave</div>
                 <div>Čas dostave</div>
               </div>
-              
+
               {/* Table Rows */}
               {deliveryZones.map((zone, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className={`px-6 py-5 grid grid-cols-4 gap-4 items-center ${
                     index % 2 === 0 ? 'bg-gray-50' : 'bg-white'
                   }`}
@@ -143,7 +150,8 @@ export default function ShippingPage() {
             </div>
 
             <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
-              <strong>Opomba:</strong> Časi dostave so okvirni in odvisni od razpoložljivosti izdelkov ter vremenskih razmer.
+              <strong>Opomba:</strong> Časi dostave so okvirni in odvisni od razpoložljivosti
+              izdelkov ter vremenskih razmer.
             </div>
           </div>
         </div>
@@ -161,7 +169,9 @@ export default function ShippingPage() {
                 </div>
                 <div className="flex-1 bg-white rounded-xl shadow-md p-6">
                   <h3 className="font-bold text-lg mb-2">Oddajte naročilo</h3>
-                  <p className="text-gray-600">Izberite izdelke in oddajte naročilo do 15:00 za procesiranje istega dne.</p>
+                  <p className="text-gray-600">
+                    Izberite izdelke in oddajte naročilo do 15:00 za procesiranje istega dne.
+                  </p>
                 </div>
               </div>
 
@@ -171,7 +181,9 @@ export default function ShippingPage() {
                 </div>
                 <div className="flex-1 bg-white rounded-xl shadow-md p-6">
                   <h3 className="font-bold text-lg mb-2">Kmet pripravi izdelke</h3>
-                  <p className="text-gray-600">Kmet nabere/pripravi sveže izdelke in jih skrbno zapakira za transport.</p>
+                  <p className="text-gray-600">
+                    Kmet nabere/pripravi sveže izdelke in jih skrbno zapakira za transport.
+                  </p>
                 </div>
               </div>
 
@@ -181,7 +193,9 @@ export default function ShippingPage() {
                 </div>
                 <div className="flex-1 bg-white rounded-xl shadow-md p-6">
                   <h3 className="font-bold text-lg mb-2">Prevzem in transport</h3>
-                  <p className="text-gray-600">Naš kurir prevzame paket s kmetije in ga dostavi na vaš naslov.</p>
+                  <p className="text-gray-600">
+                    Naš kurir prevzame paket s kmetije in ga dostavi na vaš naslov.
+                  </p>
                 </div>
               </div>
 
@@ -191,7 +205,9 @@ export default function ShippingPage() {
                 </div>
                 <div className="flex-1 bg-white rounded-xl shadow-md p-6">
                   <h3 className="font-bold text-lg mb-2">Dostava na vaš dom</h3>
-                  <p className="text-gray-600">Prejmete sveže pridelke direktno na dom. Uživajte!</p>
+                  <p className="text-gray-600">
+                    Prejmete sveže pridelke direktno na dom. Uživajte!
+                  </p>
                 </div>
               </div>
             </div>
@@ -223,10 +239,16 @@ export default function ShippingPage() {
               Oglejte si našo stran s pogostimi vprašanji ali nas kontaktirajte.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="/faq" className="bg-green-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-green-700 transition">
+              <a
+                href="/faq"
+                className="bg-green-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-green-700 transition"
+              >
                 Pogosta vprašanja
               </a>
-              <a href="/contact" className="bg-white border-2 border-green-600 text-green-600 px-8 py-4 rounded-lg font-semibold hover:bg-green-50 transition">
+              <a
+                href="/contact"
+                className="bg-white border-2 border-green-600 text-green-600 px-8 py-4 rounded-lg font-semibold hover:bg-green-50 transition"
+              >
                 Kontaktirajte nas
               </a>
             </div>
@@ -234,5 +256,5 @@ export default function ShippingPage() {
         </div>
       </section>
     </main>
-  );
+  )
 }

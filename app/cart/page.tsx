@@ -17,10 +17,17 @@ export default function CartPage() {
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+              />
             </svg>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Vasa kosarca je prazna</h2>
-            <p className="text-gray-500 mb-8">Dodajte izdelke iz nase ponudbe in zacnite z nakupovanjem.</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Vaša košarica je prazna</h2>
+            <p className="text-gray-500 mb-8">
+              Dodajte izdelke iz naše ponudbe in začnite z nakupovanjem.
+            </p>
             <Link
               href="/products"
               className="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition"
@@ -39,12 +46,12 @@ export default function CartPage() {
     <main className="flex-grow bg-gray-50 py-10">
       <div className="max-w-4xl mx-auto px-4">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Kosarca</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Košarica</h1>
           <button
             onClick={clearCart}
             className="text-sm text-gray-500 hover:text-red-600 transition underline"
           >
-            Izprazni kosarco
+            Izprazni košarico
           </button>
         </div>
 
@@ -78,7 +85,9 @@ export default function CartPage() {
                   >
                     -
                   </button>
-                  <span className="w-8 text-center font-semibold text-gray-900">{item.quantity}</span>
+                  <span className="w-8 text-center font-semibold text-gray-900">
+                    {item.quantity}
+                  </span>
                   <button
                     onClick={() => updateQuantity(item.productId, item.quantity + 1)}
                     disabled={item.quantity >= item.maxStock}
@@ -107,7 +116,7 @@ export default function CartPage() {
           {/* Order summary */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 sticky top-24">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Povzetek narocila</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Povzetek naročila</h2>
 
               <div className="space-y-3 mb-6">
                 {items.map((item) => (

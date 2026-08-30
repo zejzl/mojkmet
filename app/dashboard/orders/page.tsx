@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react'
 import OrderStatusBadge from '@/components/dashboard/OrderStatusBadge'
 import PageHeader from '@/components/dashboard/PageHeader'
+import type { Order } from '@/types/api'
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<any[]>([])
+  const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null)
 
@@ -30,17 +31,17 @@ export default function OrdersPage() {
 
   return (
     <div>
-      <PageHeader title="Moja narocila" description="Pregled vseh vasih narocil" />
+      <PageHeader title="Moja naročila" description="Pregled vseh vaših naročil" />
 
       {orders.length === 0 ? (
         <div className="bg-white rounded-xl shadow-md p-12 text-center">
           <span className="text-5xl block mb-4">📦</span>
-          <h3 className="text-lg font-semibold text-gray-900">Se nimate narocil</h3>
-          <p className="text-gray-500 mt-2">Ko boste oddali narocilo, se bo pojavilo tukaj.</p>
+          <h3 className="text-lg font-semibold text-gray-900">Se nimate naročil</h3>
+          <p className="text-gray-500 mt-2">Ko boste oddali naročilo, se bo pojavilo tukaj.</p>
         </div>
       ) : (
         <div className="space-y-4">
-          {orders.map((order: any) => (
+          {orders.map((order) => (
             <div key={order.id} className="bg-white rounded-xl shadow-md overflow-hidden">
               <button
                 onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
@@ -49,7 +50,7 @@ export default function OrdersPage() {
                 <div className="flex items-center space-x-4">
                   <div className="text-left">
                     <p className="text-sm font-medium text-gray-900">
-                      Narocilo #{order.id.slice(-6).toUpperCase()}
+                      Naročilo #{order.id.slice(-6).toUpperCase()}
                     </p>
                     <p className="text-xs text-gray-500">
                       {new Date(order.createdAt).toLocaleDateString('sl-SI', {
@@ -71,7 +72,12 @@ export default function OrdersPage() {
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </div>
               </button>
@@ -83,12 +89,12 @@ export default function OrdersPage() {
                       <tr className="text-left text-xs text-gray-500 uppercase">
                         <th className="pb-2">Izdelek</th>
                         <th className="pb-2">Kmetija</th>
-                        <th className="pb-2 text-right">Kolicina</th>
+                        <th className="pb-2 text-right">Količina</th>
                         <th className="pb-2 text-right">Cena</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {order.items?.map((item: any) => (
+                      {order.items?.map((item) => (
                         <tr key={item.id}>
                           <td className="py-2 text-sm text-gray-900">{item.productName}</td>
                           <td className="py-2 text-sm text-gray-500">{item.farmName}</td>

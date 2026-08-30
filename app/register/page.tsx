@@ -1,5 +1,6 @@
 'use client'
 
+import { getErrorMessage } from '@/lib/errors'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
@@ -66,8 +67,8 @@ export default function RegisterPage() {
       } else {
         router.push(formData.role === 'FARMER' ? '/dashboard/farmer' : '/')
       }
-    } catch (error: any) {
-      setError(error.message || 'Prišlo je do napake')
+    } catch (error) {
+      setError(getErrorMessage(error, 'Prišlo je do napake'))
     } finally {
       setLoading(false)
     }
@@ -76,9 +77,7 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="text-center text-3xl font-bold text-gray-900">
-          Ustvari račun
-        </h2>
+        <h2 className="text-center text-3xl font-bold text-gray-900">Ustvari račun</h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           Ali že imaš račun?{' '}
           <Link href="/login" className="font-medium text-green-600 hover:text-green-500">

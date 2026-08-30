@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@/lib/errors'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrError } from '@/lib/auth-helpers'
@@ -15,9 +16,9 @@ export async function GET() {
     })
 
     return NextResponse.json({ user })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Profile GET error:', error)
-    return NextResponse.json({ error: error.message || 'Napaka' }, { status: 500 })
+    return NextResponse.json({ error: getErrorMessage(error, 'Napaka') }, { status: 500 })
   }
 }
 
@@ -48,8 +49,11 @@ export async function PUT(request: Request) {
     })
 
     return NextResponse.json({ user })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Profile PUT error:', error)
-    return NextResponse.json({ error: error.message || 'Napaka pri posodabljanju profila' }, { status: 500 })
+    return NextResponse.json(
+      { error: getErrorMessage(error, 'Napaka pri posodabljanju profila') },
+      { status: 500 }
+    )
   }
 }

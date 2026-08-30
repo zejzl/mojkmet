@@ -1,5 +1,6 @@
 'use client'
 
+import { getErrorMessage } from '@/lib/errors'
 import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -47,8 +48,8 @@ function ResetPasswordForm() {
 
       setSuccess(true)
       setTimeout(() => router.push('/login'), 3000)
-    } catch (error: any) {
-      setError(error.message || 'Prislo je do napake')
+    } catch (error) {
+      setError(getErrorMessage(error, 'Prislo je do napake'))
     } finally {
       setLoading(false)
     }
@@ -60,10 +61,7 @@ function ResetPasswordForm() {
         <p className="text-sm text-gray-700 mb-4">
           Manjkajo podatki za ponastavitev. Uporabite povezavo iz e-postnega sporocila.
         </p>
-        <Link
-          href="/forgot-password"
-          className="font-medium text-green-600 hover:text-green-500"
-        >
+        <Link href="/forgot-password" className="font-medium text-green-600 hover:text-green-500">
           Zaznajte novo zahtevo
         </Link>
       </div>
@@ -75,8 +73,18 @@ function ResetPasswordForm() {
       {success ? (
         <div className="text-center space-y-4">
           <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
-            <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <svg
+              className="h-6 w-6 text-green-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
             </svg>
           </div>
           <p className="text-sm text-gray-700">
@@ -141,9 +149,7 @@ export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="text-center text-3xl font-bold text-gray-900">
-          Nastavi novo geslo
-        </h2>
+        <h2 className="text-center text-3xl font-bold text-gray-900">Nastavi novo geslo</h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           Ali se spomnite?{' '}
           <Link href="/login" className="font-medium text-green-600 hover:text-green-500">

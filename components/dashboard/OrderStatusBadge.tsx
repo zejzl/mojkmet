@@ -15,7 +15,9 @@ export default function OrderStatusBadge({ status }: OrderStatusBadgeProps) {
   const config = statusConfig[status] || { label: status, classes: 'bg-gray-100 text-gray-800' }
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.classes}`}>
+    <span
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.classes}`}
+    >
       {config.label}
     </span>
   )

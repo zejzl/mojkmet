@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@/lib/errors'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrError } from '@/lib/auth-helpers'
@@ -38,9 +39,12 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     })
 
     return NextResponse.json({ product: updated })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Product PUT error:', error)
-    return NextResponse.json({ error: error.message || 'Napaka pri posodabljanju' }, { status: 500 })
+    return NextResponse.json(
+      { error: getErrorMessage(error, 'Napaka pri posodabljanju') },
+      { status: 500 }
+    )
   }
 }
 
@@ -63,8 +67,8 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     await prisma.product.delete({ where: { id } })
 
     return NextResponse.json({ success: true })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Product DELETE error:', error)
-    return NextResponse.json({ error: error.message || 'Napaka pri brisanju' }, { status: 500 })
+    return NextResponse.json({ error: getErrorMessage(error, 'Napaka pri brisanju') }, { status: 500 })
   }
 }

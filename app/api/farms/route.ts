@@ -1,11 +1,11 @@
-import { neon } from '@neondatabase/serverless';
-import { NextResponse } from 'next/server';
+import { neon } from '@neondatabase/serverless'
+import { NextResponse } from 'next/server'
 
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
-export const maxDuration = 10;
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+export const maxDuration = 10
 
-const sql = neon(process.env.DATABASE_URL!);
+const sql = neon(process.env.DATABASE_URL!)
 
 export async function GET() {
   try {
@@ -14,7 +14,7 @@ export async function GET() {
       return NextResponse.json(
         { error: 'Database not configured. Set DATABASE_URL environment variable.' },
         { status: 500 }
-      );
+      )
     }
 
     const rows = await sql`
@@ -31,18 +31,18 @@ export async function GET() {
       LEFT JOIN reviews r ON f.id = r."farmId"
       GROUP BY f.id, f.name, f.description, f.city, f.verified, f."createdAt"
       ORDER BY f."createdAt" DESC
-    `;
-    
-    return NextResponse.json({ farms: rows });
+    `
+
+    return NextResponse.json({ farms: rows })
   } catch (error) {
-    console.error('Database error:', error);
+    console.error('Database error:', error)
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to fetch farms',
         details: error instanceof Error ? error.message : 'Unknown error',
-        env_check: !!process.env.DATABASE_URL
+        env_check: !!process.env.DATABASE_URL,
       },
       { status: 500 }
-    );
+    )
   }
 }

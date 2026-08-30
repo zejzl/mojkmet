@@ -1,6 +1,8 @@
+import { getErrorMessage } from '@/lib/errors'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrError } from '@/lib/auth-helpers'
+import type { Order } from '@/types/api'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,7 +43,7 @@ export async function GET(request: Request) {
       })
 
       // Group by order
-      const orderMap = new Map<string, any>()
+      const orderMap = new Map<string, Order>()
       for (const item of orderItems) {
         if (!orderMap.has(item.orderId)) {
           orderMap.set(item.orderId, {
@@ -57,7 +59,7 @@ export async function GET(request: Request) {
             items: [],
           })
         }
-        orderMap.get(item.orderId).items.push({
+        orderMap.get(item.orderId)!.items.push({
           id: item.id,
           productName: item.product.name,
           quantity: item.quantity,
@@ -102,8 +104,11 @@ export async function GET(request: Request) {
         })),
       })),
     })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Orders error:', error)
-    return NextResponse.json({ error: error.message || 'Napaka pri pridobivanju narocil' }, { status: 500 })
+    return NextResponse.json(
+      { error: getErrorMessage(error, 'Napaka pri pridobivanju naročil') },
+      { status: 500 }
+    )
   }
 }

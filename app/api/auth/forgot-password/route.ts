@@ -13,10 +13,7 @@ export async function POST(request: NextRequest) {
     const { email } = await request.json()
 
     if (!email || typeof email !== 'string' || !email.includes('@')) {
-      return NextResponse.json(
-        { error: 'Veljaven e-postni naslov je obvezen' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Veljaven e-poštni naslov je obvezen' }, { status: 400 })
     }
 
     const normalizedEmail = email.toLowerCase().trim()
@@ -55,7 +52,7 @@ export async function POST(request: NextRequest) {
   <br>
   <p>Lep pozdrav,<br>Ekipa mojkmet.eu</p>
   <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
-  <p style="color: #9ca3af; font-size: 12px;"><a href="https://mojkmet.eu">mojkmet.eu</a> - Sveze iz kmetije, naravnost k vam.</p>
+  <p style="color: #9ca3af; font-size: 12px;"><a href="https://mojkmet.eu">mojkmet.eu</a> - Sveže iz kmetije, naravnost k vam.</p>
 </div>`,
         })
       } catch (err) {
@@ -70,7 +67,8 @@ export async function POST(request: NextRequest) {
     // Generic response - do not reveal whether the account exists
     return NextResponse.json({
       success: true,
-      message: 'Ce racun obstaja, je povezava za ponastavitev gesla poslana na vas e-postni naslov.',
+      message:
+        'Ce racun obstaja, je povezava za ponastavitev gesla poslana na vas e-poštni naslov.',
     })
   } catch (error) {
     console.error('Forgot password error:', error)

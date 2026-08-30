@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@/lib/errors'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrError } from '@/lib/auth-helpers'
@@ -41,9 +42,8 @@ export async function GET() {
         }),
       ])
 
-      const avgRating = reviews.length > 0
-        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-        : 0
+      const avgRating =
+        reviews.length > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0
 
       const totalRevenue = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
@@ -76,8 +76,11 @@ export async function GET() {
       activeOrders,
       favorites: favoriteCount,
     })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Stats error:', error)
-    return NextResponse.json({ error: error.message || 'Napaka pri pridobivanju statistike' }, { status: 500 })
+    return NextResponse.json(
+      { error: getErrorMessage(error, 'Napaka pri pridobivanju statistike') },
+      { status: 500 }
+    )
   }
 }

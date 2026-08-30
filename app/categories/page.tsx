@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from 'next/link'
 
 export default function CategoriesPage() {
   const categories = [
@@ -7,58 +7,58 @@ export default function CategoriesPage() {
       slug: 'sadje',
       icon: '🍎',
       description: 'Sveže sezonsko sadje slovenskih sadjarjev',
-      color: 'from-red-500 to-orange-500'
+      color: 'from-red-500 to-orange-500',
     },
     {
       name: 'Zelenjava',
       slug: 'zelenjava',
       icon: '🥕',
       description: 'Zelenjava direktno iz vrta na vašo mizo',
-      color: 'from-green-500 to-emerald-500'
+      color: 'from-green-500 to-emerald-500',
     },
     {
       name: 'Mlečni izdelki',
       slug: 'mlecni-izdelki',
       icon: '🥛',
       description: 'Mleko, jogurt, sir in skuta iz lokalnih mlekarn',
-      color: 'from-blue-400 to-cyan-400'
+      color: 'from-blue-400 to-cyan-400',
     },
     {
       name: 'Meso',
       slug: 'meso',
       icon: '🥩',
       description: 'Kakovostno meso z domačih kmetij',
-      color: 'from-red-600 to-pink-600'
+      color: 'from-red-600 to-pink-600',
     },
     {
       name: 'Pekovsko',
       slug: 'pekovsko',
       icon: '🥖',
       description: 'Domač kruh, pecivo in testenine',
-      color: 'from-amber-600 to-yellow-600'
+      color: 'from-amber-600 to-yellow-600',
     },
     {
       name: 'Med',
       slug: 'med',
       icon: '🍯',
       description: 'Pravi slovenski med iz slovenskih panjev',
-      color: 'from-yellow-500 to-orange-400'
+      color: 'from-yellow-500 to-orange-400',
     },
     {
       name: 'Vino',
       slug: 'vino',
       icon: '🍷',
       description: 'Vrhunska vina slovenskih vinogradnikov',
-      color: 'from-purple-600 to-red-600'
+      color: 'from-purple-600 to-red-600',
     },
     {
       name: 'Olja',
       slug: 'olja',
       icon: '🫒',
       description: 'Bučno, olivno in druga domača olja',
-      color: 'from-green-700 to-lime-600'
+      color: 'from-green-700 to-lime-600',
     },
-  ];
+  ]
 
   return (
     <main className="flex-grow">
@@ -83,16 +83,16 @@ export default function CategoriesPage() {
                 className="group"
               >
                 <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden h-full">
-                  <div className={`bg-gradient-to-br ${category.color} p-8 text-center transition-transform group-hover:scale-105`}>
+                  <div
+                    className={`bg-gradient-to-br ${category.color} p-8 text-center transition-transform group-hover:scale-105`}
+                  >
                     <div className="text-6xl mb-2">{category.icon}</div>
                   </div>
                   <div className="p-6">
                     <h3 className="text-xl font-bold mb-2 text-gray-900 group-hover:text-green-600 transition">
                       {category.name}
                     </h3>
-                    <p className="text-gray-600 text-sm">
-                      {category.description}
-                    </p>
+                    <p className="text-gray-600 text-sm">{category.description}</p>
                   </div>
                 </div>
               </Link>
@@ -110,28 +110,22 @@ export default function CategoriesPage() {
               <div className="bg-white rounded-xl p-6 shadow-md">
                 <div className="text-4xl mb-4">🎯</div>
                 <h3 className="text-lg font-bold mb-2">Hitra navigacija</h3>
-                <p className="text-gray-600">
-                  Hitro najdite točno tisto, kar potrebujete
-                </p>
+                <p className="text-gray-600">Hitro najdite točno tisto, kar potrebujete</p>
               </div>
               <div className="bg-white rounded-xl p-6 shadow-md">
                 <div className="text-4xl mb-4">🌱</div>
                 <h3 className="text-lg font-bold mb-2">Sezonska ponudba</h3>
-                <p className="text-gray-600">
-                  Odkrijte, kaj je ravno v sezoni
-                </p>
+                <p className="text-gray-600">Odkrijte, kaj je ravno v sezoni</p>
               </div>
               <div className="bg-white rounded-xl p-6 shadow-md">
                 <div className="text-4xl mb-4">👨‍🌾</div>
                 <h3 className="text-lg font-bold mb-2">Lokalni kmeti</h3>
-                <p className="text-gray-600">
-                  Spoznajte pridelovalce za vsakim izdelkom
-                </p>
+                <p className="text-gray-600">Spoznajte pridelovalce za vsakim izdelkom</p>
               </div>
             </div>
           </div>
         </div>
       </section>
     </main>
-  );
+  )
 }

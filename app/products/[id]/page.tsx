@@ -101,8 +101,8 @@ export default function ProductDetailPage() {
     product.stock > 10
       ? { label: 'Na zalogi', color: 'bg-green-50 text-green-700' }
       : product.stock > 0
-      ? { label: 'Zadnje na zalogi', color: 'bg-yellow-50 text-yellow-700' }
-      : { label: 'Razprodano', color: 'bg-red-50 text-red-700' }
+        ? { label: 'Zadnje na zalogi', color: 'bg-yellow-50 text-yellow-700' }
+        : { label: 'Razprodano', color: 'bg-red-50 text-red-700' }
 
   return (
     <main className="flex-grow bg-gray-50">
@@ -168,7 +168,9 @@ export default function ProductDetailPage() {
                     {product.price.toFixed(2)} EUR
                     <span className="text-lg text-gray-500 font-normal ml-2">/ {product.unit}</span>
                   </div>
-                  <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${stockStatus.color}`}>
+                  <div
+                    className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${stockStatus.color}`}
+                  >
                     {stockStatus.label}
                   </div>
                 </div>
@@ -208,7 +210,10 @@ export default function ProductDetailPage() {
                       {product.farm_name}
                     </Link>
                     {product.farm_verified && (
-                      <span className="ml-2 inline-flex items-center text-green-600" title="Verificirana kmetija">
+                      <span
+                        className="ml-2 inline-flex items-center text-green-600"
+                        title="Verificirana kmetija"
+                      >
                         ✓ Verificirana
                       </span>
                     )}
@@ -220,7 +225,8 @@ export default function ProductDetailPage() {
                         ⭐ {product.farm_rating}
                       </div>
                       <p className="text-sm text-gray-600">
-                        {product.farm_total_reviews} {product.farm_total_reviews === 1 ? 'ocena' : 'ocene'}
+                        {product.farm_total_reviews}{' '}
+                        {product.farm_total_reviews === 1 ? 'ocena' : 'ocene'}
                       </p>
                     </div>
                   )}
@@ -261,7 +267,9 @@ export default function ProductDetailPage() {
                     </h3>
                     <div className="text-green-700 font-bold text-lg">
                       {relatedProduct.price.toFixed(2)} EUR
-                      <span className="text-xs text-gray-500 font-normal">/{relatedProduct.unit}</span>
+                      <span className="text-xs text-gray-500 font-normal">
+                        /{relatedProduct.unit}
+                      </span>
                     </div>
                   </div>
                 </Link>

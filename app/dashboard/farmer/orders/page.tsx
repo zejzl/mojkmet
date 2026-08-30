@@ -5,8 +5,9 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import OrderStatusBadge from '@/components/dashboard/OrderStatusBadge'
 import PageHeader from '@/components/dashboard/PageHeader'
+import type { Order, OrderStatus } from '@/types/api'
 
-const STATUS_TRANSITIONS: Record<string, { value: string; label: string }[]> = {
+const STATUS_TRANSITIONS: Record<OrderStatus, { value: OrderStatus; label: string }[]> = {
   PENDING: [
     { value: 'CONFIRMED', label: 'Potrdi' },
     { value: 'CANCELLED', label: 'Preklic' },
@@ -15,12 +16,8 @@ const STATUS_TRANSITIONS: Record<string, { value: string; label: string }[]> = {
     { value: 'PREPARING', label: 'Zacel pripravo' },
     { value: 'CANCELLED', label: 'Preklic' },
   ],
-  PREPARING: [
-    { value: 'READY', label: 'Pripravljeno' },
-  ],
-  READY: [
-    { value: 'DELIVERED', label: 'Dostavljeno' },
-  ],
+  PREPARING: [{ value: 'READY', label: 'Pripravljeno' }],
+  READY: [{ value: 'DELIVERED', label: 'Dostavljeno' }],
   DELIVERED: [],
   CANCELLED: [],
 }
@@ -28,7 +25,7 @@ const STATUS_TRANSITIONS: Record<string, { value: string; label: string }[]> = {
 export default function FarmerOrdersPage() {
   const { data: session } = useSession()
   const router = useRouter()
-  const [orders, setOrders] = useState<any[]>([])
+  const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
@@ -46,7 +43,7 @@ export default function FarmerOrdersPage() {
       .finally(() => setLoading(false))
   }, [session, router])
 
-  async function handleStatusUpdate(orderId: string, newStatus: string) {
+  async function handleStatusUpdate(orderId: string, newStatus: OrderStatus) {
     setUpdatingId(orderId)
     try {
       const res = await fetch(`/api/orders/${orderId}`, {
@@ -55,9 +52,7 @@ export default function FarmerOrdersPage() {
         body: JSON.stringify({ status: newStatus }),
       })
       if (res.ok) {
-        setOrders((prev) =>
-          prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
-        )
+        setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o)))
       }
     } catch (err) {
       console.error('Status update error:', err)
@@ -79,21 +74,33 @@ export default function FarmerOrdersPage() {
 
   return (
     <div>
-      <PageHeader title="Prejeta narocila" description="Narocila, ki vsebujejo vase izdelke" />
+      <PageHeader title="Prejeta naročila" description="Naročila, ki vsebujejo vaše izdelke" />
 
       {orders.length === 0 ? (
         <div className="bg-white rounded-xl shadow-md p-12 text-center">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            <svg
+              className="w-8 h-8 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+              />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900">Se nimate prejetih narocil</h3>
-          <p className="text-gray-500 mt-2">Ko kupci narocijo vase izdelke, se bodo pojavili tukaj.</p>
+          <h3 className="text-lg font-semibold text-gray-900">Se nimate prejetih naročil</h3>
+          <p className="text-gray-500 mt-2">
+            Ko kupci narocijo vaše izdelke, se bodo pojavili tukaj.
+          </p>
         </div>
       ) : (
         <div className="space-y-4">
-          {orders.map((order: any) => {
+          {orders.map((order) => {
             const transitions = STATUS_TRANSITIONS[order.status] || []
             return (
               <div key={order.id} className="bg-white rounded-xl shadow-md overflow-hidden">
@@ -109,7 +116,8 @@ export default function FarmerOrdersPage() {
                       </span>
                     </p>
                     <p className="text-xs text-gray-500 mt-0.5">
-                      {order.items?.length || 0} {order.items?.length === 1 ? 'izdelek' : 'izdelkov'} &middot;{' '}
+                      {order.items?.length || 0}{' '}
+                      {order.items?.length === 1 ? 'izdelek' : 'izdelkov'} &middot;{' '}
                       {new Date(order.createdAt).toLocaleDateString('sl-SI', {
                         day: 'numeric',
                         month: 'long',
@@ -128,7 +136,12 @@ export default function FarmerOrdersPage() {
                       stroke="currentColor"
                       viewBox="0 0 24 24"
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
                     </svg>
                   </div>
                 </button>
@@ -140,12 +153,12 @@ export default function FarmerOrdersPage() {
                       <thead>
                         <tr className="text-left text-xs text-gray-500 uppercase">
                           <th className="pb-2">Izdelek</th>
-                          <th className="pb-2 text-right">Kolicina</th>
+                          <th className="pb-2 text-right">Količina</th>
                           <th className="pb-2 text-right">Cena</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
-                        {order.items?.map((item: any) => (
+                        {order.items?.map((item) => (
                           <tr key={item.id}>
                             <td className="py-2 text-sm text-gray-900">{item.productName}</td>
                             <td className="py-2 text-sm text-gray-900 text-right">

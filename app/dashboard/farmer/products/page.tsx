@@ -5,11 +5,12 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import PageHeader from '@/components/dashboard/PageHeader'
+import type { ProductRow } from '@/types/api'
 
 export default function ProductsPage() {
   const { data: session } = useSession()
   const router = useRouter()
-  const [products, setProducts] = useState<any[]>([])
+  const [products, setProducts] = useState<ProductRow[]>([])
   const [loading, setLoading] = useState(true)
   const [togglingId, setTogglingId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -39,9 +40,7 @@ export default function ProductsPage() {
         body: JSON.stringify({ available: !currentAvailable }),
       })
       if (res.ok) {
-        setProducts(products.map((p) =>
-          p.id === id ? { ...p, available: !currentAvailable } : p
-        ))
+        setProducts(products.map((p) => (p.id === id ? { ...p, available: !currentAvailable } : p)))
       }
     } catch (error) {
       console.error('Toggle error:', error)
@@ -118,12 +117,14 @@ export default function ProductsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {products.map((product: any) => (
+                {products.map((product) => (
                   <tr key={product.id} className="hover:bg-gray-50 transition">
                     <td className="px-6 py-4">
                       <p className="text-sm font-medium text-gray-900">{product.name}</p>
                       {product.description && (
-                        <p className="text-xs text-gray-500 truncate max-w-xs">{product.description}</p>
+                        <p className="text-xs text-gray-500 truncate max-w-xs">
+                          {product.description}
+                        </p>
                       )}
                     </td>
                     <td className="px-6 py-4">
@@ -135,7 +136,9 @@ export default function ProductsPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <span className={`text-sm font-medium ${product.stock > 0 ? 'text-gray-900' : 'text-red-600'}`}>
+                      <span
+                        className={`text-sm font-medium ${product.stock > 0 ? 'text-gray-900' : 'text-red-600'}`}
+                      >
                         {product.stock}
                       </span>
                     </td>

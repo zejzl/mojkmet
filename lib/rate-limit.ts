@@ -27,8 +27,5 @@ export function rateLimit(
 }
 
 export function tooManyRequests() {
-  return Response.json(
-    { error: 'Prevec zahtevkov. Poskusite ponovno pozneje.' },
-    { status: 429 }
-  )
+  return Response.json({ error: 'Prevec zahtevkov. Poskusite ponovno pozneje.' }, { status: 429 })
 }

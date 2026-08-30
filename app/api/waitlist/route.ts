@@ -6,10 +6,7 @@ export async function POST(request: NextRequest) {
     const { email } = await request.json()
 
     if (!email || !email.includes('@')) {
-      return NextResponse.json(
-        { error: 'Veljaven e-postni naslov je obvezen' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Veljaven e-poštni naslov je obvezen' }, { status: 400 })
     }
 
     const now = new Date().toLocaleString('sl-SI', { timeZone: 'Europe/Ljubljana' })
@@ -18,8 +15,8 @@ export async function POST(request: NextRequest) {
     try {
       await sendMail({
         to: 'info@mojkmet.eu',
-        subject: `Nova prijava na seznam cakanja: ${email}`,
-        text: `Nova prijava na seznam cakanja:\n\nE-naslov: ${email}\nDatum: ${now}\n\n---\nmojkmet.eu waitlist`,
+        subject: `Nova prijava na seznam čakanja: ${email}`,
+        text: `Nova prijava na seznam čakanja:\n\nE-naslov: ${email}\nDatum: ${now}\n\n---\nmojkmet.eu waitlist`,
       })
     } catch (err) {
       console.error('Failed to send notification email:', err)
@@ -30,18 +27,18 @@ export async function POST(request: NextRequest) {
     try {
       await sendMail({
         to: email,
-        subject: 'Dobrodosli na mojkmet.eu!',
-        text: `Pozdravljeni!\n\nHvala, da ste se prijavili na seznam cakanja za mojkmet.eu - slovensko trznico za sveze, lokalne pridelke.\n\nObvestili vas bomo, ko bo platforma pripravljena za uporabo.\n\nLep pozdrav,\nEkipa mojkmet.eu\nhttps://mojkmet.eu`,
+        subject: 'Dobrodošli na mojkmet.eu!',
+        text: `Pozdravljeni!\n\nHvala, da ste se prijavili na seznam čakanja za mojkmet.eu - slovensko tržnico za sveže, lokalne pridelke.\n\nObvestili vas bomo, ko bo platforma pripravljena za uporabo.\n\nLep pozdrav,\nEkipa mojkmet.eu\nhttps://mojkmet.eu`,
         html: `
 <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-  <h2 style="color: #16a34a;">Dobrodosli na mojkmet.eu!</h2>
+  <h2 style="color: #16a34a;">Dobrodošli na mojkmet.eu!</h2>
   <p>Pozdravljeni!</p>
-  <p>Hvala, da ste se prijavili na seznam cakanja za <strong>mojkmet.eu</strong> - slovensko trznico za sveze, lokalne pridelke.</p>
+  <p>Hvala, da ste se prijavili na seznam čakanja za <strong>mojkmet.eu</strong> - slovensko tržnico za sveže, lokalne pridelke.</p>
   <p>Obvestili vas bomo, ko bo platforma pripravljena za uporabo.</p>
   <br>
   <p>Lep pozdrav,<br>Ekipa mojkmet.eu</p>
   <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
-  <p style="color: #9ca3af; font-size: 12px;"><a href="https://mojkmet.eu">mojkmet.eu</a> - Sveze iz kmetije, naravnost k vam.</p>
+  <p style="color: #9ca3af; font-size: 12px;"><a href="https://mojkmet.eu">mojkmet.eu</a> - Sveže iz kmetije, naravnost k vam.</p>
 </div>`,
       })
     } catch (err) {
@@ -50,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Uspesno ste se prijavili na seznam cakanja!'
+      message: 'Uspešno ste se prijavili na seznam čakanja!',
     })
   } catch (error) {
     console.error('Waitlist error:', error)

@@ -1,24 +1,25 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'
 
 export default function CookieNotice() {
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState(false)
 
   useEffect(() => {
     // Check if user has already accepted
-    const consent = localStorage.getItem('cookie-consent');
+    const consent = localStorage.getItem('cookie-consent')
     if (!consent) {
-      setShow(true);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setShow(true)
     }
-  }, []);
+  }, [])
 
   const acceptCookies = () => {
-    localStorage.setItem('cookie-consent', 'accepted');
-    setShow(false);
-  };
+    localStorage.setItem('cookie-consent', 'accepted')
+    setShow(false)
+  }
 
-  if (!show) return null;
+  if (!show) return null
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-gray-900 text-white p-4 shadow-lg z-50 border-t border-gray-700">
@@ -35,5 +36,5 @@ export default function CookieNotice() {
         </button>
       </div>
     </div>
-  );
+  )
 }

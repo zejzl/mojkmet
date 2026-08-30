@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@/lib/errors'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrError } from '@/lib/auth-helpers'
@@ -41,8 +42,8 @@ export async function GET() {
         },
       })),
     })
-  } catch (err: any) {
+  } catch (err) {
     console.error('Dashboard favorites error:', err)
-    return NextResponse.json({ error: err.message || 'Napaka' }, { status: 500 })
+    return NextResponse.json({ error: getErrorMessage(err, 'Napaka') }, { status: 500 })
   }
 }

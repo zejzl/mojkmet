@@ -1,5 +1,6 @@
 'use client'
 
+import { getErrorMessage } from '@/lib/errors'
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
@@ -65,9 +66,12 @@ export default function FarmPage() {
       if (!res.ok) throw new Error(data.error)
 
       setIsNew(false)
-      setMessage({ type: 'success', text: isNew ? 'Kmetija uspesno ustvarjena!' : 'Kmetija uspesno posodobljena!' })
-    } catch (error: any) {
-      setMessage({ type: 'error', text: error.message || 'Napaka pri shranjevanju' })
+      setMessage({
+        type: 'success',
+        text: isNew ? 'Kmetija uspesno ustvarjena!' : 'Kmetija uspesno posodobljena!',
+      })
+    } catch (error) {
+      setMessage({ type: 'error', text: getErrorMessage(error, 'Napaka pri shranjevanju') })
     } finally {
       setSaving(false)
     }
@@ -90,17 +94,19 @@ export default function FarmPage() {
     <div>
       <PageHeader
         title={isNew ? 'Ustvari kmetijo' : 'Profil kmetije'}
-        description={isNew ? 'Vnesite podatke o vasi kmetiji' : 'Uredite podatke vase kmetije'}
+        description={isNew ? 'Vnesite podatke o vaši kmetiji' : 'Uredite podatke vaše kmetije'}
       />
 
       <div className="max-w-2xl">
         <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-md p-6 space-y-6">
           {message.text && (
-            <div className={`px-4 py-3 rounded text-sm ${
-              message.type === 'success'
-                ? 'bg-green-50 border border-green-200 text-green-700'
-                : 'bg-red-50 border border-red-200 text-red-600'
-            }`}>
+            <div
+              className={`px-4 py-3 rounded text-sm ${
+                message.type === 'success'
+                  ? 'bg-green-50 border border-green-200 text-green-700'
+                  : 'bg-red-50 border border-red-200 text-red-600'
+              }`}
+            >
               {message.text}
             </div>
           )}
@@ -131,7 +137,7 @@ export default function FarmPage() {
               rows={3}
               value={formData.description}
               onChange={handleChange}
-              placeholder="Kratko opistie vase kmetije..."
+              placeholder="Kratko opistie vaše kmetije..."
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500"
             />
           </div>
