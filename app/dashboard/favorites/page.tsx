@@ -49,6 +49,7 @@ export default function FavoritesPage() {
       name: fav.product.name,
       price: fav.product.price,
       unit: fav.product.unit,
+      farmId: fav.product.farmId,
       farmName: fav.product.farmName,
       categoryIcon: fav.product.categoryIcon || '',
       maxStock: fav.product.stock,

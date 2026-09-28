@@ -8,18 +8,14 @@ import PageHeader from '@/components/dashboard/PageHeader'
 import type { Order, OrderStatus } from '@/types/api'
 
 const STATUS_TRANSITIONS: Record<OrderStatus, { value: OrderStatus; label: string }[]> = {
-  PENDING: [
-    { value: 'CONFIRMED', label: 'Potrdi' },
-    { value: 'CANCELLED', label: 'Preklic' },
-  ],
-  CONFIRMED: [
-    { value: 'PREPARING', label: 'Zacel pripravo' },
-    { value: 'CANCELLED', label: 'Preklic' },
-  ],
-  PREPARING: [{ value: 'READY', label: 'Pripravljeno' }],
-  READY: [{ value: 'DELIVERED', label: 'Dostavljeno' }],
-  DELIVERED: [],
+  AWAITING_PAYMENT: [],
+  PAID: [{ value: 'ACCEPTED', label: 'Sprejmi naročilo' }],
+  ACCEPTED: [{ value: 'READY', label: 'Pripravljeno' }],
+  READY: [{ value: 'COLLECTED', label: 'Prevzeto' }],
+  COLLECTED: [],
+  COMPLETED: [],
   CANCELLED: [],
+  REFUNDED: [],
 }
 
 export default function FarmerOrdersPage() {
@@ -128,7 +124,7 @@ export default function FarmerOrdersPage() {
                   <div className="flex items-center space-x-4">
                     <OrderStatusBadge status={order.status} />
                     <span className="text-sm font-semibold text-gray-900">
-                      {order.totalAmount.toFixed(2)} EUR
+                      {order.subtotal.toFixed(2)} EUR
                     </span>
                     <svg
                       className={`w-5 h-5 text-gray-400 transition-transform ${expandedOrder === order.id ? 'rotate-180' : ''}`}
@@ -172,21 +168,27 @@ export default function FarmerOrdersPage() {
                       </tbody>
                     </table>
 
-                    {/* Delivery info */}
-                    {order.deliveryAddress && (
-                      <div className="pt-3 border-t border-gray-100">
-                        <p className="text-xs text-gray-500 uppercase font-medium mb-1">Dostava</p>
-                        <p className="text-sm text-gray-900">
-                          {order.deliveryAddress}, {order.deliveryCity}
-                        </p>
-                        {order.phone && (
-                          <p className="text-sm text-gray-500 mt-0.5">{order.phone}</p>
-                        )}
-                        {order.notes && (
-                          <p className="text-sm text-gray-500 mt-1 italic">{order.notes}</p>
-                        )}
-                      </div>
-                    )}
+                    {/* Pickup info */}
+                    <div className="pt-3 border-t border-gray-100">
+                      <p className="text-xs text-gray-500 uppercase font-medium mb-1">Prevzem</p>
+                      <p className="text-sm text-gray-900">
+                        {order.pickupStartsAt
+                          ? new Date(order.pickupStartsAt).toLocaleString('sl-SI', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })
+                          : 'Po dogovoru'}
+                      </p>
+                      {order.phone && (
+                        <p className="text-sm text-gray-500 mt-0.5">{order.phone}</p>
+                      )}
+                      {order.notes && (
+                        <p className="text-sm text-gray-500 mt-1 italic">{order.notes}</p>
+                      )}
+                    </div>
 
                     {/* Status actions */}
                     {transitions.length > 0 && (

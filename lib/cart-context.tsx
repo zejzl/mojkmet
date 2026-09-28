@@ -8,6 +8,7 @@ export interface CartItem {
   price: number
   unit: string
   quantity: number
+  farmId: string
   farmName: string
   categoryIcon: string
   maxStock: number

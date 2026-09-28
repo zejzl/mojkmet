@@ -1,11 +1,9 @@
-import { neon } from '@neondatabase/serverless'
 import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 10
-
-const sql = neon(process.env.DATABASE_URL!)
 
 export async function GET() {
   try {
@@ -16,19 +14,16 @@ export async function GET() {
       )
     }
 
-    const rows = await sql`
-      SELECT 
-        (SELECT COUNT(*) FROM farms)::integer as farm_count,
-        (SELECT COUNT(*) FROM products)::integer as product_count,
-        (SELECT COUNT(*) FROM orders)::integer as order_count
-    `
-
-    const stats = rows[0]
+    const [farmCount, productCount, orderCount] = await Promise.all([
+      prisma.farm.count(),
+      prisma.product.count(),
+      prisma.order.count(),
+    ])
 
     return NextResponse.json({
-      farmCount: stats.farm_count,
-      productCount: stats.product_count,
-      orderCount: stats.order_count,
+      farmCount,
+      productCount,
+      orderCount,
     })
   } catch (error) {
     console.error('Database error:', error)

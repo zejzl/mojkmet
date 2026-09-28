@@ -1,64 +1,69 @@
-import { neon } from '@neondatabase/serverless'
 import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 10
 
-const sql = neon(process.env.DATABASE_URL!)
-
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    if (!process.env.DATABASE_URL) {
-      return NextResponse.json(
-        { error: 'Database not configured. Set DATABASE_URL environment variable.' },
-        { status: 500 }
-      )
-    }
-
     const { id: farmId } = await params
 
-    // Fetch farm details with rating
-    const farmRows = await sql`
-      SELECT 
-        f.id,
-        f.name,
-        f.description,
-        f.city,
-        f.verified as is_verified,
-        f."createdAt",
-        COALESCE(AVG(r.rating), 0)::numeric(3,1) as rating,
-        COUNT(r.id)::integer as total_reviews
-      FROM farms f
-      LEFT JOIN reviews r ON f.id = r."farmId"
-      WHERE f.id = ${farmId}
-      GROUP BY f.id, f.name, f.description, f.city, f.verified, f."createdAt"
-    `
+    const farm = await prisma.farm.findUnique({
+      where: { id: farmId },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        city: true,
+        verified: true,
+        createdAt: true,
+      },
+    })
 
-    if (farmRows.length === 0) {
+    if (!farm) {
       return NextResponse.json({ error: 'Farm not found' }, { status: 404 })
     }
 
-    const farm = farmRows[0]
-
-    // Fetch farm products
-    const productRows = await sql`
-      SELECT 
-        p.id,
-        p.name,
-        p.description,
-        p.price,
-        p.unit,
-        p.category,
-        p.available
-      FROM products p
-      WHERE p."farmId" = ${farmId}
-      ORDER BY p.available DESC, p.name ASC
-    `
+    const [ratingAgg, reviewCount, products] = await Promise.all([
+      prisma.review.aggregate({ where: { farmId }, _avg: { rating: true } }),
+      prisma.review.count({ where: { farmId } }),
+      prisma.product.findMany({
+        where: { farmId },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          price: true,
+          unit: true,
+          available: true,
+          category: { select: { name: true, icon: true } },
+        },
+        orderBy: [{ available: 'desc' }, { name: 'asc' }],
+      }),
+    ])
 
     return NextResponse.json({
-      farm,
-      products: productRows,
+      farm: {
+        id: farm.id,
+        name: farm.name,
+        description: farm.description,
+        city: farm.city,
+        is_verified: farm.verified,
+        createdAt: farm.createdAt,
+        rating: ratingAgg._avg.rating == null ? 0 : Math.round(ratingAgg._avg.rating * 10) / 10,
+        total_reviews: reviewCount,
+      },
+      products: products.map((p) => ({
+        id: p.id,
+        name: p.name,
+        description: p.description,
+        price: p.price,
+        unit: p.unit,
+        category: p.category.name,
+        category_icon: p.category.icon || '',
+        available: p.available,
+      })),
     })
   } catch (error) {
     console.error('Database error:', error)

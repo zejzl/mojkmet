@@ -64,7 +64,7 @@ export default function OrdersPage() {
                 <div className="flex items-center space-x-4">
                   <OrderStatusBadge status={order.status} />
                   <span className="text-sm font-semibold text-gray-900">
-                    {order.totalAmount.toFixed(2)} EUR
+                    {order.subtotal.toFixed(2)} EUR
                   </span>
                   <svg
                     className={`w-5 h-5 text-gray-400 transition-transform ${expandedOrder === order.id ? 'rotate-180' : ''}`}

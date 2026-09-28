@@ -6,6 +6,17 @@ import { orderStatusSchema, parseJson } from '@/lib/validation'
 
 export const dynamic = 'force-dynamic'
 
+const VALID_STATUSES = [
+  'AWAITING_PAYMENT',
+  'PAID',
+  'ACCEPTED',
+  'READY',
+  'COLLECTED',
+  'COMPLETED',
+  'CANCELLED',
+  'REFUNDED',
+] as const
+
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { session, error } = await getSessionOrError()
@@ -16,6 +27,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     const order = await prisma.order.findUnique({
       where: { id },
       include: {
+        farm: { select: { id: true, name: true, city: true, address: true } },
         items: {
           include: {
             product: {
@@ -43,10 +55,16 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       order: {
         id: order.id,
         status: order.status,
-        totalAmount: order.totalAmount,
-        deliveryAddress: order.deliveryAddress,
-        deliveryCity: order.deliveryCity,
-        deliveryPostal: order.deliveryPostal,
+        subtotal: order.subtotal.toNumber(),
+        platformFee: order.platformFee.toNumber(),
+        payoutAmount: order.payoutAmount.toNumber(),
+        paymentStatus: order.paymentStatus,
+        paymentProvider: order.paymentProvider,
+        paymentRef: order.paymentRef,
+        farmName: order.farm.name,
+        farmCity: order.farm.city,
+        pickupStartsAt: order.pickupStartsAt,
+        pickupEndsAt: order.pickupEndsAt,
         phone: order.phone,
         notes: order.notes,
         createdAt: order.createdAt,
@@ -79,6 +97,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
     const { status } = parsed.data
 
+    if (!VALID_STATUSES.includes(status)) {
+      return NextResponse.json({ error: 'Neveljaven status' }, { status: 400 })
+    }
+
     // Preveri, ce kmet ima pravico posodobiti to naročilo
     if (session!.user!.role === 'FARMER') {
       const farm = await prisma.farm.findUnique({
@@ -109,7 +131,17 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       data: { status },
     })
 
-    return NextResponse.json({ order: updated })
+    return NextResponse.json({
+      order: {
+        id: updated.id,
+        status: updated.status,
+        subtotal: updated.subtotal.toNumber(),
+        platformFee: updated.platformFee.toNumber(),
+        payoutAmount: updated.payoutAmount.toNumber(),
+        pickupStartsAt: updated.pickupStartsAt,
+        pickupEndsAt: updated.pickupEndsAt,
+      },
+    })
   } catch (err) {
     console.error('Order PATCH error:', err)
     return NextResponse.json({ error: getErrorMessage(err, 'Napaka') }, { status: 500 })

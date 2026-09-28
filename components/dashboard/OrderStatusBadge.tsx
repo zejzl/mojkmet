@@ -1,10 +1,12 @@
 const statusConfig: Record<string, { label: string; classes: string }> = {
-  PENDING: { label: 'V obdelavi', classes: 'bg-yellow-100 text-yellow-800' },
-  CONFIRMED: { label: 'Potrjeno', classes: 'bg-blue-100 text-blue-800' },
-  PREPARING: { label: 'V pripravi', classes: 'bg-orange-100 text-orange-800' },
+  AWAITING_PAYMENT: { label: 'Čaka na plačilo', classes: 'bg-amber-100 text-amber-800' },
+  PAID: { label: 'Plačano', classes: 'bg-blue-100 text-blue-800' },
+  ACCEPTED: { label: 'Sprejeto', classes: 'bg-teal-100 text-teal-800' },
   READY: { label: 'Pripravljeno', classes: 'bg-green-100 text-green-800' },
-  DELIVERED: { label: 'Dostavljeno', classes: 'bg-gray-100 text-gray-800' },
+  COLLECTED: { label: 'Prevzeto', classes: 'bg-cyan-100 text-cyan-800' },
+  COMPLETED: { label: 'Zaključeno', classes: 'bg-gray-100 text-gray-800' },
   CANCELLED: { label: 'Preklicano', classes: 'bg-red-100 text-red-800' },
+  REFUNDED: { label: 'Vrnjeno', classes: 'bg-purple-100 text-purple-800' },
 }
 
 interface OrderStatusBadgeProps {

@@ -18,6 +18,7 @@ interface Product {
   farm_name: string
   farm_city: string
   farm_verified: boolean
+  farm_id: string
   category_name: string
   category_slug: string
   category_icon: string
@@ -107,6 +108,7 @@ function ProductsContent() {
       name: product.name,
       price: product.price,
       unit: product.unit,
+      farmId: product.farm_id,
       farmName: product.farm_name,
       categoryIcon: product.category_icon,
       maxStock: product.stock,

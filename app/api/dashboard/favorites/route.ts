@@ -37,6 +37,7 @@ export async function GET() {
           available: f.product.available,
           image: f.product.image,
           categoryIcon: f.product.category.icon || '',
+          farmId: f.product.farmId,
           farmName: f.product.farm.name,
           farmCity: f.product.farm.city,
         },

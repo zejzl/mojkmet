@@ -1,10 +1,12 @@
 export type OrderStatus =
-  | 'PENDING'
-  | 'CONFIRMED'
-  | 'PREPARING'
+  | 'AWAITING_PAYMENT'
+  | 'PAID'
+  | 'ACCEPTED'
   | 'READY'
-  | 'DELIVERED'
+  | 'COLLECTED'
+  | 'COMPLETED'
   | 'CANCELLED'
+  | 'REFUNDED'
 
 export interface OrderItem {
   id: string
@@ -18,11 +20,13 @@ export interface OrderItem {
 export interface Order {
   id: string
   status: OrderStatus
-  totalAmount: number
+  subtotal: number
+  platformFee?: number | null
+  payoutAmount?: number | null
   createdAt: string | Date
-  deliveryAddress?: string | null
-  deliveryCity?: string | null
-  deliveryPostal?: string | null
+  farmName?: string
+  pickupStartsAt?: string | Date | null
+  pickupEndsAt?: string | Date | null
   phone?: string | null
   notes?: string | null
   buyer?: { name: string | null; email: string } | null
@@ -59,6 +63,7 @@ export interface Favorite {
     available: boolean
     image: string | null
     categoryIcon: string
+    farmId: string
     farmName: string
     farmCity: string
   }

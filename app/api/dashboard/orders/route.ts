@@ -35,12 +35,13 @@ export async function GET(request: Request) {
           product: { select: { name: true, unit: true } },
           order: {
             include: {
+              farm: { select: { name: true } },
               user: { select: { name: true, email: true } },
             },
           },
         },
         orderBy: { order: { createdAt: 'desc' } },
-        take: limit,
+        take: limit * 8,
       })
 
       // Group by order
@@ -50,10 +51,10 @@ export async function GET(request: Request) {
           orderMap.set(item.orderId, {
             id: item.order.id,
             status: item.order.status,
-            totalAmount: item.order.totalAmount,
-            deliveryAddress: item.order.deliveryAddress,
-            deliveryCity: item.order.deliveryCity,
-            phone: item.order.phone,
+            subtotal: item.order.subtotal.toNumber(),
+            farmName: item.order.farm?.name || '',
+            pickupStartsAt: item.order.pickupStartsAt,
+            pickupEndsAt: item.order.pickupEndsAt,
             notes: item.order.notes,
             createdAt: item.order.createdAt,
             buyer: item.order.user,
@@ -76,6 +77,7 @@ export async function GET(request: Request) {
     const orders = await prisma.order.findMany({
       where: { userId },
       include: {
+        farm: { select: { name: true } },
         items: {
           include: {
             product: {
@@ -92,8 +94,10 @@ export async function GET(request: Request) {
       orders: orders.map((order) => ({
         id: order.id,
         status: order.status,
-        totalAmount: order.totalAmount,
-        deliveryCity: order.deliveryCity,
+        subtotal: order.subtotal.toNumber(),
+        farmName: order.farm.name,
+        pickupStartsAt: order.pickupStartsAt,
+        pickupEndsAt: order.pickupEndsAt,
         createdAt: order.createdAt,
         items: order.items.map((item) => ({
           id: item.id,

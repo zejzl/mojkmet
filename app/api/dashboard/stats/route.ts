@@ -64,7 +64,9 @@ export async function GET() {
       prisma.order.count({
         where: {
           userId,
-          status: { in: ['PENDING', 'CONFIRMED', 'PREPARING', 'READY'] },
+          status: {
+            in: ['AWAITING_PAYMENT', 'PAID', 'ACCEPTED', 'READY'],
+          },
         },
       }),
       prisma.favorite.count({ where: { userId } }),

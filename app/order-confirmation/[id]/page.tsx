@@ -75,8 +75,13 @@ export default function OrderConfirmationPage() {
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Naročilo je oddano!</h1>
           <p className="text-gray-500 mb-4">
-            Hvala za vaše naročilo. Kmet bo prejel obvestilo in stopil v stik z vami.
+            Hvala za vaše naročilo. Kmet vas bo kontaktiral za potrditev termina prevzema.
           </p>
+          {order.status === 'AWAITING_PAYMENT' && (
+            <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 mb-4">
+              Plačilo še ni bilo izvedeno. Sporočilo o plačilu boste prejeli naknadno.
+            </p>
+          )}
           <div className="flex items-center justify-center gap-3">
             <span className="text-sm text-gray-500">
               Naročilo #{order.id.slice(-8).toUpperCase()}
@@ -118,41 +123,43 @@ export default function OrderConfirmationPage() {
                   Skupaj
                 </td>
                 <td className="pt-3 text-right font-bold text-green-700">
-                  {order.totalAmount.toFixed(2)} EUR
+                  {order.subtotal.toFixed(2)} EUR
                 </td>
               </tr>
             </tfoot>
           </table>
         </div>
 
-        {/* Delivery info */}
+        {/* Pickup info */}
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Podatki za dostavo</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Prevzem</h2>
           <div className="space-y-2 text-sm">
             <div className="flex gap-2">
-              <span className="text-gray-500 w-28 flex-shrink-0">Naslov:</span>
-              <span className="text-gray-900">{order.deliveryAddress}</span>
+              <span className="text-gray-500 w-28 flex-shrink-0">Kmetija:</span>
+              <span className="text-gray-900">{order.farmName}</span>
             </div>
             <div className="flex gap-2">
-              <span className="text-gray-500 w-28 flex-shrink-0">Mesto:</span>
+              <span className="text-gray-500 w-28 flex-shrink-0">Termin:</span>
               <span className="text-gray-900">
-                {order.deliveryPostal} {order.deliveryCity}
+                {order.pickupStartsAt
+                  ? new Date(order.pickupStartsAt).toLocaleString('sl-SI', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })
+                  : '—'}
               </span>
             </div>
             <div className="flex gap-2">
               <span className="text-gray-500 w-28 flex-shrink-0">Telefon:</span>
               <span className="text-gray-900">{order.phone}</span>
             </div>
-            {order.notes && (
-              <div className="flex gap-2">
-                <span className="text-gray-500 w-28 flex-shrink-0">Opombe:</span>
-                <span className="text-gray-900 italic">{order.notes}</span>
-              </div>
-            )}
             <div className="flex gap-2">
-              <span className="text-gray-500 w-28 flex-shrink-0">Datum:</span>
+              <span className="text-gray-500 w-28 flex-shrink-0">Datum naročila:</span>
               <span className="text-gray-900">
-                {new Date(order.createdAt).toLocaleDateString('sl-SI', {
+                {new Date(order.createdAt).toLocaleString('sl-SI', {
                   day: 'numeric',
                   month: 'long',
                   year: 'numeric',
@@ -161,6 +168,12 @@ export default function OrderConfirmationPage() {
                 })}
               </span>
             </div>
+            {order.notes && (
+              <div className="flex gap-2">
+                <span className="text-gray-500 w-28 flex-shrink-0">Opombe:</span>
+                <span className="text-gray-900 italic">{order.notes}</span>
+              </div>
+            )}
           </div>
         </div>
 

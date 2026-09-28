@@ -48,15 +48,22 @@ export const orderSchema = z.object({
     )
     .min(1)
     .max(100),
-  deliveryAddress: z.string().trim().min(1).max(500),
-  deliveryCity: z.string().trim().min(1).max(100),
-  deliveryPostal: z.string().trim().min(1).max(20),
+  pickupStartsAt: z.string().datetime(),
   phone: z.string().trim().min(3).max(30),
   notes: z.string().trim().max(2000).optional(),
 })
 
 export const orderStatusSchema = z.object({
-  status: z.enum(['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'DELIVERED', 'CANCELLED']),
+  status: z.enum([
+    'AWAITING_PAYMENT',
+    'PAID',
+    'ACCEPTED',
+    'READY',
+    'COLLECTED',
+    'COMPLETED',
+    'CANCELLED',
+    'REFUNDED',
+  ]),
 })
 
 export const farmSchema = z.object({

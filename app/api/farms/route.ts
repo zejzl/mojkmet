@@ -1,39 +1,50 @@
-import { neon } from '@neondatabase/serverless'
 import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 10
 
-const sql = neon(process.env.DATABASE_URL!)
-
 export async function GET() {
   try {
-    // Check if database URL is configured
-    if (!process.env.DATABASE_URL) {
-      return NextResponse.json(
-        { error: 'Database not configured. Set DATABASE_URL environment variable.' },
-        { status: 500 }
-      )
-    }
+    const [farms, ratings] = await Promise.all([
+      prisma.farm.findMany({
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          city: true,
+          verified: true,
+          createdAt: true,
+          _count: { select: { reviews: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.review.groupBy({
+        by: ['farmId'],
+        _avg: { rating: true },
+      }),
+    ])
 
-    const rows = await sql`
-      SELECT 
-        f.id,
-        f.name,
-        f.description,
-        f.city,
-        f.verified as is_verified,
-        f."createdAt",
-        COALESCE(AVG(r.rating), 0)::numeric(3,1) as rating,
-        COUNT(r.id)::integer as total_reviews
-      FROM farms f
-      LEFT JOIN reviews r ON f.id = r."farmId"
-      GROUP BY f.id, f.name, f.description, f.city, f.verified, f."createdAt"
-      ORDER BY f."createdAt" DESC
-    `
+    const ratingMap = new Map<string, number>(
+      ratings.map((r) => [
+        r.farmId,
+        r._avg.rating == null ? 0 : Math.round(r._avg.rating * 10) / 10,
+      ])
+    )
 
-    return NextResponse.json({ farms: rows })
+    return NextResponse.json({
+      farms: farms.map((f) => ({
+        id: f.id,
+        name: f.name,
+        description: f.description,
+        city: f.city,
+        is_verified: f.verified,
+        createdAt: f.createdAt,
+        rating: ratingMap.get(f.id) ?? 0,
+        total_reviews: f._count.reviews,
+      })),
+    })
   } catch (error) {
     console.error('Database error:', error)
     return NextResponse.json({ error: 'Failed to fetch farms' }, { status: 500 })

@@ -59,6 +59,7 @@ export default function FarmDetailPage() {
       name: product.name,
       price: product.price,
       unit: product.unit,
+      farmId: farm.id,
       farmName: farm.name,
       categoryIcon: product.category_icon || CATEGORY_ICONS[product.category] || '🌾',
       maxStock: product.stock || 999, // Default to high stock if not specified

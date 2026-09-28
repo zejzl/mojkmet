@@ -1,30 +1,72 @@
 'use client'
 
 import { getErrorMessage } from '@/lib/errors'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { useCart } from '@/lib/cart-context'
+import { useCart, CartItem } from '@/lib/cart-context'
+
+interface FarmGroup {
+  farmId: string
+  farmName: string
+  items: CartItem[]
+  total: number
+}
+
+function toLocalInputValue(d: Date) {
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
 
 export default function CheckoutPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const { items, getCartTotal, clearCart } = useCart()
+  const { items, clearCart } = useCart()
 
   const [formData, setFormData] = useState({
-    deliveryAddress: '',
-    deliveryCity: '',
-    deliveryPostal: '',
     phone: '',
     notes: '',
   })
+
+  const tomorrow = useMemo(() => {
+    const d = new Date()
+    d.setDate(d.getDate() + 1)
+    d.setHours(9, 0, 0, 0)
+    return d
+  }, [])
+  const [pickupValue, setPickupValue] = useState(() => toLocalInputValue(tomorrow))
+
+  const [selectedFarmId, setSelectedFarmId] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
-  const total = getCartTotal()
+  const farmGroups = useMemo(() => {
+    const groups = new Map<string, FarmGroup>()
+    for (const item of items) {
+      const existing = groups.get(item.farmId)
+      if (existing) {
+        existing.items.push(item)
+        existing.total += item.price * item.quantity
+      } else {
+        groups.set(item.farmId, {
+          farmId: item.farmId,
+          farmName: item.farmName,
+          items: [item],
+          total: item.price * item.quantity,
+        })
+      }
+    }
+    return Array.from(groups.values())
+  }, [items])
 
-  // Ce košarica je prazna, preusmeri
+  const activeGroup =
+    farmGroups.find((g) => g.farmId === selectedFarmId) ||
+    farmGroups.reduce((a, b) => (b.items.length > a.items.length ? b : a), farmGroups[0])
+
+  const total = activeGroup?.total ?? 0
+
+  // Ce kosarica je prazna, preusmeri
   if (items.length === 0 && status !== 'loading') {
     return (
       <main className="flex-grow bg-gray-50 py-16">
@@ -55,21 +97,29 @@ export default function CheckoutPage() {
       return
     }
 
+    if (!activeGroup) {
+      setError('Košarica je prazna.')
+      return
+    }
+
     setSubmitting(true)
     setError('')
 
     try {
+      const pickupStartsAt = new Date(pickupValue)
+      if (Number.isNaN(pickupStartsAt.getTime())) {
+        throw new Error('Izberite datum in uro prevzema.')
+      }
+
       const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          items: items.map((item) => ({
+          items: activeGroup.items.map((item) => ({
             productId: item.productId,
             quantity: item.quantity,
           })),
-          deliveryAddress: formData.deliveryAddress,
-          deliveryCity: formData.deliveryCity,
-          deliveryPostal: formData.deliveryPostal,
+          pickupStartsAt: pickupStartsAt.toISOString(),
           phone: formData.phone,
           notes: formData.notes || undefined,
         }),
@@ -81,9 +131,7 @@ export default function CheckoutPage() {
         throw new Error(data.error || 'Napaka pri oddaji naročila')
       }
 
-      // PLACEHOLDER: Stripe plačilo bi bilo tukaj
-      // await stripe.confirmPayment(...)
-
+      // PLACEHOLDER: preusmeritev na plačilo (Step 3 - mock provider)
       clearCart()
       router.push(`/order-confirmation/${data.orderId}`)
     } catch (err) {
@@ -132,7 +180,7 @@ export default function CheckoutPage() {
               onSubmit={handleSubmit}
               className="bg-white rounded-xl shadow-sm p-6 space-y-6 border border-gray-100"
             >
-              <h2 className="text-lg font-semibold text-gray-900">Podatki za dostavo</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Prevzem</h2>
 
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
@@ -140,62 +188,62 @@ export default function CheckoutPage() {
                 </div>
               )}
 
+              {farmGroups.length > 1 && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Izberite kmetijo (naročilo vsebuje izdelke iz več kmetij)
+                  </label>
+                  <div className="space-y-2">
+                    {farmGroups.map((group) => (
+                      <label
+                        key={group.farmId}
+                        className={`flex items-center justify-between gap-3 border rounded-lg px-4 py-3 cursor-pointer transition ${
+                          activeGroup?.farmId === group.farmId
+                            ? 'border-green-600 bg-green-50'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <span className="flex items-center gap-3">
+                          <input
+                            type="radio"
+                            name="farm"
+                            checked={activeGroup?.farmId === group.farmId}
+                            onChange={() => setSelectedFarmId(group.farmId)}
+                            className="accent-green-600"
+                          />
+                          <span className="text-sm font-medium text-gray-900">{group.farmName}</span>
+                        </span>
+                        <span className="text-sm text-gray-600">
+                          {group.items.reduce((s, i) => s + i.quantity, 0)} izd. ·{' '}
+                          {group.total.toFixed(2)} EUR
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {farmGroups.length === 1 && activeGroup && (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-700">
+                  Prevzem pri: <span className="font-medium text-gray-900">{activeGroup.farmName}</span>
+                </div>
+              )}
+
               <div>
-                <label
-                  htmlFor="deliveryAddress"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Naslov dostave *
+                <label htmlFor="pickupStartsAt" className="block text-sm font-medium text-gray-700 mb-1">
+                  Termin prevzema *
                 </label>
                 <input
-                  id="deliveryAddress"
-                  name="deliveryAddress"
-                  type="text"
+                  id="pickupStartsAt"
+                  name="pickupStartsAt"
+                  type="datetime-local"
                   required
-                  value={formData.deliveryAddress}
-                  onChange={handleChange}
-                  placeholder="Ulica in hisna stevilka"
+                  min={toLocalInputValue(new Date())}
+                  value={pickupValue}
+                  onChange={(e) => setPickupValue(e.target.value)}
                   className="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label
-                    htmlFor="deliveryCity"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Mesto *
-                  </label>
-                  <input
-                    id="deliveryCity"
-                    name="deliveryCity"
-                    type="text"
-                    required
-                    value={formData.deliveryCity}
-                    onChange={handleChange}
-                    placeholder="Ljubljana"
-                    className="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="deliveryPostal"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Postna stevilka *
-                  </label>
-                  <input
-                    id="deliveryPostal"
-                    name="deliveryPostal"
-                    type="text"
-                    required
-                    value={formData.deliveryPostal}
-                    onChange={handleChange}
-                    placeholder="1000"
-                    className="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
-                </div>
+                <p className="text-xs text-gray-500 mt-1">Točen termin potrdi kmetija.</p>
               </div>
 
               <div>
@@ -224,17 +272,17 @@ export default function CheckoutPage() {
                   rows={3}
                   value={formData.notes}
                   onChange={handleChange}
-                  placeholder="Posebne zelje za dostavo..."
+                  placeholder="Posebne želje glede prevzema..."
                   className="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
                 />
               </div>
 
               <div className="pt-4 border-t border-gray-100">
                 <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                  <p className="text-sm font-medium text-gray-700 mb-1">Nacin placila</p>
+                  <p className="text-sm font-medium text-gray-700 mb-1">Način plačila</p>
                   <p className="text-sm text-gray-500">
-                    Plačilo ob dostavi
-                    {/* PLACEHOLDER: Stripe integracija bo dodana tukaj */}
+                    Spletno plačilo s kartico
+                    {/* PLACEHOLDER: mock plačilni ponudnik bo dodan tukaj (Step 3) */}
                   </p>
                 </div>
 
@@ -247,7 +295,7 @@ export default function CheckoutPage() {
                     ? 'Oddajam naročilo...'
                     : !session
                       ? 'Prijavite se za nakup'
-                      : `Placaj ${total.toFixed(2)} EUR`}
+                      : `Plačaj ${total.toFixed(2)} EUR`}
                 </button>
               </div>
             </form>
@@ -258,8 +306,15 @@ export default function CheckoutPage() {
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 sticky top-24">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Povzetek naročila</h2>
 
+              {farmGroups.length > 1 && (
+                <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-4">
+                  V košarici imate izdelke iz več kmetij. Izberite eno kmetijo za naročilo; ostalo
+                  ostane v košarici.
+                </p>
+              )}
+
               <div className="space-y-3 mb-4">
-                {items.map((item) => (
+                {(activeGroup?.items ?? []).map((item) => (
                   <div key={item.productId} className="flex items-start gap-2">
                     <div className="w-8 h-8 rounded bg-green-50 flex items-center justify-center text-base flex-shrink-0">
                       {item.categoryIcon}
@@ -279,12 +334,12 @@ export default function CheckoutPage() {
 
               <div className="border-t border-gray-200 pt-4 space-y-2">
                 <div className="flex justify-between text-sm text-gray-600">
-                  <span>Vmesni seštevek</span>
-                  <span>{total.toFixed(2)} EUR</span>
+                  <span>Kmetija</span>
+                  <span>{activeGroup?.farmName ?? '—'}</span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-600">
-                  <span>Dostava</span>
-                  <span>Po dogovoru</span>
+                  <span>Vmesni seštevek</span>
+                  <span>{total.toFixed(2)} EUR</span>
                 </div>
                 <div className="flex justify-between font-bold text-gray-900 text-lg pt-2 border-t border-gray-200">
                   <span>Skupaj</span>

@@ -1,72 +1,90 @@
-import { neon } from '@neondatabase/serverless'
 import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 10
 
-const sql = neon(process.env.DATABASE_URL!)
+async function getProducts(category: string | null, search: string | null) {
+  const include = {
+    farm: { select: { name: true, city: true, verified: true } as const },
+    category: { select: { name: true, slug: true, icon: true } as const },
+  }
+
+  if (category) {
+    return prisma.product.findMany({
+      where: { category: { slug: category } },
+      include,
+      orderBy: { name: 'asc' },
+    })
+  }
+
+  if (search) {
+    return prisma.product.findMany({
+      where: {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { description: { contains: search, mode: 'insensitive' } },
+        ],
+      },
+      include,
+      orderBy: { name: 'asc' },
+    })
+  }
+
+  return prisma.product.findMany({
+    include,
+    orderBy: [{ category: { name: 'asc' } }, { name: 'asc' }],
+  })
+}
 
 export async function GET(request: NextRequest) {
   try {
-    if (!process.env.DATABASE_URL) {
-      return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
-    }
-
     const { searchParams } = new URL(request.url)
     const category = searchParams.get('category')
     const search = searchParams.get('search')
 
-    let products
-    if (category) {
-      products = await sql`
-        SELECT 
-          p.id, p.name, p.description, p.price, p.unit, p.stock, p.available, p.image,
-          f.name as farm_name, f.city as farm_city, f.verified as farm_verified,
-          c.name as category_name, c.slug as category_slug, c.icon as category_icon
-        FROM products p
-        JOIN farms f ON p."farmId" = f.id
-        JOIN categories c ON p."categoryId" = c.id
-        WHERE c.slug = ${category}
-        ORDER BY p.name ASC
-      `
-    } else if (search) {
-      const pattern = `%${search}%`
-      products = await sql`
-        SELECT 
-          p.id, p.name, p.description, p.price, p.unit, p.stock, p.available, p.image,
-          f.name as farm_name, f.city as farm_city, f.verified as farm_verified,
-          c.name as category_name, c.slug as category_slug, c.icon as category_icon
-        FROM products p
-        JOIN farms f ON p."farmId" = f.id
-        JOIN categories c ON p."categoryId" = c.id
-        WHERE LOWER(p.name) LIKE LOWER(${pattern}) OR LOWER(p.description) LIKE LOWER(${pattern})
-        ORDER BY p.name ASC
-      `
-    } else {
-      products = await sql`
-        SELECT 
-          p.id, p.name, p.description, p.price, p.unit, p.stock, p.available, p.image,
-          f.name as farm_name, f.city as farm_city, f.verified as farm_verified,
-          c.name as category_name, c.slug as category_slug, c.icon as category_icon
-        FROM products p
-        JOIN farms f ON p."farmId" = f.id
-        JOIN categories c ON p."categoryId" = c.id
-        ORDER BY c.name ASC, p.name ASC
-      `
-    }
+    const products = await getProducts(category, search)
 
-    // Also fetch categories with product counts
-    const categories = await sql`
-      SELECT c.id, c.name, c.slug, c.icon, COUNT(p.id)::integer as product_count
-      FROM categories c
-      LEFT JOIN products p ON c.id = p."categoryId"
-      GROUP BY c.id, c.name, c.slug, c.icon
-      HAVING COUNT(p.id) > 0
-      ORDER BY c.name ASC
-    `
+    const categories = await prisma.category.findMany({
+      where: { products: { some: {} } },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        icon: true,
+        _count: { select: { products: true } },
+      },
+      orderBy: { name: 'asc' },
+    })
 
-    return NextResponse.json({ products, categories, total: products.length })
+    return NextResponse.json({
+      products: products.map((p) => ({
+        id: p.id,
+        name: p.name,
+        description: p.description,
+        price: p.price,
+        unit: p.unit,
+        stock: p.stock,
+        available: p.available,
+        image: p.image,
+        farm_id: p.farmId,
+        farm_name: p.farm.name,
+        farm_city: p.farm.city,
+        farm_verified: p.farm.verified,
+        category_name: p.category.name,
+        category_slug: p.category.slug,
+        category_icon: p.category.icon || '',
+      })),
+      categories: categories.map((c) => ({
+        id: c.id,
+        name: c.name,
+        slug: c.slug,
+        icon: c.icon || '',
+        product_count: c._count.products,
+      })),
+      total: products.length,
+    })
   } catch (error) {
     console.error('Products API error:', error)
     return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 })
