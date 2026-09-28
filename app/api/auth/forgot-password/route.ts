@@ -7,7 +7,7 @@ import { forgotPasswordSchema, parseJson, escapeHtml } from '@/lib/validation'
 
 export async function POST(request: NextRequest) {
   try {
-    if (!rateLimit(request, 'forgot-password', 5, 15 * 60 * 1000)) {
+    if (!(await rateLimit(request, 'forgot-password', 5, 15 * 60 * 1000))) {
       return tooManyRequests()
     }
 

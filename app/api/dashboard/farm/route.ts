@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrError } from '@/lib/auth-helpers'
 import { farmSchema, parseJson } from '@/lib/validation'
+import { sanitizeImageDataUrl } from '@/lib/image-upload'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,8 +35,11 @@ export async function PUT(request: Request) {
     const parsed = await parseJson(farmSchema, request)
     if (!parsed.ok) return parsed.error
 
-    const { name, description, address, city, postalCode, phone, website, minOrder, latitude, longitude } =
+    const { name, description, address, city, postalCode, phone, website, minOrder, latitude, longitude, image } =
       parsed.data
+
+    const sanitized = sanitizeImageDataUrl(image)
+    if (!sanitized.ok) return NextResponse.json({ error: sanitized.error }, { status: 400 })
 
     const existingFarm = await prisma.farm.findUnique({
       where: { userId: session!.user!.id },
@@ -52,6 +56,7 @@ export async function PUT(request: Request) {
       minOrder: minOrder !== undefined && minOrder > 0 ? minOrder : null,
       latitude: latitude !== undefined ? latitude : null,
       longitude: longitude !== undefined ? longitude : null,
+      image: sanitized.value,
     }
 
     let farm

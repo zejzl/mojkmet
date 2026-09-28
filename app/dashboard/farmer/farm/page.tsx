@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import PageHeader from '@/components/dashboard/PageHeader'
+import ImageUploadInput from '@/components/dashboard/ImageUploadInput'
 
 export default function FarmPage() {
   const { data: session } = useSession()
@@ -25,6 +26,7 @@ export default function FarmPage() {
     minOrder: '',
     latitude: '',
     longitude: '',
+    image: '',
   })
 
   useEffect(() => {
@@ -52,6 +54,7 @@ export default function FarmPage() {
             minOrder: data.farm.minOrder ? String(data.farm.minOrder) : '',
             latitude: data.farm.latitude != null ? String(data.farm.latitude) : '',
             longitude: data.farm.longitude != null ? String(data.farm.longitude) : '',
+            image: data.farm.image || '',
           })
         } else {
           setIsNew(true)
@@ -296,6 +299,10 @@ export default function FarmPage() {
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500"
               />
             </div>
+          </div>
+
+          <div className="pt-4 border-t border-gray-200">
+            <ImageUploadInput value={formData.image} onChange={(image) => setFormData({ ...formData, image })} />
           </div>
 
           <div className="pt-4 border-t border-gray-200">

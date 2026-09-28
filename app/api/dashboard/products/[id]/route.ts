@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrError } from '@/lib/auth-helpers'
 import { productUpdateSchema, parseJson } from '@/lib/validation'
+import { sanitizeImageDataUrl } from '@/lib/image-upload'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,7 +27,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const parsed = await parseJson(productUpdateSchema, request)
     if (!parsed.ok) return parsed.error
 
-    const { name, description, price, unit, stock, categoryId, available } = parsed.data
+    const { name, description, price, unit, stock, categoryId, available, image } = parsed.data
+
+    const sanitized = sanitizeImageDataUrl(image)
+    if (!sanitized.ok) return NextResponse.json({ error: sanitized.error }, { status: 400 })
 
     if (Object.keys(parsed.data).length === 0) {
       return NextResponse.json({ error: 'Ni podatkov za posodobitev' }, { status: 400 })
@@ -42,6 +46,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         ...(stock !== undefined && { stock }),
         ...(categoryId !== undefined && { categoryId }),
         ...(available !== undefined && { available }),
+        ...(sanitized.changed && { image: sanitized.value }),
       },
     })
 

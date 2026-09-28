@@ -7,7 +7,7 @@ import { resetPasswordSchema, parseJson } from '@/lib/validation'
 
 export async function POST(request: NextRequest) {
   try {
-    if (!rateLimit(request, 'reset-password', 10, 15 * 60 * 1000)) {
+    if (!(await rateLimit(request, 'reset-password', 10, 15 * 60 * 1000))) {
       return tooManyRequests()
     }
 

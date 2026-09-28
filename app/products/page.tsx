@@ -253,7 +253,16 @@ function ProductsContent() {
                   className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition border border-gray-100"
                 >
                   <div className="bg-gradient-to-br from-gray-50 to-gray-100 h-40 flex items-center justify-center text-7xl relative">
-                    {product.category_icon}
+                    {product.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
+                    ) : (
+                      product.category_icon
+                    )}
                     {/* Favorite button */}
                     <button
                       onClick={() => handleToggleFavorite(product.id)}

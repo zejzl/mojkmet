@@ -149,8 +149,17 @@ export default function ProductDetailPage() {
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Product Image */}
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-12">
-                <div className="text-9xl">{product.category_icon}</div>
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-12 relative">
+                {product.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="max-h-[480px] w-full object-cover rounded-xl"
+                  />
+                ) : (
+                  <div className="text-9xl">{product.category_icon}</div>
+                )}
               </div>
 
               {/* Product Info */}
@@ -267,8 +276,17 @@ export default function ProductDetailPage() {
                   href={`/products/${relatedProduct.id}`}
                   className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition border border-gray-100"
                 >
-                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 h-40 flex items-center justify-center text-7xl">
-                    {relatedProduct.category_icon}
+                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 h-40 flex items-center justify-center text-7xl relative">
+                    {relatedProduct.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={relatedProduct.image}
+                        alt={relatedProduct.name}
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
+                    ) : (
+                      relatedProduct.category_icon
+                    )}
                   </div>
                   <div className="p-5">
                     <h3 className="font-bold text-gray-900 text-lg mb-2 leading-tight">

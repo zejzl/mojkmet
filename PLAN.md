@@ -184,8 +184,29 @@ Commits: `4967651` (scrub), `346ba0d` (reset flow), `8dc7b2b` (security fixes),
 - [x] Smoke-tested (12 checks): onboarding null → create (TRIAL + 1yr, null coords) → update coords → shopper APIs expose coords → products carry farm coords → Haversine sanity (LJ→MB 103,6 km)
 
 ### Step 7 — Hardening
-- [ ] Upstash Redis rate limiter (scale-out), Sentry monitoring, GitHub Action CI (lint+build)
-- [ ] AES/other related cleanup, seed script bcrypt parity, README/docs refresh
+- [x] **Image upload**: there was *no* upload path before — `Product.image`/`Farm.image` were unvalidated URL strings (seed-only). Added real upload backed by Postgres (data URL) with strict validation in `lib/image-upload.ts`: allowlist (JPEG/PNG/WebP/GIF), **magic-byte sniffing + structural dimension parse** (rejects fake/polyglot/SVG/HTML/JS disguised as images), **canonicalization** (trailing garbage after IEND/EOI/trailer stripped — polyglots sanitized), 1.5 MB size cap, dimension cap (≤16000px, blocks decompression bombs), declared-MIME must match content, **external/image URLs rejected** (farmers can't hotlink trackers/payloads), empty = clears image. Wired into product create/update + farm PUT; `ImageUploadInput` client component (client pre-check + preview); images now rendered on product cards, product detail, farm detail, farms list, FeaturedFarms, farmer product table.
+- [x] **Upstash Redis rate limiter**: `lib/rate-limit.ts` rewritten async, sliding-window via
+      Upstash when `UPSTASH_REDIS_REST_URL`/`_TOKEN` set, else pruned in-memory fallback;
+      client identity from `X-Forwarded-For` (trusted — set by Vercel's edge, not the client;
+      `NextRequest.ip` no longer exists in Next.js 15+); all 4 call sites
+      (`register`, `forgot-password`, `reset-password`, `contact`) updated to `await`
+- [x] **Sentry monitoring**: `@sentry/nextjs` + client/server/edge configs + `instrumentation.ts`
+      + `withSentryConfig` in `next.config.ts`; `lib/errors.ts`'s `getErrorMessage` (used by
+      nearly every API route and client error handler) calls `Sentry.captureException`
+- [x] **GitHub Action CI**: `.github/workflows/ci.yml` — lint, `tsc --noEmit`, build on push/PR
+- [x] AES cleanup verified (no AES references left in any `.ts`/`.tsx` source), seed script
+      bcrypt parity (cost 12, matches register/reset/change-password), README/docs refresh
+      (README: Upstash/Sentry env vars + Images/Rate limiting/Monitoring sections;
+      `VERCEL_ENV_SETUP.md`: optional Upstash/Sentry vars)
+- [x] Smoke-tested (20 validator + 11 API): valid PNG/JPEG/GIF/WebP stored canonical; SVG/HTML/garbage/mismatched-mime/external-URL/`javascript:` rejected; PNG+`<script>` polyglot stored *with script bytes stripped*; 20000px & 0px dimensions rejected; >1.5 MB rejected; image clear via `''` works.
+- [x] Upstash/Sentry/CI hardening verified: fixed 3 API-drift errors surfaced by `tsc --noEmit`
+      that predated this round — `NextRequest.ip` removed in Next.js 15+ (rate-limit IP now
+      from `X-Forwarded-For`/`X-Real-IP` only), `withSentryConfig` moved to
+      `@sentry/nextjs/config` in SDK 11.x, `hideSourceMaps`/`disableLogger` build options
+      removed (source-map deletion is now default behavior). Lint, `tsc --noEmit`, and
+      `next build` all clean. Dev-server smoke test: `/api/contact` (limit 3/15min) allowed
+      3 requests then returned 429 on the 4th, confirming the in-memory rate-limit fallback
+      still works post-fix.
 
 ---
 

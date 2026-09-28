@@ -120,12 +120,24 @@ export default function ProductsPage() {
                 {products.map((product) => (
                   <tr key={product.id} className="hover:bg-gray-50 transition">
                     <td className="px-6 py-4">
-                      <p className="text-sm font-medium text-gray-900">{product.name}</p>
-                      {product.description && (
-                        <p className="text-xs text-gray-500 truncate max-w-xs">
-                          {product.description}
-                        </p>
-                      )}
+                      <div className="flex items-center gap-3">
+                        {product.image ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={product.image}
+                            alt={product.name}
+                            className="h-10 w-10 rounded object-cover border border-gray-200"
+                          />
+                        ) : null}
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{product.name}</p>
+                          {product.description && (
+                            <p className="text-xs text-gray-500 truncate max-w-xs">
+                              {product.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-sm text-gray-600">{product.category?.name || '-'}</span>

@@ -28,6 +28,18 @@ Local food marketplace: farms sell directly to shoppers, with payment and pickup
    MOJKMET_EMAIL_PASS=<SMTP password>
    ```
 
+   Optional (see below for what each enables):
+
+   ```
+   UPSTASH_REDIS_REST_URL=<from Upstash Redis dashboard>
+   UPSTASH_REDIS_REST_TOKEN=<from Upstash Redis dashboard>
+   SENTRY_DSN=<server/edge DSN from Sentry project settings>
+   NEXT_PUBLIC_SENTRY_DSN=<client DSN, same project>
+   SENTRY_ORG=<sentry org slug>       # only needed to upload source maps on build
+   SENTRY_PROJECT=<sentry project slug>
+   SENTRY_AUTH_TOKEN=<sentry auth token>
+   ```
+
 3. Regenerate the Prisma client (schema changes):
 
    ```bash
@@ -75,6 +87,37 @@ defaults `mail.mojkmet.eu` / 465 / `info@mojkmet.eu`). Templates live in `lib/or
 `lib/pickup-mail.ts` (pickup proposal / resolved), all rendered from the shared
 `lib/email-layout.ts`. Sends are **best-effort**: a failed send is logged and never fails the
 underlying order/webhook.
+
+## Images
+
+Product/farm images are uploaded through `ImageUploadInput` and validated server-side in
+`lib/image-upload.ts`: magic-byte sniffing + structural dimension parsing (JPEG/PNG/WebP/GIF
+only), canonicalization (strips trailing bytes after the real end-of-image marker, so polyglot
+files are sanitized), a 1.5 MB size cap and a 16000px dimension cap, and a declared-MIME match
+check. There is no file storage (S3, disk, CDN) — accepted images are re-encoded as a `data:`
+URL and stored directly in the `image` column on `Product`/`Farm` in Postgres. External image
+URLs are rejected; clearing the field (`''`) removes the image.
+
+## Rate limiting
+
+`lib/rate-limit.ts` guards `register`, `forgot-password`, `reset-password`, and `contact`.
+It uses Upstash Redis (sliding window) when `UPSTASH_REDIS_REST_URL` /
+`UPSTASH_REDIS_REST_TOKEN` are set, and otherwise falls back to an in-memory, per-instance
+limiter (pruned, capped at 5000 buckets) — fine for a single dev server or a single Vercel
+instance, but not correct across multiple serverless instances, which is why Upstash should be
+configured in production. The client identity is `X-Forwarded-For`, which Vercel's edge sets
+itself (overwriting any client-supplied value), falling back to `X-Real-IP`.
+
+## Monitoring
+
+Errors are reported to Sentry via `@sentry/nextjs` (`sentry.client.config.ts`,
+`sentry.server.config.ts`, `sentry.edge.config.ts`, wired up in `instrumentation.ts` and
+`next.config.ts` via `withSentryConfig`). Sentry only activates when its DSN env vars are set —
+without them the app runs the same, just unmonitored. `lib/errors.ts`'s `getErrorMessage`,
+the shared helper used by nearly every API route and client error handler, calls
+`Sentry.captureException` before formatting the user-facing message, so anywhere in the app
+that reports an error also reports it to Sentry. `SENTRY_ORG`/`SENTRY_PROJECT`/
+`SENTRY_AUTH_TOKEN` are only needed to upload source maps during `next build`, not at runtime.
 
 ## Database
 

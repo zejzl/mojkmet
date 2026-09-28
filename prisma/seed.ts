@@ -11,7 +11,7 @@ async function main() {
   console.log('🌱 Seeding database...\n')
 
   // Create test user (consumer)
-  const hashedPassword = await bcrypt.hash('password123', 10)
+  const hashedPassword = await bcrypt.hash('password123', 12)
 
   const user = await prisma.user.upsert({
     where: { email: 'marko.novak@gmail.com' },

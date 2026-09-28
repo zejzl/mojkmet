@@ -17,6 +17,7 @@ interface Farm {
   rating: number
   total_reviews: number
   is_verified: boolean
+  image?: string | null
   minOrder?: number | null
   pickupWindows?: { id: string; dayOfWeek: number; startTime: string; endTime: string; active: boolean }[]
 }
@@ -29,6 +30,7 @@ interface Product {
   unit: string
   category: string
   category_icon?: string
+  image?: string | null
   available: boolean
   stock?: number
 }
@@ -201,8 +203,17 @@ export default function FarmDetailPage() {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-green-200 to-amber-200 rounded-2xl h-64 md:h-96 flex items-center justify-center text-8xl">
-                🏡
+              <div className="bg-gradient-to-br from-green-200 to-amber-200 rounded-2xl h-64 md:h-96 flex items-center justify-center text-8xl relative">
+                {farm.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={farm.image}
+                    alt={farm.name}
+                    className="absolute inset-0 h-full w-full object-cover rounded-2xl"
+                  />
+                ) : (
+                  '🏡'
+                )}
               </div>
             </div>
           </div>
@@ -230,6 +241,15 @@ export default function FarmDetailPage() {
                     }`}
                   >
                     <div className="bg-gradient-to-br from-green-100 to-amber-100 h-40 flex items-center justify-center text-6xl relative">
+                      {product.image ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="absolute inset-0 h-full w-full object-cover"
+                        />
+                      ) : (
+                        <>
                       {product.category === 'mleko' && '🥛'}
                       {product.category === 'jajca' && '🥚'}
                       {product.category === 'zelenjava' && '🥬'}
@@ -237,6 +257,8 @@ export default function FarmDetailPage() {
                       {product.category === 'med' && '🍯'}
                       {!['mleko', 'jajca', 'zelenjava', 'meso', 'med'].includes(product.category) &&
                         '🌾'}
+                        </>
+                      )}
 
                       {!product.available && (
                         <div className="absolute inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">

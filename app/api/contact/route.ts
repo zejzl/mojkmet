@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
 
     const { name, email, subject, message } = parsed.data
 
-    if (!rateLimit(request, 'contact', 3, 15 * 60 * 1000)) {
+    if (!(await rateLimit(request, 'contact', 3, 15 * 60 * 1000))) {
       return NextResponse.json(
         { error: 'Preveč sporočil. Poskusite ponovno pozneje.' },
         { status: 429 }

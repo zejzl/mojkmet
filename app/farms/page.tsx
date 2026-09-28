@@ -15,6 +15,7 @@ interface Farm {
   rating: number
   total_reviews: number
   is_verified: boolean
+  image: string | null
 }
 
 export default function FarmsPage() {
@@ -78,8 +79,17 @@ export default function FarmsPage() {
                   key={farm.id}
                   className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition border border-gray-200"
                 >
-                  <div className="bg-gradient-to-br from-green-50 to-green-100 h-48 flex items-center justify-center text-8xl">
-                    🌾
+                  <div className="bg-gradient-to-br from-green-50 to-green-100 h-48 flex items-center justify-center text-8xl relative">
+                    {farm.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={farm.image}
+                        alt={farm.name}
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
+                    ) : (
+                      '🌾'
+                    )}
                   </div>
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-2">

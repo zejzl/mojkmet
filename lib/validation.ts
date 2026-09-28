@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { MAX_IMAGE_DATA_URL_CHARS } from '@/lib/image-upload'
 
 export const emailSchema = z.string().trim().toLowerCase().email().max(254)
 
@@ -77,6 +78,11 @@ export const optionalCoord = (min: number, max: number) =>
     z.number().min(min).max(max).optional()
   )
 
+export const imageDataUrlField = z
+  .union([z.literal(''), z.string().max(MAX_IMAGE_DATA_URL_CHARS)])
+  .nullable()
+  .optional()
+
 export const farmSchema = z.object({
   name: z.string().trim().min(1).max(120),
   description: z.string().max(4000).nullable().optional(),
@@ -88,6 +94,7 @@ export const farmSchema = z.object({
   minOrder: z.coerce.number().min(0).max(100000).optional(),
   latitude: optionalCoord(-90, 90),
   longitude: optionalCoord(-180, 180),
+  image: imageDataUrlField,
 })
 
 const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/
@@ -140,6 +147,7 @@ export const productSchema = z.object({
   stock: z.coerce.number().int().min(0).max(999999),
   categoryId: z.string().min(1).max(64),
   available: z.boolean().optional(),
+  image: imageDataUrlField,
 })
 
 export const productUpdateSchema = z.object({
@@ -150,6 +158,7 @@ export const productUpdateSchema = z.object({
   stock: z.coerce.number().int().min(0).max(999999).optional(),
   categoryId: z.string().min(1).max(64).optional(),
   available: z.boolean().optional(),
+  image: imageDataUrlField,
 })
 
 type ParseResult<T extends z.ZodTypeAny> =

@@ -1,12 +1,12 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { rateLimit, tooManyRequests } from '@/lib/rate-limit'
 import { registerSchema, parseJson } from '@/lib/validation'
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    if (!rateLimit(request, 'register', 5, 15 * 60 * 1000)) {
+    if (!(await rateLimit(request, 'register', 5, 15 * 60 * 1000))) {
       return tooManyRequests()
     }
 

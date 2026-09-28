@@ -12,6 +12,7 @@ interface Farm {
   latitude?: number | null
   longitude?: number | null
   is_verified: boolean
+  image?: string | null
 }
 
 export default function FeaturedFarms() {
@@ -93,9 +94,18 @@ export default function FeaturedFarms() {
             >
               {/* Farm Image */}
               <div className="h-48 bg-gradient-to-br from-green-200 to-amber-200 relative overflow-hidden">
+                {farm.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={farm.image}
+                    alt={farm.name}
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                ) : (
                 <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-6xl">
                   🏡
                 </div>
+                )}
                 {farm.is_verified && (
                   <div className="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">

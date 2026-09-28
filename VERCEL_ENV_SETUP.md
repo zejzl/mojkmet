@@ -1,6 +1,7 @@
 # ⚠️ Vercel Environment Variables - REQUIRED
 
-**For mojkmet.eu to work fully, you need these 6 environment variables:**
+**For mojkmet.eu to work fully, you need these 6 environment variables**, plus optional
+monitoring/rate-limiting variables described at the bottom.
 
 ## 1. Go to Vercel Dashboard
 https://vercel.com/dashboard
@@ -170,5 +171,33 @@ After deployment with all env vars:
 
 ---
 
+## Optional: Rate limiting (Upstash Redis)
+
+**Name:** `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`
+
+**Purpose:** Without these, `lib/rate-limit.ts` falls back to an in-memory limiter that is
+**per serverless instance** — on Vercel that means the limit isn't actually shared across
+instances. Set both (from the Upstash Redis dashboard, REST API section) so rate limiting on
+`register`/`forgot-password`/`reset-password`/`contact` works correctly at scale.
+
+**Environments:** All (Production, Preview, Development)
+
+## Optional: Error monitoring (Sentry)
+
+**Name:** `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`
+
+**Purpose:** Enables error reporting (`@sentry/nextjs`) for server/edge and client code
+respectively. Without them the app runs identically, just unmonitored — see README "Monitoring".
+
+**Name:** `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN`
+
+**Purpose:** Build-time only — lets `next build` upload source maps to Sentry so stack traces
+resolve to real source. Not needed for runtime error capture to work.
+
+**Environments:** All (Production, Preview, Development)
+
+---
+
 **Status:** ⏳ First 3 variables (DATABASE_URL, NEXTAUTH_SECRET, NEXTAUTH_URL) are on Vercel.
 The 3 `PAYMENT_*` variables still need to be added before the payment go-live (Step 3 PHASE-2 rollout).
+The Upstash and Sentry variables are optional but recommended before Phase 2 goes fully live.

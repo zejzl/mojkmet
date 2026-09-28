@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrError } from '@/lib/auth-helpers'
 import { productSchema, parseJson } from '@/lib/validation'
+import { sanitizeImageDataUrl } from '@/lib/image-upload'
 
 export const dynamic = 'force-dynamic'
 
@@ -57,7 +58,10 @@ export async function POST(request: Request) {
     const parsed = await parseJson(productSchema, request)
     if (!parsed.ok) return parsed.error
 
-    const { name, description, price, unit, stock, categoryId, available } = parsed.data
+    const { name, description, price, unit, stock, categoryId, available, image } = parsed.data
+
+    const sanitized = sanitizeImageDataUrl(image)
+    if (!sanitized.ok) return NextResponse.json({ error: sanitized.error }, { status: 400 })
 
     const product = await prisma.product.create({
       data: {
@@ -69,6 +73,7 @@ export async function POST(request: Request) {
         unit,
         stock,
         available: available !== false,
+        image: sanitized.value,
       },
     })
 
