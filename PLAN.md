@@ -274,6 +274,29 @@ Commits: `4967651` (scrub), `346ba0d` (reset flow), `8dc7b2b` (security fixes),
       Fixed by reusing `TEST_DATABASE_URL` for the build step too (`next build` never runs a
       real query, it only needs the var present) rather than adding a third secret.
 - [ ] Delete retired `ep-divine-butterfly` Neon project entirely (creds already removed)
+- [ ] **Bug: farmer-cancelling an order doesn't restore stock.** `PATCH /api/orders/[id]/route.ts`
+      lets a farmer/admin set any status including `CANCELLED`, but unlike the other two
+      cancellation paths (`app/api/orders/route.ts`'s payment-init-failure rollback,
+      `lib/payments/reconcile.ts`'s expired-reservation sweep), this one never increments
+      stock back — a farmer cancelling a paid order permanently loses that stock.
+- [ ] No consumer-initiated order cancellation. `PATCH /api/orders/[id]/route.ts` is
+      farmer/admin only — a shopper who ordered by mistake or changed their mind has no
+      self-service way to cancel before pickup.
+- [ ] `User.emailVerified` is defined in the schema but completely unused anywhere in the
+      app — no verification email is ever sent on registration, credentials login doesn't
+      check it. Not urgent (email ownership isn't security-critical the way password reset
+      is), but currently decorative.
+- [ ] No pagination on `/api/products` or `/api/farms` — both fetch everything unbounded.
+      Fine at today's scale (~10 farms), will degrade once real farmers sign up.
+- [ ] No rate limiting on `/api/orders` — unlike auth/contact routes, a logged-in user could
+      spam order creation, each one putting a 15-minute stock hold on real inventory. Low
+      likelihood of abuse at current userbase size, but it's the one write-heavy route with
+      zero rate limiting.
+- [ ] Image storage is a `data:` URL blob directly in Postgres (see Step 7) — deliberate
+      tradeoff for now, but a scaling concern once farmers upload more/larger images; a real
+      blob store (Vercel Blob, R2) is the eventual fix.
+- [ ] No account deletion / data export flow — EU user data, worth having on the GDPR radar
+      even at tiny scale.
 
 ---
 
