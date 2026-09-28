@@ -152,10 +152,15 @@ Commits: `4967651` (scrub), `346ba0d` (reset flow), `8dc7b2b` (security fixes),
 - [ ] Migrate the 5 raw-SQL routes in Step 1 onto Prisma
 
 ### Step 3 — Payments
-- [ ] `lib/payments/` provider interface + `mock` implementation calling `api.mojkmet.eu`
-- [ ] `app/api/webhooks/payments/route.ts` — verify HMAC signature, dedupe via `PaymentEvent`
-- [ ] Checkout: initiate payment → redirect customer to hosted `/pay/<ref>` page → on
+- [x] `lib/payments/` provider interface + `mock` implementation calling `api.mojkmet.eu`
+- [x] `app/api/webhooks/payments/route.ts` — verify HMAC signature, dedupe via `PaymentEvent`
+- [x] Checkout: initiate payment → redirect customer to hosted `/pay/<ref>` page → on
       success hit return URL → mark order PAID (parity check with `reservedUntil` expiry)
+- [x] Local dev mock: `scripts/dev-payment-mock.mjs` (port 8787, `PAYMENT_MOCK_BASE_URL=http://localhost:8787`) + end-to-end verified
+      (initiate/idempotency/409, settle→webhook HMAC, 401/404/409/400 guards, order → PAID, idempotent replay); e2e fixture cleaned up
+- [ ] Deploy env vars on Vercel: `PAYMENT_PROVIDER=mojkmet-mockpay`, `PAYMENT_MOCK_BASE_URL=https://api.mojkmet.eu`,
+      `PAYMENT_MOCK_SECRET=<shared key>` (blocked on `api.mojkmet.eu` vhost, see Server infra note)
+- [ ] Confirm `api.mojkmet.eu` serves mock over HTTPS (LiteSpeed vhost) and run a real init→redirect→settle round trip
 
 ### Step 4 — Pickup coordination
 - [ ] Farmer dashboard: `PickupWindow` CRUD (recurring availability), min-order settings, location

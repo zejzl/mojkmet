@@ -131,8 +131,15 @@ export default function CheckoutPage() {
         throw new Error(data.error || 'Napaka pri oddaji naročila')
       }
 
-      // PLACEHOLDER: preusmeritev na plačilo (Step 3 - mock provider)
       clearCart()
+
+      if (data.paymentUrl) {
+        // Preusmeri na gostiteljsko plačilno stran ponudnika; po plačilu
+        // ponudnik preusmeri nazaj na /payment/result?order=...
+        window.location.href = data.paymentUrl
+        return
+      }
+
       router.push(`/order-confirmation/${data.orderId}`)
     } catch (err) {
       setError(getErrorMessage(err, 'Napaka pri oddaji naročila'))
@@ -280,10 +287,7 @@ export default function CheckoutPage() {
               <div className="pt-4 border-t border-gray-100">
                 <div className="bg-gray-50 rounded-lg p-4 mb-4">
                   <p className="text-sm font-medium text-gray-700 mb-1">Način plačila</p>
-                  <p className="text-sm text-gray-500">
-                    Spletno plačilo s kartico
-                    {/* PLACEHOLDER: mock plačilni ponudnik bo dodan tukaj (Step 3) */}
-                  </p>
+                  <p className="text-sm text-gray-500">Spletno plačilo s kartico</p>
                 </div>
 
                 <button

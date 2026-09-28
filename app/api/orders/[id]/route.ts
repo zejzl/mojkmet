@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrError } from '@/lib/auth-helpers'
 import { orderStatusSchema, parseJson } from '@/lib/validation'
+import { expireAwaitingOrder } from '@/lib/payments/reconcile'
 
 export const dynamic = 'force-dynamic'
 
@@ -51,6 +52,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: 'Dostop zavrnjen' }, { status: 403 })
     }
 
+    // Lazy sweep: pretekla rezervacija preveri pri ponudniku in prekliče
+    await expireAwaitingOrder(id)
+
     return NextResponse.json({
       order: {
         id: order.id,
@@ -61,6 +65,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         paymentStatus: order.paymentStatus,
         paymentProvider: order.paymentProvider,
         paymentRef: order.paymentRef,
+        paidAt: order.paidAt,
         farmName: order.farm.name,
         farmCity: order.farm.city,
         pickupStartsAt: order.pickupStartsAt,

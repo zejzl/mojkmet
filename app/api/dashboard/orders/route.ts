@@ -2,6 +2,7 @@ import { getErrorMessage } from '@/lib/errors'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrError } from '@/lib/auth-helpers'
+import { sweepExpiredOrders } from '@/lib/payments/reconcile'
 import type { Order } from '@/types/api'
 
 export const dynamic = 'force-dynamic'
@@ -27,6 +28,9 @@ export async function GET(request: Request) {
       if (!farm) {
         return NextResponse.json({ orders: [] })
       }
+
+      // Lazy sweep neplacanih zadrzkov pred prikazom
+      await sweepExpiredOrders({ farmId: farm.id })
 
       // Get orders that contain this farmer's products
       const orderItems = await prisma.orderItem.findMany({
@@ -72,6 +76,9 @@ export async function GET(request: Request) {
 
       return NextResponse.json({ orders: Array.from(orderMap.values()) })
     }
+
+    // Lazy sweep neplacanih zadrzkov pred prikazom
+    await sweepExpiredOrders({ userId })
 
     // Consumer orders
     const orders = await prisma.order.findMany({

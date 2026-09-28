@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrError } from '@/lib/auth-helpers'
 import { orderSchema, parseJson } from '@/lib/validation'
+import { getPaymentProvider, PaymentProviderError } from '@/lib/payments'
 
 export const dynamic = 'force-dynamic'
 
@@ -77,8 +78,6 @@ export async function POST(request: Request) {
     const platformFee = platformFeeCents / 100
     const payoutAmount = (subtotalCents - platformFeeCents) / 100
 
-    // PLACEHOLDER: sproži plačilo pri ponudniku (Step 3)
-
     // Ustvari naročilo v transakciji
     const order = await prisma.$transaction(async (tx) => {
       // Zmanjsaj zaloge (zadržek ob oddaji, sproščeno z lazy sweep po expiry)
@@ -115,6 +114,54 @@ export async function POST(request: Request) {
       })
     })
 
+    // Sprozi plačilo pri ponudniku. Če iniciacija spodleti, naročilo preklicemo
+    // in sprostimo zadržano zalogo.
+    const amountCents = subtotalCents + platformFeeCents
+    let paymentUrl: string | null = null
+    try {
+      const baseUrl = process.env.NEXTAUTH_URL || 'https://mojkmet.eu'
+      const initiation = await getPaymentProvider().initiate({
+        orderId: order.id,
+        amountCents,
+        idempotencyKey: order.id,
+        webhookUrl: `${baseUrl}/api/webhooks/payments`,
+        returnUrl: `${baseUrl}/payment/result?order=${encodeURIComponent(order.id)}`,
+      })
+      paymentUrl = initiation.paymentUrl
+
+      await prisma.order.update({
+        where: { id: order.id },
+        data: {
+          paymentProvider: getPaymentProvider().name,
+          paymentRef: initiation.paymentRef,
+          paymentStatus: 'PROCESSING',
+        },
+      })
+    } catch (err) {
+      console.error('Payment initiation failed, cancelling order:', err)
+      await prisma.$transaction(async (tx) => {
+        for (const item of items) {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { stock: { increment: item.quantity } },
+          })
+        }
+        await tx.order.update({
+          where: { id: order.id },
+          data: { status: 'CANCELLED', paymentStatus: 'FAILED', reservedUntil: null },
+        })
+      })
+      return NextResponse.json(
+        {
+          error:
+            err instanceof PaymentProviderError
+              ? err.message
+              : 'Plačilni ponudnik ni dosegljiv. Poskusite znova.',
+        },
+        { status: 502 }
+      )
+    }
+
     const orderPayload = {
       id: order.id,
       status: order.status,
@@ -125,7 +172,12 @@ export async function POST(request: Request) {
       pickupEndsAt: order.pickupEndsAt,
     }
 
-    return NextResponse.json({ orderId: order.id, order: orderPayload })
+    return NextResponse.json({
+      orderId: order.id,
+      order: orderPayload,
+      paymentStatus: 'PROCESSING',
+      paymentUrl,
+    })
   } catch (err) {
     console.error('Orders POST error:', err)
     return NextResponse.json(
