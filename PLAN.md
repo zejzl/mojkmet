@@ -267,3 +267,18 @@ Commits: `4967651` (scrub), `346ba0d` (reset flow), `8dc7b2b` (security fixes),
   to GitHub directly, causing drift
 - Vercel build uses `.npmrc` `legacy-peer-deps=true` (nodemailer 9 vs next-auth peer range)
 - Local dev: `npm run dev`; production parity check: `npm run build`
+- **Neon DB naming has drifted from reality before — always verify `DATABASE_URL` directly,
+  don't trust cached names.** The production Neon project's *display name* has stayed
+  `ep-little-dust-ag4wbjxz` since creation, but its actual compute endpoint hostname was
+  regenerated to `ep-royal-recipe-ag8s29y6` at some point without any doc being updated —
+  Vercel's own "Storage" tab integration panel still shows the stale `ep-little-dust` binding
+  too. There is exactly one Neon project (`shiny-grass-90842747`), one branch
+  (`br-autumn-paper-agu3k7bu`), one endpoint, one role (`neondb_owner`). If this is ever in
+  doubt again: reveal `DATABASE_URL` directly in Vercel (Settings → Environment Variables),
+  don't infer from the Storage tab or from old docs.
+- **2026-09-28: `neondb_owner` password rotated** (previous rotation was 2026-08-20) after the
+  value was pasted in a chat session for debugging. Rotated via Neon's API
+  (`POST /projects/{id}/branches/{id}/roles/neondb_owner/reset_password`), `DATABASE_URL`
+  updated in Vercel (all environments, marked Sensitive) via `vercel env update`, local
+  `.env`/`.env.local` updated, production redeployed (`vercel --prod`). Verified live
+  post-deploy: `/api/farms` on www.mojkmet.eu returns normal data.

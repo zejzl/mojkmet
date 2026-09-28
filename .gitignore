@@ -45,3 +45,7 @@ next-env.d.ts
 /app/generated/prisma
 
 .vercel
+.env*
+
+# claude code local settings (personal permission overrides, not shared)
+.claude/settings.local.json

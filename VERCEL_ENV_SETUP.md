@@ -18,13 +18,20 @@ https://vercel.com/dashboard
 
 **Value:**
 ```
-postgresql://neondb_owner:YOUR_NEON_PASSWORD@ep-little-dust-ag4wbjxz-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require
+postgresql://neondb_owner:YOUR_NEON_PASSWORD@ep-royal-recipe-ag8s29y6-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require
 ```
 
 **⚠️ SECURITY:** Replace `YOUR_NEON_PASSWORD` with your actual Neon database password from the Neon dashboard.
 
-**Database Endpoint:** `ep-little-dust-ag4wbjxz`  
-**Branch:** `br-mute-thunder-ag8jjk1n`
+**Database Endpoint:** `ep-royal-recipe-ag8s29y6` — confirmed 2026-09-28 directly from Vercel's
+`DATABASE_URL` env var, matched against live mojkmet.eu data. This doc previously named
+`ep-little-dust-ag4wbjxz`, which is **not** the live database, though it's the same underlying
+Neon project/role (same `neondb_owner` password on both) — the compute endpoint hostname was
+regenerated at some point without this doc being updated. Vercel's own **Storage** tab still
+shows a stale/orphaned binding labeled `ep-little-dust-ag4wbjxz` — that display name does not
+reflect the actual `DATABASE_URL` env var and should not be trusted; always check the env var
+value directly (Settings → Environment Variables → reveal `DATABASE_URL`) if this is ever in
+doubt again.
 
 **Environments:** All (Production, Preview, Development)
 
