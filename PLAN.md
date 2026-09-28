@@ -260,10 +260,19 @@ Commits: `4967651` (scrub), `346ba0d` (reset flow), `8dc7b2b` (security fixes),
       whatever's passed to `CredentialsProvider`, so the original inline version wasn't
       reachable from a test), orders (stock/farm-grouping/min-order/pickup-time/payment-
       failure-rollback), cart, reviews. `test/integration/setup.ts` refuses to run without
-      `TEST_DATABASE_URL` and refuses if it ever equals `DATABASE_URL`. CI runs unit tests
-      unconditionally; integration tests only if a `TEST_DATABASE_URL` secret is set (not yet
-      added to the GitHub repo — do that to turn CI integration tests on).
-      `test:unit`/`test`/`test:db:migrate` in `package.json`.
+      `TEST_DATABASE_URL` and refuses if it ever equals `DATABASE_URL`. `test:unit`/`test`/
+      `test:db:migrate` in `package.json`.
+      **2026-09-28: `TEST_DATABASE_URL` GitHub secret added, and CI went fully green for the
+      first time ever** (`gh run watch`) — the workflow had actually been broken since it was
+      first added: (1) `if: ${{ secrets.TEST_DATABASE_URL != '' }}` on a step is invalid —
+      `secrets` isn't a valid context in a step-level `if:`, so GitHub silently rejects the
+      *entire workflow file* (0 jobs, "workflow file issue", no useful log) rather than
+      failing that one step; fixed via a job-level `env:` var computed from the secret,
+      checked in the step's `if:` instead. (2) The `Build` step's `DATABASE_URL` secret was
+      **never actually set** on this repo (only `NEON_API_KEY` existed before today) —
+      `lib/prisma.ts` throws at module load if unset, so `next build` failed on every push.
+      Fixed by reusing `TEST_DATABASE_URL` for the build step too (`next build` never runs a
+      real query, it only needs the var present) rather than adding a third secret.
 - [ ] Delete retired `ep-divine-butterfly` Neon project entirely (creds already removed)
 
 ---
