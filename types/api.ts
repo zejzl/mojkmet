@@ -59,6 +59,15 @@ export interface Order {
   activePickupChange?: PickupChange | null
 }
 
+export interface Review {
+  id: string
+  rating: number
+  comment: string | null
+  createdAt: string | Date
+  updatedAt: string | Date
+  reviewerName: string
+}
+
 export interface ConsumerStats {
   role: 'CONSUMER'
   totalOrders: number

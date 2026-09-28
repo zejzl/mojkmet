@@ -70,7 +70,14 @@ export default function CartPage() {
 
                 {/* Details */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-900 truncate">{item.name}</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-gray-900 truncate">{item.name}</h3>
+                    {item.available === false && (
+                      <span className="text-xs bg-red-50 text-red-600 px-2 py-0.5 rounded-full flex-shrink-0">
+                        Ni na voljo
+                      </span>
+                    )}
+                  </div>
                   <p className="text-sm text-gray-500">{item.farmName}</p>
                   <p className="text-sm text-green-700 font-medium mt-1">
                     {item.price.toFixed(2)} EUR / {item.unit}

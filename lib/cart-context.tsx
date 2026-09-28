@@ -1,6 +1,7 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react'
+import { useSession } from 'next-auth/react'
 
 export interface CartItem {
   productId: string
@@ -12,6 +13,7 @@ export interface CartItem {
   farmName: string
   categoryIcon: string
   maxStock: number
+  available?: boolean
 }
 
 interface CartContextType {
@@ -26,36 +28,109 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | null>(null)
 
+const STORAGE_KEY = 'mojkmet-cart'
+
 export function CartProvider({ children }: { children: ReactNode }) {
+  const { status } = useSession()
   const [items, setItems] = useState<CartItem[]>([])
   const [initialized, setInitialized] = useState(false)
+  // Guards the one-time guest->server merge so it fires once per login, not on every render
+  // while `status` stays 'authenticated'.
+  const mergedRef = useRef(false)
 
-  // Two-effect load/save split, gated by `initialized`: without it the save effect would
-  // fire on mount with the empty initial `items` and overwrite localStorage before the
-  // load effect ever runs.
   useEffect(() => {
+    if (status === 'unauthenticated') mergedRef.current = false
+  }, [status])
+
+  // Guest path (signed out): same localStorage load/save as before the server-cart sync
+  // existed. Skipped entirely once authenticated — see the sync effect below.
+  useEffect(() => {
+    if (status !== 'unauthenticated') return
     try {
-      const saved = localStorage.getItem('mojkmet-cart')
+      const saved = localStorage.getItem(STORAGE_KEY)
       if (saved) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setItems(JSON.parse(saved))
       }
     } catch {
       // ignore parse errors
     }
     setInitialized(true)
-  }, [])
+  }, [status])
 
   useEffect(() => {
-    if (!initialized) return
+    if (!initialized || status !== 'unauthenticated') return
     try {
-      localStorage.setItem('mojkmet-cart', JSON.stringify(items))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
     } catch {
       // ignore storage errors
     }
-  }, [items, initialized])
+  }, [items, initialized, status])
+
+  // Authenticated path: merge whatever was in the guest cart into the server cart exactly
+  // once per login, then the server is the source of truth (all mutations below re-fetch
+  // from it) for the rest of the session.
+  useEffect(() => {
+    if (status !== 'authenticated' || mergedRef.current) return
+    mergedRef.current = true
+
+    async function syncServerCart() {
+      let guestItems: CartItem[] = []
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY)
+        guestItems = saved ? JSON.parse(saved) : []
+      } catch {
+        guestItems = []
+      }
+
+      try {
+        for (const item of guestItems) {
+          await fetch('/api/cart', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId: item.productId, quantity: item.quantity }),
+          })
+        }
+        if (guestItems.length > 0) {
+          try {
+            localStorage.removeItem(STORAGE_KEY)
+          } catch {
+            // ignore
+          }
+        }
+
+        const res = await fetch('/api/cart')
+        if (res.ok) {
+          const data = await res.json()
+          setItems(data.items || [])
+        }
+      } catch {
+        // best-effort merge; a failed sync just leaves the server cart as-is
+      } finally {
+        setInitialized(true)
+      }
+    }
+
+    syncServerCart()
+  }, [status])
+
+  function applyServerResponse(res: Response) {
+    res
+      .json()
+      .then((data) => setItems(data.items || []))
+      .catch(() => {
+        // ignore — cart state just stays whatever it was before this mutation
+      })
+  }
 
   function addToCart(item: Omit<CartItem, 'quantity'>) {
+    if (status === 'authenticated') {
+      fetch('/api/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: item.productId }),
+      }).then(applyServerResponse)
+      return
+    }
     setItems((prev) => {
       const existing = prev.find((i) => i.productId === item.productId)
       if (existing) {
@@ -70,6 +145,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   function removeFromCart(productId: string) {
+    if (status === 'authenticated') {
+      fetch(`/api/cart/${productId}`, { method: 'DELETE' }).then(applyServerResponse)
+      return
+    }
     setItems((prev) => prev.filter((i) => i.productId !== productId))
   }
 
@@ -78,16 +157,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeFromCart(productId)
       return
     }
+    if (status === 'authenticated') {
+      fetch(`/api/cart/${productId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantity }),
+      }).then(applyServerResponse)
+      return
+    }
     setItems((prev) =>
       prev.map((i) =>
-        i.productId === productId
-          ? { ...i, quantity: Math.min(quantity, i.maxStock) }
-          : i
+        i.productId === productId ? { ...i, quantity: Math.min(quantity, i.maxStock) } : i
       )
     )
   }
 
   function clearCart() {
+    if (status === 'authenticated') {
+      fetch('/api/cart', { method: 'DELETE' }).then(applyServerResponse)
+      return
+    }
     setItems([])
   }
 

@@ -39,6 +39,20 @@ export const favoriteSchema = z.object({
   productId: z.string().min(1).max(64),
 })
 
+export const cartAddSchema = z.object({
+  productId: z.string().min(1).max(64),
+  quantity: z.number().int().min(1).max(999).optional(),
+})
+
+export const cartUpdateSchema = z.object({
+  quantity: z.number().int().min(1).max(999),
+})
+
+export const reviewSchema = z.object({
+  rating: z.number().int().min(1).max(5),
+  comment: z.string().trim().max(1000).optional(),
+})
+
 export const orderSchema = z.object({
   items: z
     .array(

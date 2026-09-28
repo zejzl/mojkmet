@@ -3,7 +3,10 @@
 import { useState, useEffect } from 'react'
 import OrderStatusBadge from '@/components/dashboard/OrderStatusBadge'
 import PageHeader from '@/components/dashboard/PageHeader'
+import StarRating from '@/components/StarRating'
 import type { Order } from '@/types/api'
+
+const REVIEWABLE_STATUSES = ['COLLECTED', 'COMPLETED']
 
 interface PickupSlot {
   id: string
@@ -66,6 +69,40 @@ function ProposeSlots({
   )
 }
 
+function ReviewForm({
+  onSubmit,
+  submitting,
+  error,
+}: {
+  onSubmit: (rating: number, comment: string) => void
+  submitting: boolean
+  error: string
+}) {
+  const [rating, setRating] = useState(5)
+  const [comment, setComment] = useState('')
+
+  return (
+    <div className="mt-3 bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-3">
+      {error && <p className="text-sm text-red-600">{error}</p>}
+      <StarRating value={rating} onChange={setRating} size="lg" />
+      <textarea
+        rows={2}
+        value={comment}
+        onChange={(e) => setComment(e.target.value)}
+        placeholder="Komentar (neobvezno)"
+        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+      />
+      <button
+        onClick={() => onSubmit(rating, comment)}
+        disabled={submitting}
+        className="px-4 py-1.5 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition disabled:opacity-50"
+      >
+        {submitting ? 'Pošiljam...' : 'Oddaj oceno'}
+      </button>
+    </div>
+  )
+}
+
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
@@ -80,6 +117,11 @@ export default function OrdersPage() {
   const [proposalReason, setProposalReason] = useState('')
   const [proposing, setProposing] = useState(false)
   const [proposalError, setProposalError] = useState('')
+
+  const [reviewFor, setReviewFor] = useState<string | null>(null)
+  const [reviewSubmitting, setReviewSubmitting] = useState(false)
+  const [reviewError, setReviewError] = useState('')
+  const [reviewedOrders, setReviewedOrders] = useState<Set<string>>(new Set())
 
   const loadOrders = () => {
     setLoading(true)
@@ -168,6 +210,27 @@ export default function OrdersPage() {
       setProposalError(err instanceof Error ? err.message : 'Napaka')
     } finally {
       setProposing(false)
+    }
+  }
+
+  const submitReview = async (order: Order, rating: number, comment: string) => {
+    if (!order.farmId) return
+    setReviewSubmitting(true)
+    setReviewError('')
+    try {
+      const res = await fetch(`/api/farms/${order.farmId}/reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rating, comment: comment || undefined }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Napaka pri oddaji ocene')
+      setReviewedOrders((prev) => new Set(prev).add(order.id))
+      setReviewFor(null)
+    } catch (err) {
+      setReviewError(err instanceof Error ? err.message : 'Napaka')
+    } finally {
+      setReviewSubmitting(false)
     }
   }
 
@@ -373,6 +436,35 @@ export default function OrdersPage() {
                         )}
                       </div>
                     )}
+
+                  {REVIEWABLE_STATUSES.includes(order.status) && (
+                    <div className="mt-4 border-t border-gray-100 pt-4">
+                      {reviewedOrders.has(order.id) ? (
+                        <p className="text-sm text-green-700 font-medium">
+                          ✓ Hvala za oceno!
+                        </p>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => {
+                              setReviewError('')
+                              setReviewFor(reviewFor === order.id ? null : order.id)
+                            }}
+                            className="text-sm font-medium text-green-700 hover:text-green-900"
+                          >
+                            {reviewFor === order.id ? 'Skrij' : '+ Oceni kmetijo'}
+                          </button>
+                          {reviewFor === order.id && (
+                            <ReviewForm
+                              onSubmit={(rating, comment) => submitReview(order, rating, comment)}
+                              submitting={reviewSubmitting}
+                              error={reviewError}
+                            />
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

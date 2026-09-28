@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { useCart } from '@/lib/cart-context'
 import Toast from '@/components/Toast'
 import DistanceBadge from '@/components/DistanceBadge'
+import StarRating from '@/components/StarRating'
+import type { Review } from '@/types/api'
 
 interface Farm {
   id: string
@@ -57,6 +59,8 @@ export default function FarmDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [showToast, setShowToast] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [reviewsLoading, setReviewsLoading] = useState(true)
 
   const { addToCart } = useCart()
 
@@ -99,6 +103,24 @@ export default function FarmDetailPage() {
 
     if (farmId) {
       fetchFarmDetails()
+    }
+  }, [farmId])
+
+  useEffect(() => {
+    async function fetchReviews() {
+      try {
+        const response = await fetch(`/api/farms/${farmId}/reviews`)
+        const data = await response.json()
+        setReviews(data.reviews || [])
+      } catch {
+        // reviews are supplementary — a failed fetch just leaves the section empty
+      } finally {
+        setReviewsLoading(false)
+      }
+    }
+
+    if (farmId) {
+      fetchReviews()
     }
   }, [farmId])
 
@@ -301,6 +323,57 @@ export default function FarmDetailPage() {
                         )}
                       </div>
                     </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Reviews Section */}
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4 max-w-3xl">
+            <h2 className="text-3xl font-bold text-gray-900 mb-8">
+              Ocene ({reviews.length})
+            </h2>
+
+            {reviewsLoading ? (
+              <div className="animate-pulse space-y-4">
+                {[1, 2].map((i) => (
+                  <div key={i} className="h-24 bg-gray-100 rounded-xl" />
+                ))}
+              </div>
+            ) : reviews.length === 0 ? (
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-8 text-center">
+                <p className="text-gray-600">
+                  Bodite prvi, ki oceni to kmetijo. Oceno lahko oddate iz{' '}
+                  <Link href="/dashboard/orders" className="text-green-600 hover:text-green-700 font-medium">
+                    svojih naročil
+                  </Link>{' '}
+                  po prevzemu.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {reviews.map((review) => (
+                  <div
+                    key={review.id}
+                    className="bg-white border border-gray-100 shadow-sm rounded-xl p-5"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-semibold text-gray-900">{review.reviewerName}</span>
+                      <StarRating value={review.rating} size="sm" />
+                    </div>
+                    {review.comment && (
+                      <p className="text-gray-700 text-sm leading-relaxed">{review.comment}</p>
+                    )}
+                    <p className="text-xs text-gray-400 mt-2">
+                      {new Date(review.createdAt).toLocaleDateString('sl-SI', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                      })}
+                    </p>
                   </div>
                 ))}
               </div>

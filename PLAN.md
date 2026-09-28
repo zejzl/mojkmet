@@ -223,10 +223,31 @@ Commits: `4967651` (scrub), `346ba0d` (reset flow), `8dc7b2b` (security fixes),
 
 ## Next Steps (Prioritized) — beyond Phase 2
 
-- [ ] Payments go-live: swap mock → Račun123 "API po meri" (invoice, zoi/eor, pdfUrl,
-      hosted payment page); confirm refund/credit-note path with vendor
-- [ ] Server-side cart sync for logged-in users (cart currently localStorage-only)
-- [ ] Reviews/ratings UI (DB table exists and feeds farm ratings already)
+- [ ] Payments go-live: **on hold** — needs a registered company before Račun123 (or any
+      real merchant-of-record processor) can be set up; swap mock → Račun123 "API po meri"
+      (invoice, zoi/eor, pdfUrl, hosted payment page); confirm refund/credit-note path with vendor
+- [x] **Server-side cart sync for logged-in users.** New `CartItem` model (`prisma/schema.prisma`,
+      migration `20260928230000_cart_items`) — stores only `userId`/`productId`/`quantity`,
+      name/price/stock always hydrated fresh from `Product` (`lib/cart.ts`) so it can't go
+      stale the way the old localStorage cart could. API: `app/api/cart/route.ts` (GET/POST/DELETE),
+      `app/api/cart/[productId]/route.ts` (PATCH/DELETE), all session-gated, stock-clamped.
+      `lib/cart-context.tsx`'s public `useCart()` interface is unchanged — guests keep the
+      original localStorage behavior; on login, any guest cart is merged into the server cart
+      once, then the server is the source of truth. No consumer page needed to change.
+      Verified live via API: add/increment/update/remove/clear, over-stock clamping (999 → 200),
+      401 when unauthenticated.
+- [x] **Reviews/ratings UI.** `Review` gained `@@unique([userId, farmId])` + `updatedAt`
+      (migration `20260928231000_review_unique_updated_at`, existing duplicates collapsed).
+      `app/api/farms/[id]/reviews/route.ts`: public GET, POST gated to verified purchase
+      (`Order.status` in `COLLECTED`/`COMPLETED` for that user+farm) and blocks `FARMER` role,
+      upserts so a resubmit edits rather than duplicates. New `components/StarRating.tsx`
+      (read-only + interactive). UI: read-only review list on `app/farms/[id]/page.tsx`;
+      submit/edit form on `app/dashboard/orders/page.tsx` for COLLECTED/COMPLETED orders
+      (same inline-expand pattern as the existing pickup-change proposal UI). Existing
+      rating aggregation (`prisma.review.groupBy`/`aggregate` in the farms/products routes)
+      needed no changes. Verified live via API: 403 without a verified purchase, 403 for
+      `FARMER` role, successful submit, resubmit edits in place (same review id, no duplicate),
+      farm's aggregate rating/count reflects it.
 - [ ] Migrate NextAuth v4 → Auth.js v5 (v4 maintenance mode)
 - [ ] Admin tooling (farm verification, moderation) — ADMIN role exists but unused
 - [ ] Profile email change requires re-verification
