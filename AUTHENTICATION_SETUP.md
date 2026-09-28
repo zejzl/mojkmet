@@ -1,3 +1,7 @@
+> ⚠️ **Superseded / stale snapshot.** This is a point-in-time session log, not current docs —
+> see `PLAN.md` for status and `README.md` for setup. Security posture has changed materially
+> since Feb 2026 (see PLAN.md's security audit + Phase 2 hardening sections).
+
 # 🔐 mojkmet.eu Authentication - Complete Setup
 
 **Date:** February 7, 2026  

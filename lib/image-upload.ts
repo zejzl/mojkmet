@@ -22,6 +22,9 @@ export function sanitizeImageDataUrl(input: string | null | undefined): ImageSan
     return { ok: false, error: 'Vrsta slike v zaglavju se ne ujema z vsebino.' }
   }
 
+  // Re-slice to the detected end-of-image marker: drops any trailer bytes appended after
+  // a valid image (the classic polyglot trick — e.g. a PNG with a <script> tag stuffed
+  // after IEND), so only genuine image bytes ever get stored.
   const canonical = detected.bytes.subarray(0, detected.endIndex)
   const value = `data:${detected.mime};base64,${canonical.toString('base64')}`
   if (value.length > MAX_IMAGE_DATA_URL_CHARS) {
@@ -164,6 +167,8 @@ function detectJpeg(bytes: Buffer): DetectResult {
       break
     }
     const marker = bytes[i + 1]
+    // 0xC0-0xCF are the SOF (start-of-frame, i.e. dimensions) markers, except 0xC4/C8/CC
+    // (DHT/JPG/DAC) which share the range but aren't frame headers and have no width/height.
     if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
       if (i + 9 >= size) return { ok: false, error: 'Neveljavna JPEG slika.' }
       const height = (bytes[i + 5] << 8) | bytes[i + 6]
@@ -199,6 +204,8 @@ function detectWebp(bytes: Buffer): DetectResult {
   }
   const endIndex = Math.min(declaredSize, size)
 
+  // Width/height layout differs per WebP sub-format (VP8X/VP8/VP8L); offsets and the
+  // 14-bit field width with a +1 bias come from the WebP container/bitstream spec.
   const chunk = bytes.slice(12, 16).toString('ascii')
   let width = 0
   let height = 0

@@ -125,31 +125,39 @@ Commits: `4967651` (scrub), `346ba0d` (reset flow), `8dc7b2b` (security fixes),
 ### Step 0 — Plan doc (this file) ✅
 
 ### Step 1 — Security fixes (prerequisite, unblocks everything)
-- [ ] Introduce `zod` + `lib/validation.ts`; validate **every** API route body (currently
+- [x] Introduce `zod` + `lib/validation.ts`; validate **every** API route body (currently
       routes do `request.json() as Partial<T>` — no validation library installed)
-- [ ] Stop leaking `details: error.message` in the 5 raw-SQL routes:
+- [x] Stop leaking `details: error.message` in the 5 raw-SQL routes:
       `api/products`, `api/products/[id]`, `api/farms`, `api/farms/[id]`, `api/stats`
-- [ ] Bound `?limit=` in `app/api/dashboard/orders/route.ts` (currently unbounded)
-- [ ] Fix host-header injection in `app/api/auth/forgot-password/route.ts` (lines 32–35:
+      (those routes are now on Prisma, not raw SQL — see Step 2; `getErrorMessage`
+      only returns raw messages outside production)
+- [x] Bound `?limit=` in `app/api/dashboard/orders/route.ts` (currently unbounded)
+- [x] Fix host-header injection in `app/api/auth/forgot-password/route.ts` (lines 32–35:
       attacker-controlled `Host` lands in the reset URL inside email HTML) +
       HTML-escape every interpolated value in email templates
-- [ ] `middleware.ts` server-side gate for `/dashboard/*` + strict CSP headers
-      (client-side gating today is not a gate)
-- [ ] Fix in-memory rate limiter (`lib/rate-limit.ts`): unbound `Map`, never pruned —
+- [ ] **`middleware.ts` server-side gate for `/dashboard/*` + strict CSP headers — still
+      open.** `app/dashboard/layout.tsx` only redirects client-side via `useSession()`; an
+      unauthenticated request can still hit dashboard API routes directly (those *are*
+      individually gated via `getSessionOrError()`) and briefly render the shell before the
+      client redirect fires. Security headers exist (`next.config.ts`) but no CSP.
+- [x] Fix in-memory rate limiter (`lib/rate-limit.ts`): unbound `Map`, never pruned —
       prune + cap (Upstash in Step 7 if abuse appears)
-- [ ] Fix `parseInt` stock validation in `api/dashboard/products` (NaN coercion)
+- [x] Fix `parseInt` stock validation in `api/dashboard/products` (NaN coercion) —
+      superseded by `z.coerce.number().int()` in `productSchema`/`productUpdateSchema`
 
 ### Step 2 — Data model + migrations
-- [ ] Rewrite `prisma/schema.prisma` per design below; start `prisma/migrations/` history
-- [ ] Order: `farmId` (1:1), `paymentStatus`, `subtotal`/`platformFee`/`payoutAmount` as
+- [x] Rewrite `prisma/schema.prisma` per design below; start `prisma/migrations/` history
+- [x] Order: `farmId` (1:1), `paymentStatus`, `subtotal`/`platformFee`/`payoutAmount` as
       `Decimal(10,2)`, `paymentProvider`/`paymentRef`/`invoiceNumber`/`invoicePdfUrl`/`paidAt`,
       `pickupStartsAt`/`pickupEndsAt`, `reservedUntil`. Remove `deliveryAddress`/`deliveryCity`/`deliveryPostal`
-- [ ] New: `PickupWindow` (recurring farmer availability), `PickupChange` (farmer/consumer
+- [x] New: `PickupWindow` (recurring farmer availability), `PickupChange` (farmer/consumer
       override proposals), `PaymentEvent` (`@@unique([provider, externalId])` — webhook idempotency)
-- [ ] Order status state machine:
+- [x] Order status state machine:
       `AWAITING_PAYMENT → PAID → ACCEPTED → READY → COLLECTED → COMPLETED`, plus `CANCELLED`/`REFUNDED`
-- [ ] Stock: decrement on order create with `reservedUntil` (≈15 min) + lazy sweep for expired holds
-- [ ] Migrate the 5 raw-SQL routes in Step 1 onto Prisma
+- [x] Stock: decrement on order create with `reservedUntil` (≈15 min) + lazy sweep for expired holds
+      (`lib/payments/reconcile.ts`)
+- [x] Migrate the 5 raw-SQL routes in Step 1 onto Prisma (verified: no `$queryRaw`/`$executeRaw`
+      remain anywhere in `app`/`lib`)
 
 ### Step 3 — Payments
 - [x] `lib/payments/` provider interface + `mock` implementation calling `api.mojkmet.eu`

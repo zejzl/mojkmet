@@ -3,6 +3,9 @@
 import { useRef, useState } from 'react'
 import { getErrorMessage } from '@/lib/errors'
 
+// UX-only pre-check so users get instant feedback — the real, security-relevant validation
+// (magic-byte sniffing, dimension caps, canonicalization) happens server-side in
+// lib/image-upload.ts and cannot be bypassed by skipping this check.
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 const MAX_BYTES = 1_500_000
 

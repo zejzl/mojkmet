@@ -1,3 +1,7 @@
+> ⚠️ **Superseded / stale snapshot.** This is a point-in-time session log, not current docs —
+> see `PLAN.md` for status and `README.md` for setup. Some details below are now wrong (e.g.
+> this project is on **NextAuth v4**, not v5).
+
 # Authentication Setup Complete ✅
 
 Full authentication system implemented using NextAuth.js v5 with Prisma and PostgreSQL.

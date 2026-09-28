@@ -1,3 +1,7 @@
+> ⚠️ **Superseded / stale snapshot.** This is a point-in-time session log, not current docs —
+> see `PLAN.md` for status (the Neon project referenced here, `ep-divine-butterfly`, was later
+> retired) and `README.md` for setup.
+
 # ✅ mojkmet.eu - Neon Database Integration Complete
 
 **Date:** January 29, 2026  

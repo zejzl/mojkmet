@@ -20,6 +20,8 @@ const createPrismaClient = () => {
   })
 }
 
+// Cache on `global` in dev so Next.js's hot-reload doesn't spawn a fresh PrismaClient
+// (and a fresh connection pool) on every module reload.
 export const prisma = globalForPrisma.prisma || createPrismaClient()
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma

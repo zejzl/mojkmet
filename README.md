@@ -127,5 +127,9 @@ that reports an error also reports it to Sentry. `SENTRY_ORG`/`SENTRY_PROJECT`/
 
 ## Docs
 
-- `PLAN.md` — phase-by-phase rollout plan and status
+- `PLAN.md` — phase-by-phase rollout plan and status (the living doc — check here first)
 - `VERCEL_ENV_SETUP.md` — required environment variables for deployment
+- `AGENTS.md` — conventions and architecture notes for AI coding agents working in this repo
+- `AUTH_SETUP.md`, `AUTHENTICATION_SETUP.md`, `DATABASE_CONNECTION_COMPLETE.md`,
+  `INTEGRATION_COMPLETE.md`, `LANDING_PAGE_UPDATES.md` — dated session logs from early
+  development (Jan–Feb 2026), kept for history; superseded by `PLAN.md`

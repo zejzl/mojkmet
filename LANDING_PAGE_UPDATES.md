@@ -1,3 +1,6 @@
+> ⚠️ **Superseded / stale snapshot.** This is a point-in-time session log, not current docs —
+> see `PLAN.md` for status. Landing page has likely changed further since this was written.
+
 # mojkmet.eu Landing Page Updates
 
 **Date:** February 7, 2026  

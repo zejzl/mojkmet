@@ -28,6 +28,8 @@ export const authOptions: NextAuthOptions = {
           },
         })
 
+        // Same generic message whether the email doesn't exist or the password is wrong —
+        // distinguishing them would let an attacker enumerate registered emails.
         if (!user || !user.password) {
           throw new Error('Invalid credentials')
         }

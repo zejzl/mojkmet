@@ -30,13 +30,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
   const [initialized, setInitialized] = useState(false)
 
+  // Two-effect load/save split, gated by `initialized`: without it the save effect would
+  // fire on mount with the empty initial `items` and overwrite localStorage before the
+  // load effect ever runs.
   useEffect(() => {
     try {
       const saved = localStorage.getItem('mojkmet-cart')
-if (saved) {
-          // eslint-disable-next-line react-hooks/set-state-in-effect
-          setItems(JSON.parse(saved))
-        }
+      if (saved) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setItems(JSON.parse(saved))
+      }
     } catch {
       // ignore parse errors
     }

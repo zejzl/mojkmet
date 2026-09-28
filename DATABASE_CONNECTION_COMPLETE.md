@@ -1,3 +1,6 @@
+> ⚠️ **Superseded / stale snapshot.** This is a point-in-time session log, not current docs —
+> see `PLAN.md` for status (Neon credentials have since been rotated) and `README.md` for setup.
+
 # ✅ mojkmet.eu Database Connection - COMPLETE
 
 **Date:** February 7, 2026  
