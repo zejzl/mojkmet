@@ -2,6 +2,7 @@ import { getErrorMessage } from '@/lib/errors'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrError } from '@/lib/auth-helpers'
+import { productSchema, parseJson } from '@/lib/validation'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,12 +54,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Najprej ustvarite kmetijo' }, { status: 400 })
     }
 
-    const body = await request.json()
-    const { name, description, price, unit, stock, categoryId, available } = body
+    const parsed = await parseJson(productSchema, request)
+    if (!parsed.ok) return parsed.error
 
-    if (!name || !price || !categoryId) {
-      return NextResponse.json({ error: 'Ime, cena in kategorija so obvezni' }, { status: 400 })
-    }
+    const { name, description, price, unit, stock, categoryId, available } = parsed.data
 
     const product = await prisma.product.create({
       data: {
@@ -66,9 +65,9 @@ export async function POST(request: Request) {
         categoryId,
         name,
         description: description || null,
-        price: parseFloat(price),
-        unit: unit || 'kg',
-        stock: parseInt(stock) || 0,
+        price,
+        unit,
+        stock,
         available: available !== false,
       },
     })

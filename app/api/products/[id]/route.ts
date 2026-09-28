@@ -53,12 +53,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ product, relatedProducts })
   } catch (error) {
     console.error('Product detail API error:', error)
-    return NextResponse.json(
-      {
-        error: 'Failed to fetch product',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch product' }, { status: 500 })
   }
 }

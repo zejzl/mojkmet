@@ -2,6 +2,7 @@ import { getErrorMessage } from '@/lib/errors'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrError } from '@/lib/auth-helpers'
+import { profileSchema, parseJson } from '@/lib/validation'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,12 +28,10 @@ export async function PUT(request: Request) {
     const { session, error } = await getSessionOrError()
     if (error) return error
 
-    const body = await request.json()
-    const { name, email } = body
+    const parsed = await parseJson(profileSchema, request)
+    if (!parsed.ok) return parsed.error
 
-    if (!email) {
-      return NextResponse.json({ error: 'Email je obvezen' }, { status: 400 })
-    }
+    const { name, email } = parsed.data
 
     // Check if email is taken by another user
     if (email !== session!.user!.email) {

@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrError } from '@/lib/auth-helpers'
 import bcrypt from 'bcryptjs'
+import { changePasswordSchema, parseJson } from '@/lib/validation'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,16 +12,10 @@ export async function POST(request: Request) {
     const { session, error } = await getSessionOrError()
     if (error) return error
 
-    const body = await request.json()
-    const { currentPassword, newPassword } = body
+    const parsed = await parseJson(changePasswordSchema, request)
+    if (!parsed.ok) return parsed.error
 
-    if (!currentPassword || !newPassword) {
-      return NextResponse.json({ error: 'Obe gesli sta obvezni' }, { status: 400 })
-    }
-
-    if (newPassword.length < 8) {
-      return NextResponse.json({ error: 'Novo geslo mora imeti vsaj 8 znakov' }, { status: 400 })
-    }
+    const { currentPassword, newPassword } = parsed.data
 
     const user = await prisma.user.findUnique({
       where: { id: session!.user!.id },

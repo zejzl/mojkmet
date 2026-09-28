@@ -2,51 +2,19 @@ import { getErrorMessage } from '@/lib/errors'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrError } from '@/lib/auth-helpers'
+import { orderSchema, parseJson } from '@/lib/validation'
 
 export const dynamic = 'force-dynamic'
-
-type OrderItemInput = { productId: string; quantity: number }
-
-type CreateOrderBody = {
-  items: OrderItemInput[]
-  deliveryAddress: string
-  deliveryCity: string
-  deliveryPostal: string
-  phone: string
-  notes?: string
-}
 
 export async function POST(request: Request) {
   try {
     const { session, error } = await getSessionOrError()
     if (error) return error
 
-    const body = (await request.json()) as Partial<CreateOrderBody>
-    const { items, deliveryAddress, deliveryCity, deliveryPostal, phone, notes } = body
+    const parsed = await parseJson(orderSchema, request)
+    if (!parsed.ok) return parsed.error
 
-    // Validacija
-    if (!deliveryAddress || !deliveryCity || !deliveryPostal || !phone) {
-      return NextResponse.json(
-        { error: 'Naslov, mesto, postna stevilka in telefon so obvezni' },
-        { status: 400 }
-      )
-    }
-
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return NextResponse.json({ error: 'Košarica je prazna' }, { status: 400 })
-    }
-
-    // Validacija kolicin - pozitivna celo stevila, razumen zgornji limit
-    for (const item of items) {
-      if (
-        !item.productId ||
-        !Number.isInteger(item.quantity) ||
-        item.quantity < 1 ||
-        item.quantity > 999
-      ) {
-        return NextResponse.json({ error: 'Neveljavna količina' }, { status: 400 })
-      }
-    }
+    const { items, deliveryAddress, deliveryCity, deliveryPostal, phone, notes } = parsed.data
 
     // Preveri zaloge in pridobi aktualne cene iz DB
     const productIds = items.map((i) => i.productId)

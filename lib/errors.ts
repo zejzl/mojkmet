@@ -1,3 +1,6 @@
 export function getErrorMessage(error: unknown, fallback = 'Prišlo je do napake.'): string {
-  return error instanceof Error && error.message ? error.message : fallback
+  if (process.env.NODE_ENV !== 'production') {
+    return error instanceof Error && error.message ? error.message : fallback
+  }
+  return fallback
 }

@@ -1,7 +1,7 @@
 # mojkmet.eu — Project Plan & Status
 
 > Sveže od kmeta, neposredno k vam.
-> Farm-to-consumer marketplace for Slovenia. Last updated: **August 21, 2026**
+> Farm-to-consumer marketplace for Slovenia. Last updated: **September 28, 2026**
 
 ---
 
@@ -23,8 +23,9 @@ consumers — fresh produce without middlemen, fair prices, guaranteed freshness
 | Database | PostgreSQL (Neon) via Prisma 7 + Neon serverless adapter |
 | Auth | NextAuth v4 (credentials, JWT sessions, bcrypt-12) |
 | Email | Nodemailer via SMTP (`info@mojkmet.eu`, shared transporter in `lib/mailer.ts`) |
+| Payments | Mock provider on `api.mojkmet.eu` behind `lib/payments/` provider interface (Račun123 later) |
 | Analytics | Plausible |
-| Hosting | Vercel (env vars: DATABASE_URL, NEXTAUTH_SECRET/URL, MOJKMET_EMAIL_*) |
+| Hosting | Vercel (env vars: DATABASE_URL, NEXTAUTH_SECRET/URL, MOJKMET_EMAIL_*, PAYMENT_*) |
 
 ### Features Built
 
@@ -80,32 +81,119 @@ Commits: `4967651` (scrub), `346ba0d` (reset flow), `8dc7b2b` (security fixes),
 
 ---
 
-## Next Steps (Prioritized)
+## Session Log — September 28, 2026 (Phase 2 kickoff)
 
-### P0 — Before real users
-- [ ] Strict CSP with nonces (middleware-based; current headers are a first pass)
-- [ ] Rate limiting that survives serverless scale-out (Upstash Redis) if abuse appears
-- [ ] Error monitoring (Sentry free tier) — would have caught the Feb login scare immediately
-- [ ] CI: GitHub Action running lint + build on every push
+### Decision log (settled with product owner)
+- **Merchant of record = mojkmet.eu** — single fictional Račun123 account. mojkmet
+  issues all invoices, collects all money, and pays farmers out (split, off-platform).
+- **Payments built against a mock provider first**, behind a provider interface in
+  `lib/payments/`. Swapping in real Račun123 later is a config change, not a rewrite.
+- **Prepay at checkout** (no cash/plačilo ob prevzemu in v1).
+- **One farm per order.** Multi-farm cart is allowed, but checkout resolves to a
+  single farm (others stay in the cart until their own order).
+- **Booked pickup slots.** Farmers define recurring pickup windows; customer books a
+  slot at checkout. Farmer may propose an override (swap/change), customer confirms.
+- **Pickup-only for v1** (delivery later). Farmers pick their windows/location;
+  **farmer sets minimum order value** — farmers won't drive 30 km for €2 of eggs.
+- Račun123 facts (research): invoicing/FURS-fiscalization, no split/multi-merchant;
+  "API po meri" = push API → `invoiceNumber`/`pdfUrl`/`zoi`/`eor`; customer pays on the
+  hosted page to the account holder's TRR; refund/credit-note path unverified → assume
+  manual fallback.
 
-### P1 — Complete the purchase loop
-- [ ] Payments — **direction undecided**: Stripe feels too early; evaluate alternatives
-      when ready (e.g., Stripe Checkout lightweight, PayPal, direct bank transfer /
-      povzetek plačila as MVP). No integration until product-market fit is clearer.
-- [ ] Order confirmation emails to buyer (mailer infrastructure already in place)
+### Server infra & mock provider (done)
+- **`api.mojkmet.eu` created** on the cPanel box (`sh29.neoserv.si` / `152.89.235.65`,
+  NS `ns57/ns58.neoserv.si`). Registered as a **subdomain** of `mojkmet.eu` (not addon —
+  cPanel rejects addon names that are subdomains of an owned domain; not alias — aliases
+  would serve the Vercel-hosted main site). AutoSSL Let's Encrypt cert covers it; A record
+  points at the box. Docroot `/home/mojkmet/api.mojkmet.eu`.
+- **Mock payment provider deployed** (PHP front controller):
+  `GET /v1/health`, `POST /v1/payments/initiate` (X-API-Key, idempotency key), `GET
+  /v1/payments/status?ref=`, `GET|POST /pay/<ref>` hosted page (`/settle`, `/cancel`),
+  `POST /_wh_echo` debug. Webhook callbacks signed `X-Payment-Signature: HMAC-SHA256(body, secret)`.
+  Shared API key in server `config.php` (mode 600); app side goes in `PAYMENT_*` env vars.
+- **Status:** deployed, `php -l` clean, and verified working during sync windows
+  (health → 200 JSON). ⏳ LiteSpeed multi-node vhost sync on the Neoserv side is
+  still converging (requests intermittently answered by the main vhost). If not converged
+  within ~1–2 h → ticket Neoserv to rebuild/reload LiteSpeed vhosts. ModSecurity is
+  enabled account-wide (incl. `api.mojkmet.eu`) — watch for false-positive 403s on the
+  JSON endpoints once live.
+
+---
+
+## Plan — Phase 2: Payments + pickup marketplace (Steps 0–7)
+
+### Step 0 — Plan doc (this file) ✅
+
+### Step 1 — Security fixes (prerequisite, unblocks everything)
+- [ ] Introduce `zod` + `lib/validation.ts`; validate **every** API route body (currently
+      routes do `request.json() as Partial<T>` — no validation library installed)
+- [ ] Stop leaking `details: error.message` in the 5 raw-SQL routes:
+      `api/products`, `api/products/[id]`, `api/farms`, `api/farms/[id]`, `api/stats`
+- [ ] Bound `?limit=` in `app/api/dashboard/orders/route.ts` (currently unbounded)
+- [ ] Fix host-header injection in `app/api/auth/forgot-password/route.ts` (lines 32–35:
+      attacker-controlled `Host` lands in the reset URL inside email HTML) +
+      HTML-escape every interpolated value in email templates
+- [ ] `middleware.ts` server-side gate for `/dashboard/*` + strict CSP headers
+      (client-side gating today is not a gate)
+- [ ] Fix in-memory rate limiter (`lib/rate-limit.ts`): unbound `Map`, never pruned —
+      prune + cap (Upstash in Step 7 if abuse appears)
+- [ ] Fix `parseInt` stock validation in `api/dashboard/products` (NaN coercion)
+
+### Step 2 — Data model + migrations
+- [ ] Rewrite `prisma/schema.prisma` per design below; start `prisma/migrations/` history
+- [ ] Order: `farmId` (1:1), `paymentStatus`, `subtotal`/`platformFee`/`payoutAmount` as
+      `Decimal(10,2)`, `paymentProvider`/`paymentRef`/`invoiceNumber`/`invoicePdfUrl`/`paidAt`,
+      `pickupStartsAt`/`pickupEndsAt`, `reservedUntil`. Remove `deliveryAddress`/`deliveryCity`/`deliveryPostal`
+- [ ] New: `PickupWindow` (recurring farmer availability), `PickupChange` (farmer/consumer
+      override proposals), `PaymentEvent` (`@@unique([provider, externalId])` — webhook idempotency)
+- [ ] Order status state machine:
+      `AWAITING_PAYMENT → PAID → ACCEPTED → READY → COLLECTED → COMPLETED`, plus `CANCELLED`/`REFUNDED`
+- [ ] Stock: decrement on order create with `reservedUntil` (≈15 min) + lazy sweep for expired holds
+- [ ] Migrate the 5 raw-SQL routes in Step 1 onto Prisma
+
+### Step 3 — Payments
+- [ ] `lib/payments/` provider interface + `mock` implementation calling `api.mojkmet.eu`
+- [ ] `app/api/webhooks/payments/route.ts` — verify HMAC signature, dedupe via `PaymentEvent`
+- [ ] Checkout: initiate payment → redirect customer to hosted `/pay/<ref>` page → on
+      success hit return URL → mark order PAID (parity check with `reservedUntil` expiry)
+
+### Step 4 — Pickup coordination
+- [ ] Farmer dashboard: `PickupWindow` CRUD (recurring availability), min-order settings, location
+- [ ] Checkout: show only open slots for the farm, book start/end
+- [ ] `PickupChange` flow: farmer proposes new slot → consumer confirms → notify both
+
+### Step 5 — Email templates
+- [ ] Order confirmation, payment confirmation, pickup booking/changes
+
+### Step 6 — Farmer onboarding + distance
+- [ ] Self-serve farm creation; **free first year**
+- [ ] `Farm.latitude/longitude`; Haversine distance shown to shoppers
+
+### Step 7 — Hardening
+- [ ] Upstash Redis rate limiter (scale-out), Sentry monitoring, GitHub Action CI (lint+build)
+- [ ] AES/other related cleanup, seed script bcrypt parity, README/docs refresh
+
+---
+
+## Next Steps (Prioritized) — beyond Phase 2
+
+- [ ] Payments go-live: swap mock → Račun123 "API po meri" (invoice, zoi/eor, pdfUrl,
+      hosted payment page); confirm refund/credit-note path with vendor
 - [ ] Server-side cart sync for logged-in users (cart currently localStorage-only)
-
-### P2 — Marketplace growth
 - [ ] Reviews/ratings UI (DB table exists and feeds farm ratings already)
-- [ ] Farmer onboarding polish (self-serve farm creation flow)
+- [ ] Migrate NextAuth v4 → Auth.js v5 (v4 maintenance mode)
 - [ ] Admin tooling (farm verification, moderation) — ADMIN role exists but unused
-
-### P3 — Technical debt
-- [ ] Migrate NextAuth v4 → Auth.js v5 (v4 is maintenance mode; also addresses
-      remaining critical advisories affecting OAuth-style flows)
 - [ ] Profile email change requires re-verification
 - [ ] Tests: smoke tests for auth/order APIs minimum
 - [ ] Delete retired `ep-divine-butterfly` Neon project entirely (creds already removed)
+
+---
+
+### Env vars (new for Phase 2)
+- `PAYMENT_PROVIDER=mock`
+- `PAYMENT_MOCK_BASE_URL=https://api.mojkmet.eu`
+- `PAYMENT_MOCK_SECRET=<shared API key from server config.php>`
+- Webhook URL exposed to provider: `https://mojkmet.eu/api/webhooks/payments`
 
 ### Operational notes
 - **Always `git pull` before starting work** — external tools (openclaw etc.) can push

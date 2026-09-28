@@ -2,6 +2,7 @@ import { getErrorMessage } from '@/lib/errors'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrError } from '@/lib/auth-helpers'
+import { farmSchema, parseJson } from '@/lib/validation'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,15 +31,10 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Samo kmetje lahko urejajo kmetijo' }, { status: 403 })
     }
 
-    const body = await request.json()
-    const { name, description, address, city, postalCode, phone, website } = body
+    const parsed = await parseJson(farmSchema, request)
+    if (!parsed.ok) return parsed.error
 
-    if (!name || !address || !city || !postalCode) {
-      return NextResponse.json(
-        { error: 'Ime, naslov, mesto in postna stevilka so obvezni' },
-        { status: 400 }
-      )
-    }
+    const { name, description, address, city, postalCode, phone, website } = parsed.data
 
     const existingFarm = await prisma.farm.findUnique({
       where: { userId: session!.user!.id },
@@ -48,19 +44,27 @@ export async function PUT(request: Request) {
     if (existingFarm) {
       farm = await prisma.farm.update({
         where: { userId: session!.user!.id },
-        data: { name, description, address, city, postalCode, phone, website },
+        data: {
+          name,
+          description: description || null,
+          address,
+          city,
+          postalCode,
+          phone: phone || null,
+          website: website || null,
+        },
       })
     } else {
       farm = await prisma.farm.create({
         data: {
           userId: session!.user!.id,
           name,
-          description,
+          description: description || null,
           address,
           city,
           postalCode,
-          phone,
-          website,
+          phone: phone || null,
+          website: website || null,
         },
       })
     }

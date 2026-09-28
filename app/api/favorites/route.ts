@@ -2,6 +2,7 @@ import { getErrorMessage } from '@/lib/errors'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrError } from '@/lib/auth-helpers'
+import { favoriteSchema, parseJson } from '@/lib/validation'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,12 +30,10 @@ export async function POST(request: Request) {
     const { session, error } = await getSessionOrError()
     if (error) return error
 
-    const body = await request.json()
-    const { productId } = body
+    const parsed = await parseJson(favoriteSchema, request)
+    if (!parsed.ok) return parsed.error
 
-    if (!productId) {
-      return NextResponse.json({ error: 'productId je obvezen' }, { status: 400 })
-    }
+    const { productId } = parsed.data
 
     const existing = await prisma.favorite.findUnique({
       where: { userId_productId: { userId: session!.user!.id, productId } },

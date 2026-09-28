@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sendMail } from '@/lib/mailer'
+import { waitlistSchema, parseJson } from '@/lib/validation'
 
 export async function POST(request: NextRequest) {
   try {
-    const { email } = await request.json()
+    const parsed = await parseJson(waitlistSchema, request)
+    if (!parsed.ok) return parsed.error
 
-    if (!email || !email.includes('@')) {
-      return NextResponse.json({ error: 'Veljaven e-poštni naslov je obvezen' }, { status: 400 })
-    }
+    const { email } = parsed.data
 
     const now = new Date().toLocaleString('sl-SI', { timeZone: 'Europe/Ljubljana' })
 

@@ -36,13 +36,6 @@ export async function GET() {
     return NextResponse.json({ farms: rows })
   } catch (error) {
     console.error('Database error:', error)
-    return NextResponse.json(
-      {
-        error: 'Failed to fetch farms',
-        details: error instanceof Error ? error.message : 'Unknown error',
-        env_check: !!process.env.DATABASE_URL,
-      },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch farms' }, { status: 500 })
   }
 }

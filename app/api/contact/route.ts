@@ -1,39 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sendMail } from '@/lib/mailer'
 import { rateLimit } from '@/lib/rate-limit'
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-type ContactMessage = {
-  name: string
-  email: string
-  subject: string
-  message: string
-}
+import { contactSchema, parseJson, escapeHtml } from '@/lib/validation'
 
 export async function POST(request: NextRequest) {
   try {
-    const body = (await request.json()) as ContactMessage
-    const name = body.name?.trim() ?? ''
-    const email = body.email?.trim() ?? ''
-    const subject = body.subject?.trim() ?? ''
-    const message = body.message?.trim() ?? ''
+    const parsed = await parseJson(contactSchema, request)
+    if (!parsed.ok) return parsed.error
 
-    if (!name || name.length > 100) {
-      return NextResponse.json({ error: 'Prosimo, vnesite ime in priimek.' }, { status: 400 })
-    }
-    if (!EMAIL_REGEX.test(email)) {
-      return NextResponse.json(
-        { error: 'Prosimo, vnesite veljaven e-poštni naslov.' },
-        { status: 400 }
-      )
-    }
-    if (!subject || subject.length > 200) {
-      return NextResponse.json({ error: 'Prosimo, izberite zadevo.' }, { status: 400 })
-    }
-    if (message.length < 10 || message.length > 5000) {
-      return NextResponse.json({ error: 'Sporočilo mora imeti vsaj 10 znakov.' }, { status: 400 })
-    }
+    const { name, email, subject, message } = parsed.data
 
     if (!rateLimit(request, 'contact', 3, 15 * 60 * 1000)) {
       return NextResponse.json(
@@ -43,7 +18,7 @@ export async function POST(request: NextRequest) {
     }
 
     const nowLabel = new Date().toLocaleString('sl-SI', { timeZone: 'Europe/Ljubljana' })
-    const safeSubject = subject.replace(/<[^>]*>/g, '')
+    const safeSubject = subject.replace(/<[^>]*>/g, '').replace(/[\r\n]+/g, ' ')
 
     await sendMail({
       to: 'info@mojkmet.eu',
@@ -72,12 +47,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
 }

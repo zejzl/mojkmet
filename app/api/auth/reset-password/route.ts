@@ -3,6 +3,7 @@ import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { rateLimit, tooManyRequests } from '@/lib/rate-limit'
+import { resetPasswordSchema, parseJson } from '@/lib/validation'
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,18 +11,12 @@ export async function POST(request: NextRequest) {
       return tooManyRequests()
     }
 
-    const { email, token, password } = await request.json()
+    const parsed = await parseJson(resetPasswordSchema, request)
+    if (!parsed.ok) return parsed.error
 
-    if (!email || !token || !password) {
-      return NextResponse.json({ error: 'Manjkajo podatki za ponastavitev' }, { status: 400 })
-    }
-
-    if (typeof password !== 'string' || password.length < 8) {
-      return NextResponse.json({ error: 'Geslo mora biti dolgo vsaj 8 znakov' }, { status: 400 })
-    }
-
-    const normalizedEmail = String(email).toLowerCase().trim()
-    const tokenHash = crypto.createHash('sha256').update(String(token)).digest('hex')
+    const { email, token, password } = parsed.data
+    const normalizedEmail = email
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex')
 
     const record = await prisma.verificationToken.findUnique({
       where: { identifier_token: { identifier: normalizedEmail, token: tokenHash } },

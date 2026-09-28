@@ -62,12 +62,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     })
   } catch (error) {
     console.error('Database error:', error)
-    return NextResponse.json(
-      {
-        error: 'Failed to fetch farm details',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch farm details' }, { status: 500 })
   }
 }

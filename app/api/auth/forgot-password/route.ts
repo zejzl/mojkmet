@@ -3,6 +3,7 @@ import crypto from 'crypto'
 import { prisma } from '@/lib/prisma'
 import { sendMail } from '@/lib/mailer'
 import { rateLimit, tooManyRequests } from '@/lib/rate-limit'
+import { forgotPasswordSchema, parseJson, escapeHtml } from '@/lib/validation'
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,13 +11,10 @@ export async function POST(request: NextRequest) {
       return tooManyRequests()
     }
 
-    const { email } = await request.json()
+    const parsed = await parseJson(forgotPasswordSchema, request)
+    if (!parsed.ok) return parsed.error
 
-    if (!email || typeof email !== 'string' || !email.includes('@')) {
-      return NextResponse.json({ error: 'Veljaven e-poštni naslov je obvezen' }, { status: 400 })
-    }
-
-    const normalizedEmail = email.toLowerCase().trim()
+    const normalizedEmail = parsed.data.email
     const user = await prisma.user.findUnique({ where: { email: normalizedEmail } })
 
     if (user) {
@@ -29,9 +27,7 @@ export async function POST(request: NextRequest) {
         data: { identifier: normalizedEmail, token: tokenHash, expires },
       })
 
-      const proto = request.headers.get('x-forwarded-proto') || 'http'
-      const host = request.headers.get('host') || 'mojkmet.eu'
-      const baseUrl = process.env.NEXTAUTH_URL || `${proto}://${host}`
+      const baseUrl = process.env.NEXTAUTH_URL || 'https://mojkmet.eu'
       const resetUrl = `${baseUrl}/reset-password?token=${token}&email=${encodeURIComponent(normalizedEmail)}`
 
       try {
@@ -47,7 +43,7 @@ export async function POST(request: NextRequest) {
   <p style="margin: 24px 0;">
     <a href="${resetUrl}" style="background-color: #16a34a; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">Ponastavi geslo</a>
   </p>
-  <p style="color: #6b7280; font-size: 14px;">Povezava velja <strong>1 uro</strong>. Ce gumb ne dela, kopirajte naslov v brskalnik:<br><span style="word-break: break-all;">${resetUrl}</span></p>
+  <p style="color: #6b7280; font-size: 14px;">Povezava velja <strong>1 uro</strong>. Ce gumb ne dela, kopirajte naslov v brskalnik:<br><span style="word-break: break-all;">${escapeHtml(resetUrl)}</span></p>
   <p>Ce zahtev niste poslali vi, prezrite to sporocilo in geslo ostane nespremenjeno.</p>
   <br>
   <p>Lep pozdrav,<br>Ekipa mojkmet.eu</p>

@@ -2,6 +2,7 @@ import { getErrorMessage } from '@/lib/errors'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrError } from '@/lib/auth-helpers'
+import { productUpdateSchema, parseJson } from '@/lib/validation'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,17 +23,23 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: 'Izdelek ni najden ali nimate dostopa' }, { status: 404 })
     }
 
-    const body = await request.json()
-    const { name, description, price, unit, stock, categoryId, available } = body
+    const parsed = await parseJson(productUpdateSchema, request)
+    if (!parsed.ok) return parsed.error
+
+    const { name, description, price, unit, stock, categoryId, available } = parsed.data
+
+    if (Object.keys(parsed.data).length === 0) {
+      return NextResponse.json({ error: 'Ni podatkov za posodobitev' }, { status: 400 })
+    }
 
     const updated = await prisma.product.update({
       where: { id },
       data: {
         ...(name !== undefined && { name }),
-        ...(description !== undefined && { description }),
-        ...(price !== undefined && { price: parseFloat(price) }),
+        ...(description !== undefined && { description: description || null }),
+        ...(price !== undefined && { price }),
         ...(unit !== undefined && { unit }),
-        ...(stock !== undefined && { stock: parseInt(stock) }),
+        ...(stock !== undefined && { stock }),
         ...(categoryId !== undefined && { categoryId }),
         ...(available !== undefined && { available }),
       },

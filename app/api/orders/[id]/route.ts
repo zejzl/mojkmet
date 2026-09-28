@@ -2,6 +2,7 @@ import { getErrorMessage } from '@/lib/errors'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrError } from '@/lib/auth-helpers'
+import { orderStatusSchema, parseJson } from '@/lib/validation'
 
 export const dynamic = 'force-dynamic'
 
@@ -72,13 +73,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (error) return error
 
     const { id } = await params
-    const body = await request.json()
-    const { status } = body
 
-    const validStatuses = ['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'DELIVERED', 'CANCELLED']
-    if (!validStatuses.includes(status)) {
-      return NextResponse.json({ error: 'Neveljaven status' }, { status: 400 })
-    }
+    const parsed = await parseJson(orderStatusSchema, request)
+    if (!parsed.ok) return parsed.error
+
+    const { status } = parsed.data
 
     // Preveri, ce kmet ima pravico posodobiti to naročilo
     if (session!.user!.role === 'FARMER') {
