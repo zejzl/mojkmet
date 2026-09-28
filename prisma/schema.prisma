@@ -116,6 +116,7 @@ model Farm {
   phone       String?
   website     String?
   image       String?
+  minOrder    Decimal? @db.Decimal(10, 2)
   verified    Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -263,7 +264,6 @@ model PickupChange {
 
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
-  @@unique([orderId, status])
   @@index([orderId])
   @@map("pickup_changes")
 }

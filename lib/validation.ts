@@ -49,6 +49,7 @@ export const orderSchema = z.object({
     .min(1)
     .max(100),
   pickupStartsAt: z.string().datetime(),
+  pickupEndsAt: z.string().datetime().optional(),
   phone: z.string().trim().min(3).max(30),
   notes: z.string().trim().max(2000).optional(),
 })
@@ -74,6 +75,41 @@ export const farmSchema = z.object({
   postalCode: z.string().trim().min(1).max(10),
   phone: z.string().trim().max(30).optional(),
   website: z.union([z.string().trim().url().max(200), z.literal('')]).nullable().optional(),
+  minOrder: z.coerce.number().min(0).max(100000).optional(),
+  latitude: z.coerce.number().min(-90).max(90).optional(),
+  longitude: z.coerce.number().min(-180).max(180).optional(),
+})
+
+const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/
+
+const pickupWindowBase = z.object({
+  dayOfWeek: z.number().int().min(0).max(6),
+  startTime: z.string().regex(timeRegex, 'Neveljaven čas (HH:MM)'),
+  endTime: z.string().regex(timeRegex, 'Neveljaven čas (HH:MM)'),
+  active: z.boolean().optional(),
+})
+
+export const pickupWindowSchema = pickupWindowBase.refine((w) => w.endTime > w.startTime, {
+  message: 'Konec termina mora biti za začetkom.',
+  path: ['endTime'],
+})
+
+export const pickupWindowUpdateSchema = pickupWindowBase
+  .partial()
+  .refine((w) => w.dayOfWeek !== undefined || w.startTime || w.endTime || w.active !== undefined, {
+    message: 'Ni podatkov za posodobitev',
+  })
+
+export const pickupChangeSchema = z.object({
+  orderId: z.string().min(1).max(64),
+  requestedBy: z.enum(['FARMER', 'CONSUMER']),
+  proposedStart: z.string().datetime(),
+  proposedEnd: z.string().datetime(),
+  reason: z.string().trim().max(1000).optional(),
+})
+
+export const pickupChangeActionSchema = z.object({
+  action: z.enum(['ACCEPT', 'REJECT', 'CANCEL']),
 })
 
 export const profileSchema = z.object({

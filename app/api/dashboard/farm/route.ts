@@ -34,37 +34,37 @@ export async function PUT(request: Request) {
     const parsed = await parseJson(farmSchema, request)
     if (!parsed.ok) return parsed.error
 
-    const { name, description, address, city, postalCode, phone, website } = parsed.data
+    const { name, description, address, city, postalCode, phone, website, minOrder, latitude, longitude } =
+      parsed.data
 
     const existingFarm = await prisma.farm.findUnique({
       where: { userId: session!.user!.id },
     })
 
+    const data = {
+      name,
+      description: description || null,
+      address,
+      city,
+      postalCode,
+      phone: phone || null,
+      website: website || null,
+      minOrder: minOrder !== undefined && minOrder > 0 ? minOrder : null,
+      latitude: latitude !== undefined ? latitude : null,
+      longitude: longitude !== undefined ? longitude : null,
+    }
+
     let farm
     if (existingFarm) {
       farm = await prisma.farm.update({
         where: { userId: session!.user!.id },
-        data: {
-          name,
-          description: description || null,
-          address,
-          city,
-          postalCode,
-          phone: phone || null,
-          website: website || null,
-        },
+        data,
       })
     } else {
       farm = await prisma.farm.create({
         data: {
           userId: session!.user!.id,
-          name,
-          description: description || null,
-          address,
-          city,
-          postalCode,
-          phone: phone || null,
-          website: website || null,
+          ...data,
         },
       })
     }

@@ -40,6 +40,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             },
           },
         },
+        pickupChanges: {
+          where: { status: 'PROPOSED' },
+          take: 1,
+          orderBy: { createdAt: 'desc' },
+        },
       },
     })
 
@@ -73,6 +78,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         phone: order.phone,
         notes: order.notes,
         createdAt: order.createdAt,
+        activePickupChange: order.pickupChanges?.[0] ?? null,
         items: order.items.map((item) => ({
           id: item.id,
           productName: item.product.name,

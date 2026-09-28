@@ -16,6 +16,7 @@ const consumerLinks = [
 const farmerLinks = [
   { href: '/dashboard/farmer', label: 'Pregled', icon: '📊' },
   { href: '/dashboard/farmer/farm', label: 'Kmetija', icon: '🏡' },
+  { href: '/dashboard/farmer/pickup', label: 'Prevzem', icon: '🕑' },
   { href: '/dashboard/farmer/products', label: 'Izdelki', icon: '🥬' },
   { href: '/dashboard/farmer/orders', label: 'Naročila', icon: '📦' },
   { href: '/dashboard/settings', label: 'Nastavitve', icon: '⚙️' },

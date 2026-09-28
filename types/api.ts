@@ -17,6 +17,30 @@ export interface OrderItem {
   unit: string
 }
 
+export interface PickupWindow {
+  id: string
+  dayOfWeek: number
+  startTime: string
+  endTime: string
+  active: boolean
+}
+
+export type PickupChangeStatus = 'PROPOSED' | 'ACCEPTED' | 'REJECTED' | 'CANCELLED'
+
+export interface PickupChange {
+  id: string
+  orderId: string
+  requestedBy: 'FARMER' | 'CONSUMER'
+  currentStart: string | Date
+  currentEnd: string | Date
+  proposedStart: string | Date
+  proposedEnd: string | Date
+  reason: string | null
+  status: PickupChangeStatus
+  createdAt: string | Date
+  respondedAt: string | Date | null
+}
+
 export interface Order {
   id: string
   status: OrderStatus
@@ -24,6 +48,7 @@ export interface Order {
   platformFee?: number | null
   payoutAmount?: number | null
   createdAt: string | Date
+  farmId?: string
   farmName?: string
   pickupStartsAt?: string | Date | null
   pickupEndsAt?: string | Date | null
@@ -31,6 +56,7 @@ export interface Order {
   notes?: string | null
   buyer?: { name: string | null; email: string } | null
   items: OrderItem[]
+  activePickupChange?: PickupChange | null
 }
 
 export interface ConsumerStats {

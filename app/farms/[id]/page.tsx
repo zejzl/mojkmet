@@ -14,6 +14,8 @@ interface Farm {
   rating: number
   total_reviews: number
   is_verified: boolean
+  minOrder?: number | null
+  pickupWindows?: { id: string; dayOfWeek: number; startTime: string; endTime: string; active: boolean }[]
 }
 
 interface Product {
@@ -37,6 +39,8 @@ const CATEGORY_ICONS: { [key: string]: string } = {
   sadje: '🍎',
   zita: '🌾',
 }
+
+const DAY_NAMES = ['Nedelja', 'Ponedeljek', 'Torek', 'Sreda', 'Četrtek', 'Petek', 'Sobota']
 
 export default function FarmDetailPage() {
   const params = useParams()
@@ -161,6 +165,36 @@ export default function FarmDetailPage() {
                 {farm.description && (
                   <p className="text-gray-700 text-lg leading-relaxed">{farm.description}</p>
                 )}
+              </div>
+
+              <div className="space-y-6">
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Prevzem</h3>
+                  {farm.pickupWindows && farm.pickupWindows.length > 0 ? (
+                    <ul className="space-y-1.5">
+                      {farm.pickupWindows.map((w) => (
+                        <li key={w.id} className="flex justify-between text-sm">
+                          <span className="text-gray-600">{DAY_NAMES[w.dayOfWeek]}</span>
+                          <span className="font-medium text-gray-900">
+                            {w.startTime} – {w.endTime}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-gray-500">
+                      Termini prevzema še niso objavljeni.
+                    </p>
+                  )}
+                  {farm.minOrder ? (
+                    <p className="text-sm text-gray-600 mt-3 border-t border-gray-100 pt-3">
+                      Minimalna vrednost naročila:{' '}
+                      <span className="font-semibold text-gray-900">
+                        {Number(farm.minOrder).toFixed(2)} EUR
+                      </span>
+                    </p>
+                  ) : null}
+                </div>
               </div>
 
               <div className="bg-gradient-to-br from-green-200 to-amber-200 rounded-2xl h-64 md:h-96 flex items-center justify-center text-8xl">

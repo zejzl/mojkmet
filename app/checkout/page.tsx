@@ -1,7 +1,7 @@
 'use client'
 
 import { getErrorMessage } from '@/lib/errors'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -14,9 +14,77 @@ interface FarmGroup {
   total: number
 }
 
-function toLocalInputValue(d: Date) {
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+interface PickupSlot {
+  id: string
+  start: string
+  end: string
+  startTime: string
+  endTime: string
+}
+
+interface FarmMeta {
+  id: string
+  name: string
+  minOrder: number | null
+  hasWindows: boolean
+}
+
+function SlotPicker({
+  slots,
+  selected,
+  onSelect,
+}: {
+  slots: PickupSlot[]
+  selected: PickupSlot | null
+  onSelect: (slot: PickupSlot) => void
+}) {
+  const groups = useMemo(() => {
+    const map = new Map<string, PickupSlot[]>()
+    for (const slot of slots) {
+      const d = new Date(slot.start)
+      const key = d.toDateString()
+      if (!map.has(key)) map.set(key, [])
+      map.get(key)!.push(slot)
+    }
+    return Array.from(map.entries())
+  }, [slots])
+
+  return (
+    <div className="space-y-4 max-h-80 overflow-y-auto pr-1">
+      {groups.map(([key, group]) => {
+        const date = new Date(group[0].start)
+        const label = date.toLocaleString('sl-SI', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+        })
+        return (
+          <div key={key}>
+            <p className="text-sm font-semibold text-gray-900 capitalize mb-2">{label}</p>
+            <div className="flex flex-wrap gap-2">
+              {group.map((slot) => {
+                const isSelected = selected?.id === slot.id
+                return (
+                  <button
+                    key={slot.id}
+                    type="button"
+                    onClick={() => onSelect(slot)}
+                    className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition ${
+                      isSelected
+                        ? 'bg-green-600 border-green-600 text-white'
+                        : 'border-gray-300 text-gray-700 hover:border-green-500 hover:text-green-700'
+                    }`}
+                  >
+                    {slot.startTime}–{slot.endTime}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
 }
 
 export default function CheckoutPage() {
@@ -29,17 +97,14 @@ export default function CheckoutPage() {
     notes: '',
   })
 
-  const tomorrow = useMemo(() => {
-    const d = new Date()
-    d.setDate(d.getDate() + 1)
-    d.setHours(9, 0, 0, 0)
-    return d
-  }, [])
-  const [pickupValue, setPickupValue] = useState(() => toLocalInputValue(tomorrow))
-
   const [selectedFarmId, setSelectedFarmId] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [slots, setSlots] = useState<PickupSlot[]>([])
+  const [farmMeta, setFarmMeta] = useState<FarmMeta | null>(null)
+  const [slotsLoading, setSlotsLoading] = useState(false)
+  const [slotsError, setSlotsError] = useState('')
+  const [selectedSlot, setSelectedSlot] = useState<PickupSlot | null>(null)
 
   const farmGroups = useMemo(() => {
     const groups = new Map<string, FarmGroup>()
@@ -65,6 +130,26 @@ export default function CheckoutPage() {
     farmGroups.reduce((a, b) => (b.items.length > a.items.length ? b : a), farmGroups[0])
 
   const total = activeGroup?.total ?? 0
+
+  const belowMin =
+    farmMeta?.minOrder != null && activeGroup != null && activeGroup.total < farmMeta.minOrder
+
+  useEffect(() => {
+    if (!selectedFarmId) return
+    setSlotsLoading(true)
+    setSlotsError('')
+    setSelectedSlot(null)
+    setSlots([])
+    fetch(`/api/farms/${selectedFarmId}/pickup-slots?days=14`)
+      .then(async (r) => {
+        const data = await r.json()
+        if (!r.ok) throw new Error(data.error || 'Napaka pri nalaganju terminov')
+        setFarmMeta({ id: data.farm.id, name: data.farm.name, minOrder: data.farm.minOrder, hasWindows: data.farm.hasWindows })
+        setSlots(data.slots || [])
+      })
+      .catch((err) => setSlotsError(err instanceof Error ? err.message : 'Napaka'))
+      .finally(() => setSlotsLoading(false))
+  }, [selectedFarmId])
 
   // Ce kosarica je prazna, preusmeri
   if (items.length === 0 && status !== 'loading') {
@@ -102,15 +187,20 @@ export default function CheckoutPage() {
       return
     }
 
+    if (!selectedSlot) {
+      setError('Izberite termin prevzema.')
+      return
+    }
+
+    if (farmMeta?.minOrder != null && activeGroup.total < farmMeta.minOrder) {
+      setError(`Minimalna vrednost naročila za ${farmMeta.name} je ${farmMeta.minOrder.toFixed(2)} EUR.`)
+      return
+    }
+
     setSubmitting(true)
     setError('')
 
     try {
-      const pickupStartsAt = new Date(pickupValue)
-      if (Number.isNaN(pickupStartsAt.getTime())) {
-        throw new Error('Izberite datum in uro prevzema.')
-      }
-
       const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -119,7 +209,8 @@ export default function CheckoutPage() {
             productId: item.productId,
             quantity: item.quantity,
           })),
-          pickupStartsAt: pickupStartsAt.toISOString(),
+          pickupStartsAt: new Date(selectedSlot.start).toISOString(),
+          pickupEndsAt: new Date(selectedSlot.end).toISOString(),
           phone: formData.phone,
           notes: formData.notes || undefined,
         }),
@@ -237,20 +328,46 @@ export default function CheckoutPage() {
               )}
 
               <div>
-                <label htmlFor="pickupStartsAt" className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Termin prevzema *
                 </label>
-                <input
-                  id="pickupStartsAt"
-                  name="pickupStartsAt"
-                  type="datetime-local"
-                  required
-                  min={toLocalInputValue(new Date())}
-                  value={pickupValue}
-                  onChange={(e) => setPickupValue(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
-                <p className="text-xs text-gray-500 mt-1">Točen termin potrdi kmetija.</p>
+
+                {slotsLoading && (
+                  <div className="py-3 text-sm text-gray-500">Nalagam termine…</div>
+                )}
+
+                {!slotsLoading && slotsError && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                    {slotsError}
+                  </div>
+                )}
+
+                {!slotsLoading && !slotsError && farmMeta && !farmMeta.hasWindows && (
+                  <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg text-sm">
+                    Kmetija še ni objavila prevzemnih terminov. Naročila trenutno ni mogoče oddati.
+                  </div>
+                )}
+
+                {!slotsLoading && !slotsError && farmMeta && farmMeta.hasWindows && slots.length === 0 && (
+                  <div className="py-3 text-sm text-gray-500">
+                    V naslednjih 14 dneh ni prostih terminov.
+                  </div>
+                )}
+
+                {!slotsLoading && !slotsError && farmMeta?.hasWindows && slots.length > 0 && (
+                  <SlotPicker
+                    slots={slots}
+                    selected={selectedSlot}
+                    onSelect={setSelectedSlot}
+                  />
+                )}
+
+                {farmMeta?.minOrder != null && activeGroup && activeGroup.total < farmMeta.minOrder && (
+                  <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg text-sm mt-3">
+                    Minimalna vrednost naročila za {farmMeta.name} je{' '}
+                    {farmMeta.minOrder.toFixed(2)} EUR.
+                  </div>
+                )}
               </div>
 
               <div>
@@ -292,7 +409,7 @@ export default function CheckoutPage() {
 
                 <button
                   type="submit"
-                  disabled={submitting || !session}
+                  disabled={submitting || !session || !selectedSlot || belowMin}
                   className="w-full bg-green-600 text-white py-3.5 rounded-xl font-bold hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed text-lg"
                 >
                   {submitting

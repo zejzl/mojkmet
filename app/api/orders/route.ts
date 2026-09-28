@@ -4,10 +4,10 @@ import { prisma } from '@/lib/prisma'
 import { getSessionOrError } from '@/lib/auth-helpers'
 import { orderSchema, parseJson } from '@/lib/validation'
 import { getPaymentProvider, PaymentProviderError } from '@/lib/payments'
+import { isPickupPeriodOpen, PICKUP_DURATION_MINUTES } from '@/lib/pickup-slots'
 
 export const dynamic = 'force-dynamic'
 
-export const PICKUP_DURATION_MINUTES = 30
 export const STOCK_RESERVE_MINUTES = 15
 export const PLATFORM_FEE_PERCENT = 0
 
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     const parsed = await parseJson(orderSchema, request)
     if (!parsed.ok) return parsed.error
 
-    const { items, pickupStartsAt, phone, notes } = parsed.data
+    const { items, pickupStartsAt, pickupEndsAt, phone, notes } = parsed.data
 
     const pickupStart = new Date(pickupStartsAt)
     if (Number.isNaN(pickupStart.getTime()) || pickupStart.getTime() < Date.now()) {
@@ -28,7 +28,15 @@ export async function POST(request: Request) {
         { status: 400 }
       )
     }
-    const pickupEnd = new Date(pickupStart.getTime() + PICKUP_DURATION_MINUTES * 60 * 1000)
+    const pickupEnd = pickupEndsAt
+      ? new Date(pickupEndsAt)
+      : new Date(pickupStart.getTime() + PICKUP_DURATION_MINUTES * 60 * 1000)
+    if (Number.isNaN(pickupEnd.getTime()) || pickupEnd.getTime() <= pickupStart.getTime()) {
+      return NextResponse.json(
+        { error: 'Veljaven konec termina prevzema.' },
+        { status: 400 }
+      )
+    }
     const reservedUntil = new Date(Date.now() + STOCK_RESERVE_MINUTES * 60 * 1000)
 
     // Preveri zaloge, cene in kmetijo izdelkov iz DB
@@ -60,6 +68,25 @@ export async function POST(request: Request) {
     }
     const farmId = products[0].farmId
 
+    // Preveri prevzemne termine kmetije in minimalno vrednost naročila
+    const [farm, windows] = await Promise.all([
+      prisma.farm.findUnique({
+        where: { id: farmId },
+        select: { minOrder: true },
+      }),
+      prisma.pickupWindow.findMany({
+        where: { farmId, active: true },
+        select: { id: true, dayOfWeek: true, startTime: true, endTime: true, active: true },
+      }),
+    ])
+
+    if (windows.length > 0 && !isPickupPeriodOpen(pickupStart, pickupEnd, windows)) {
+      return NextResponse.json(
+        { error: 'Izbrani termin prevzema ni odprt za prevzem.' },
+        { status: 400 }
+      )
+    }
+
     // Izracunaj skupni znesek z aktualnimi cenami iz DB ter provizijo platforme
     // (zneski v centih za natancno aritmetiko brez zaokrozevalnih napak)
     let subtotalCents = 0
@@ -77,6 +104,14 @@ export async function POST(request: Request) {
     const platformFeeCents = Math.round(subtotalCents * (PLATFORM_FEE_PERCENT / 100))
     const platformFee = platformFeeCents / 100
     const payoutAmount = (subtotalCents - platformFeeCents) / 100
+
+    const minOrder = farm?.minOrder ? farm.minOrder.toNumber() : null
+    if (minOrder !== null && minOrder > 0 && subtotal < minOrder) {
+      return NextResponse.json(
+        { error: `Kmetija ima minimalno vrednost naročila ${minOrder.toFixed(2)} EUR.` },
+        { status: 400 }
+      )
+    }
 
     // Ustvari naročilo v transakciji
     const order = await prisma.$transaction(async (tx) => {

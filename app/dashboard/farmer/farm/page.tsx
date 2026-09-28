@@ -21,6 +21,9 @@ export default function FarmPage() {
     postalCode: '',
     phone: '',
     website: '',
+    minOrder: '',
+    latitude: '',
+    longitude: '',
   })
 
   useEffect(() => {
@@ -41,6 +44,9 @@ export default function FarmPage() {
             postalCode: data.farm.postalCode || '',
             phone: data.farm.phone || '',
             website: data.farm.website || '',
+            minOrder: data.farm.minOrder ? String(data.farm.minOrder) : '',
+            latitude: data.farm.latitude != null ? String(data.farm.latitude) : '',
+            longitude: data.farm.longitude != null ? String(data.farm.longitude) : '',
           })
         } else {
           setIsNew(true)
@@ -216,6 +222,60 @@ export default function FarmPage() {
                 value={formData.website}
                 onChange={handleChange}
                 placeholder="https://..."
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label htmlFor="minOrder" className="block text-sm font-medium text-gray-700">
+                Minimalna vrednost naročila (EUR)
+              </label>
+              <input
+                id="minOrder"
+                name="minOrder"
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.minOrder}
+                onChange={handleChange}
+                placeholder="npr. 20"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500"
+              />
+              <p className="text-xs text-gray-500 mt-1">Prazno = brez minimuma.</p>
+            </div>
+            <div>
+              <label htmlFor="latitude" className="block text-sm font-medium text-gray-700">
+                Zemljepisna širina
+              </label>
+              <input
+                id="latitude"
+                name="latitude"
+                type="number"
+                step="any"
+                min="-90"
+                max="90"
+                value={formData.latitude}
+                onChange={handleChange}
+                placeholder="npr. 46.0569"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500"
+              />
+            </div>
+            <div>
+              <label htmlFor="longitude" className="block text-sm font-medium text-gray-700">
+                Zemljepisna dolžina
+              </label>
+              <input
+                id="longitude"
+                name="longitude"
+                type="number"
+                step="any"
+                min="-180"
+                max="180"
+                value={formData.longitude}
+                onChange={handleChange}
+                placeholder="npr. 14.5058"
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500"
               />
             </div>

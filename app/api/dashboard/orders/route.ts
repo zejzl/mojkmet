@@ -39,8 +39,13 @@ export async function GET(request: Request) {
           product: { select: { name: true, unit: true } },
           order: {
             include: {
-              farm: { select: { name: true } },
+              farm: { select: { id: true, name: true } },
               user: { select: { name: true, email: true } },
+              pickupChanges: {
+                where: { status: 'PROPOSED' },
+                take: 1,
+                orderBy: { createdAt: 'desc' },
+              },
             },
           },
         },
@@ -52,16 +57,19 @@ export async function GET(request: Request) {
       const orderMap = new Map<string, Order>()
       for (const item of orderItems) {
         if (!orderMap.has(item.orderId)) {
+          const pendingChange = item.order.pickupChanges?.[0] ?? null
           orderMap.set(item.orderId, {
             id: item.order.id,
             status: item.order.status,
             subtotal: item.order.subtotal.toNumber(),
+            farmId: item.order.farm?.id,
             farmName: item.order.farm?.name || '',
             pickupStartsAt: item.order.pickupStartsAt,
             pickupEndsAt: item.order.pickupEndsAt,
             notes: item.order.notes,
             createdAt: item.order.createdAt,
             buyer: item.order.user,
+            activePickupChange: pendingChange,
             items: [],
           })
         }
@@ -84,13 +92,18 @@ export async function GET(request: Request) {
     const orders = await prisma.order.findMany({
       where: { userId },
       include: {
-        farm: { select: { name: true } },
+        farm: { select: { id: true, name: true } },
         items: {
           include: {
             product: {
               select: { name: true, unit: true, farm: { select: { name: true } } },
             },
           },
+        },
+        pickupChanges: {
+          where: { status: 'PROPOSED' },
+          take: 1,
+          orderBy: { createdAt: 'desc' },
         },
       },
       orderBy: { createdAt: 'desc' },
@@ -102,10 +115,12 @@ export async function GET(request: Request) {
         id: order.id,
         status: order.status,
         subtotal: order.subtotal.toNumber(),
+        farmId: order.farm.id,
         farmName: order.farm.name,
         pickupStartsAt: order.pickupStartsAt,
         pickupEndsAt: order.pickupEndsAt,
         createdAt: order.createdAt,
+        activePickupChange: order.pickupChanges?.[0] ?? null,
         items: order.items.map((item) => ({
           id: item.id,
           productName: item.product.name,

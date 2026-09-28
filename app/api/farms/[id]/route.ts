@@ -17,6 +17,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         description: true,
         city: true,
         verified: true,
+        minOrder: true,
         createdAt: true,
       },
     })
@@ -25,7 +26,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: 'Farm not found' }, { status: 404 })
     }
 
-    const [ratingAgg, reviewCount, products] = await Promise.all([
+    const [ratingAgg, reviewCount, products, windows] = await Promise.all([
       prisma.review.aggregate({ where: { farmId }, _avg: { rating: true } }),
       prisma.review.count({ where: { farmId } }),
       prisma.product.findMany({
@@ -41,6 +42,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         },
         orderBy: [{ available: 'desc' }, { name: 'asc' }],
       }),
+      prisma.pickupWindow.findMany({
+        where: { farmId, active: true },
+        select: { id: true, dayOfWeek: true, startTime: true, endTime: true, active: true },
+        orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }],
+      }),
     ])
 
     return NextResponse.json({
@@ -53,6 +59,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         createdAt: farm.createdAt,
         rating: ratingAgg._avg.rating == null ? 0 : Math.round(ratingAgg._avg.rating * 10) / 10,
         total_reviews: reviewCount,
+        minOrder: farm.minOrder ? farm.minOrder.toNumber() : null,
+        pickupWindows: windows.map((w) => ({
+          id: w.id,
+          dayOfWeek: w.dayOfWeek,
+          startTime: w.startTime,
+          endTime: w.endTime,
+          active: w.active,
+        })),
       },
       products: products.map((p) => ({
         id: p.id,

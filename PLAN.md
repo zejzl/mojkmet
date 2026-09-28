@@ -163,9 +163,11 @@ Commits: `4967651` (scrub), `346ba0d` (reset flow), `8dc7b2b` (security fixes),
 - [ ] Confirm `api.mojkmet.eu` serves mock over HTTPS (LiteSpeed vhost) and run a real init→redirect→settle round trip
 
 ### Step 4 — Pickup coordination
-- [ ] Farmer dashboard: `PickupWindow` CRUD (recurring availability), min-order settings, location
-- [ ] Checkout: show only open slots for the farm, book start/end
-- [ ] `PickupChange` flow: farmer proposes new slot → consumer confirms → notify both
+- [x] Farmer dashboard: `PickupWindow` CRUD (recurring availability), min-order settings, location
+- [x] Checkout: show only open slots for the farm, book start/end
+- [x] `PickupChange` flow: farmer proposes new slot → consumer confirms → notify both
+- [x] Public farm page shows windows + min order
+- [x] Smoke-tested against dev server + Neon (24 checks): window CRUD, slots, min order, valid/outside-window orders, propose/accepted-reject/cancel changes, webhook → PAID
 
 ### Step 5 — Email templates
 - [ ] Order confirmation, payment confirmation, pickup booking/changes
