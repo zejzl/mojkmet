@@ -5,6 +5,7 @@ import { getSessionOrError } from '@/lib/auth-helpers'
 import { orderSchema, parseJson } from '@/lib/validation'
 import { getPaymentProvider, PaymentProviderError } from '@/lib/payments'
 import { isPickupPeriodOpen, PICKUP_DURATION_MINUTES } from '@/lib/pickup-slots'
+import { notifyOrderCreated, formatPickupLabel } from '@/lib/order-mail'
 
 export const dynamic = 'force-dynamic'
 
@@ -72,7 +73,7 @@ export async function POST(request: Request) {
     const [farm, windows] = await Promise.all([
       prisma.farm.findUnique({
         where: { id: farmId },
-        select: { minOrder: true },
+        select: { minOrder: true, name: true },
       }),
       prisma.pickupWindow.findMany({
         where: { farmId, active: true },
@@ -205,6 +206,31 @@ export async function POST(request: Request) {
       payoutAmount: order.payoutAmount.toNumber(),
       pickupStartsAt: order.pickupStartsAt,
       pickupEndsAt: order.pickupEndsAt,
+    }
+
+    // Obvestilo kupcu, da je naročilo oddano in čaka na plačilo (best-effort)
+    try {
+      const consumerEmail = session?.user?.email
+      if (consumerEmail) {
+        const baseUrl = process.env.NEXTAUTH_URL || 'https://mojkmet.eu'
+        await notifyOrderCreated({
+          to: consumerEmail,
+          orderShort: order.id.slice(-6).toUpperCase(),
+          farmName: farm?.name || 'Kmetija',
+          items: order.items.map((item) => ({
+            name: item.product.name,
+            quantity: item.quantity,
+            unit: item.product.unit,
+            price: item.price,
+          })),
+          subtotal,
+          pickupLabel: formatPickupLabel(order.pickupStartsAt),
+          payUrl: paymentUrl || `${baseUrl}/payment/result?order=${encodeURIComponent(order.id)}`,
+          dashboardUrl: `${baseUrl}/dashboard/orders`,
+        })
+      }
+    } catch (mailErr) {
+      console.error('Order confirmation email failed (order still created):', mailErr)
     }
 
     return NextResponse.json({

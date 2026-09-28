@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createHmac, timingSafeEqual } from 'crypto'
 import { prisma } from '@/lib/prisma'
+import { notifyPaymentConfirmed, notifyNewOrderToFarmer, formatPickupLabel } from '@/lib/order-mail'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -59,7 +60,19 @@ export async function POST(request: Request) {
 
     const order = await prisma.order.findUnique({
       where: { id: order_id, paymentRef: payment_ref },
-      select: { id: true, status: true, paymentStatus: true, subtotal: true, platformFee: true },
+      select: {
+        id: true,
+        status: true,
+        paymentStatus: true,
+        subtotal: true,
+        platformFee: true,
+        pickupStartsAt: true,
+        phone: true,
+        notes: true,
+        items: { include: { product: { select: { name: true, unit: true } } } },
+        farm: { select: { name: true, phone: true, user: { select: { email: true, name: true } } } },
+        user: { select: { email: true, name: true } },
+      },
     })
 
     if (!order) {
@@ -127,6 +140,55 @@ export async function POST(request: Request) {
         },
       })
     })
+
+    // Obvestila o potrjenem plačilu - kupcu in kmetu (best-effort, ne sme zrušiti webhooka)
+    const baseUrl = process.env.NEXTAUTH_URL || 'https://mojkmet.eu'
+    const orderShort = order.id.slice(-6).toUpperCase()
+    const items = order.items.map((item) => ({
+      name: item.product.name,
+      quantity: item.quantity,
+      unit: item.product.unit,
+      price: item.price,
+    }))
+    const total = order.subtotal.toNumber() + order.platformFee.toNumber()
+    const pickupLabel = formatPickupLabel(order.pickupStartsAt)
+
+    if (order.user.email) {
+      try {
+        await notifyPaymentConfirmed({
+          to: order.user.email,
+          orderShort,
+          farmName: order.farm.name,
+          items,
+          total,
+          paymentRef: payment_ref,
+          pickupLabel,
+          farmPhone: order.farm.phone,
+          dashboardUrl: `${baseUrl}/dashboard/orders`,
+        })
+      } catch (mailErr) {
+        console.error('Payment confirmation email (consumer) failed, order already PAID:', mailErr)
+      }
+    }
+
+    if (order.farm.user.email) {
+      try {
+        await notifyNewOrderToFarmer({
+          to: order.farm.user.email,
+          orderShort,
+          farmName: order.farm.name,
+          buyerLabel: order.user.name || order.user.email || 'Kupec',
+          items,
+          total,
+          pickupLabel,
+          buyerPhone: order.phone,
+          notes: order.notes,
+          dashboardUrl: `${baseUrl}/dashboard/farmer/orders`,
+        })
+      } catch (mailErr) {
+        console.error('Payment confirmation email (farmer) failed, order already PAID:', mailErr)
+      }
+    }
 
     return NextResponse.json({ ok: true })
   } catch (err) {

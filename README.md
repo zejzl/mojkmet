@@ -22,6 +22,10 @@ Local food marketplace: farms sell directly to shoppers, with payment and pickup
    PAYMENT_PROVIDER=mojkmet-mockpay
    PAYMENT_MOCK_BASE_URL=http://localhost:8787
    PAYMENT_MOCK_SECRET=<shared key from server config.php>
+   MOJKMET_EMAIL_SERVER=mail.mojkmet.eu      # SMTP server (transactional email)
+   MOJKMET_SMTP_PORT=465
+   MOJKMET_EMAIL_USER=info@mojkmet.eu
+   MOJKMET_EMAIL_PASS=<SMTP password>
    ```
 
 3. Regenerate the Prisma client (schema changes):
@@ -62,6 +66,15 @@ Unpaid orders are swept lazily on read paths (`lib/payments/reconcile.ts`): expi
 `AWAITING_PAYMENT` orders are cancelled and stock restored.
 
 Swapping mock → real Račun123 later is a config change inside `lib/payments/`, not a rewrite.
+
+## Email
+
+Transactional email goes out via SMTP (`lib/mailer.ts` — nodemailer, env `MOJKMET_EMAIL_*`,
+defaults `mail.mojkmet.eu` / 465 / `info@mojkmet.eu`). Templates live in `lib/order-mail.ts`
+(order confirmation, payment confirmation to shopper, new-order notice to farmer) and
+`lib/pickup-mail.ts` (pickup proposal / resolved), all rendered from the shared
+`lib/email-layout.ts`. Sends are **best-effort**: a failed send is logged and never fails the
+underlying order/webhook.
 
 ## Database
 
