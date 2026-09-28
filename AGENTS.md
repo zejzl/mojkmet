@@ -64,12 +64,15 @@ done vs. open — lives in `PLAN.md`; read that first for "why," this file is fo
 - **This repo runs on Windows** (PowerShell) but is a normal Node/Next.js project — no
   Windows-specific code should be needed; git is configured to normalize line endings
   (CRLF locally, LF in the repo) and this is expected/harmless.
+- **The server-side auth/CSP gate is `proxy.ts` at the repo root, not `middleware.ts`.**
+  Next.js 16 renamed the convention; a `middleware.ts` alongside `proxy.ts` is a **build
+  error** ("Both middleware file... and proxy file... are detected"), not a silent override —
+  don't add a `middleware.ts` file. `proxy.ts` already gates `/dashboard/*` (redirects to
+  `/login` when there's no session JWT) and sets `Content-Security-Policy` on all
+  non-API/non-asset routes; `app/dashboard/layout.tsx`'s `useSession()` redirect is a
+  client-side fallback on top of that, not the actual gate.
 
 ## Known gaps (see PLAN.md for the authoritative list)
 
-- `/dashboard/*` is only gated client-side (`app/dashboard/layout.tsx` redirects via
-  `useSession()`); there's no `middleware.ts` server-side gate yet. Every dashboard **API**
-  route is individually gated via `getSessionOrError()`, so data isn't exposed, but an
-  unauthenticated request can still briefly render the dashboard shell.
 - Cart state is `localStorage`-only (`lib/cart-context.tsx`), not synced server-side for
   logged-in users.

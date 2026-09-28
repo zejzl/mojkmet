@@ -135,11 +135,14 @@ Commits: `4967651` (scrub), `346ba0d` (reset flow), `8dc7b2b` (security fixes),
 - [x] Fix host-header injection in `app/api/auth/forgot-password/route.ts` (lines 32–35:
       attacker-controlled `Host` lands in the reset URL inside email HTML) +
       HTML-escape every interpolated value in email templates
-- [ ] **`middleware.ts` server-side gate for `/dashboard/*` + strict CSP headers — still
-      open.** `app/dashboard/layout.tsx` only redirects client-side via `useSession()`; an
-      unauthenticated request can still hit dashboard API routes directly (those *are*
-      individually gated via `getSessionOrError()`) and briefly render the shell before the
-      client redirect fires. Security headers exist (`next.config.ts`) but no CSP.
+- [x] Server-side gate for `/dashboard/*` + strict CSP headers — done as **`proxy.ts`**
+      (commit `60aa464`), not `middleware.ts`: Next.js 16 renamed the middleware convention
+      to `proxy.ts` (a `middleware.ts` + `proxy.ts` pair in the same repo is a build error).
+      `proxy.ts` checks the session JWT via `getToken()` and redirects to `/login` before the
+      page loads, and sets a `Content-Security-Policy` header on all non-API/non-asset
+      routes. `app/dashboard/layout.tsx`'s `useSession()` redirect is now just a client-side
+      fallback/UX nicety, not the actual gate. Verified live: unauthenticated `GET /dashboard`
+      → `307` to `/login?callbackUrl=%2Fdashboard`; CSP header present on `/`.
 - [x] Fix in-memory rate limiter (`lib/rate-limit.ts`): unbound `Map`, never pruned —
       prune + cap (Upstash in Step 7 if abuse appears)
 - [x] Fix `parseInt` stock validation in `api/dashboard/products` (NaN coercion) —
