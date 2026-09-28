@@ -9,6 +9,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      # `secrets` isn't a valid context in a step-level `if:` (GitHub rejects the whole
+      # workflow file for it, not just the step) — go through a job-level env var instead.
+      HAS_TEST_DATABASE_URL: ${{ secrets.TEST_DATABASE_URL != '' }}
 
     steps:
       - name: Checkout
@@ -32,7 +36,7 @@ jobs:
         run: npm run test:unit
 
       - name: Integration tests
-        if: ${{ secrets.TEST_DATABASE_URL != '' }}
+        if: env.HAS_TEST_DATABASE_URL == 'true'
         run: npm test
         env:
           TEST_DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
@@ -40,7 +44,11 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          # `next build` only needs DATABASE_URL to be *present* (lib/prisma.ts throws at
+          # module load if it's unset) — it never runs a real query during the build, so the
+          # test database's connection string is fine here and avoids a separate
+          # DATABASE_URL secret (which was never actually configured on this repo).
+          DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
           NEXTAUTH_URL: http://localhost:3000
           NEXTAUTH_SECRET: ci-build-only-secret
           PAYMENT_PROVIDER: mojkmet-mockpay
