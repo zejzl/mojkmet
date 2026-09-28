@@ -170,11 +170,18 @@ Commits: `4967651` (scrub), `346ba0d` (reset flow), `8dc7b2b` (security fixes),
 - [x] Smoke-tested against dev server + Neon (24 checks): window CRUD, slots, min order, valid/outside-window orders, propose/accepted-reject/cancel changes, webhook → PAID
 
 ### Step 5 — Email templates
-- [ ] Order confirmation, payment confirmation, pickup booking/changes
+- [x] Order confirmation (consumer, on order create / awaiting payment, with pay link)
+- [x] Payment confirmation (consumer, incl. pickup slot + farm contact)
+- [x] New order notification (farmer, incl. buyer, items, slot)
+- [x] Pickup booking/changes emails (proposal + resolved; Step 4, now on shared layout)
+- [x] Shared branded email layout (`lib/email-layout.ts`); all sends best-effort
+- [x] Smoke-tested against dev server + Neon + mail.mojkmet.eu (SMTP reached; test.local recipients 550 by design)
 
 ### Step 6 — Farmer onboarding + distance
-- [ ] Self-serve farm creation; **free first year**
-- [ ] `Farm.latitude/longitude`; Haversine distance shown to shoppers
+- [x] Self-serve farm creation (existing upsert + onboarding nudge wired); **free first year**: `Farm.plan` (`TRIAL`/`STANDARD`/`PREMIUM`) + `trialEndsAt` (1 year on self-serve create), shown in farmer dashboard; pricing copy aligned ("prvi let brezplačno")
+- [x] `Farm.latitude/longitude` exposed in shopper APIs (`/api/farms`, `/api/farms/[id]`, `/api/products…`); `lib/geo.ts` Haversine; `DistanceBadge` (browser geolocation, shared registry) on farms list, farm page, featured farms, product cards; `Permissions-Policy: geolocation=(self)`
+- [x] Fixes: empty lat/long `''` no longer coerced to `0` (`optionalCoord`); FeaturedFarms `verified`→`is_verified` bug; dead CTA on `/farms` → link to `/for-farmers`
+- [x] Smoke-tested (12 checks): onboarding null → create (TRIAL + 1yr, null coords) → update coords → shopper APIs expose coords → products carry farm coords → Haversine sanity (LJ→MB 103,6 km)
 
 ### Step 7 — Hardening
 - [ ] Upstash Redis rate limiter (scale-out), Sentry monitoring, GitHub Action CI (lint+build)

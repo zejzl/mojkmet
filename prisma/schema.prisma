@@ -43,6 +43,12 @@ enum PickupChangeStatus {
   CANCELLED
 }
 
+enum FarmPlan {
+  TRIAL
+  STANDARD
+  PREMIUM
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -118,6 +124,8 @@ model Farm {
   image       String?
   minOrder    Decimal? @db.Decimal(10, 2)
   verified    Boolean  @default(false)
+  plan        FarmPlan @default(TRIAL)
+  trialEndsAt DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

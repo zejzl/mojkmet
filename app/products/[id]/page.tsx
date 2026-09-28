@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import DistanceBadge from '@/components/DistanceBadge'
 
 interface Product {
   id: string
@@ -17,6 +18,8 @@ interface Product {
   categoryId: string
   farm_name: string
   farm_city: string
+  farm_latitude?: number | null
+  farm_longitude?: number | null
   farm_description: string
   farm_verified: boolean
   farm_id: string
@@ -217,7 +220,13 @@ export default function ProductDetailPage() {
                         ✓ Verificirana
                       </span>
                     )}
-                    <p className="text-gray-600 mt-1">📍 {product.farm_city}</p>
+                    <p className="text-gray-600 mt-1">
+                      📍 {product.farm_city}{' '}
+                      <DistanceBadge
+                        latitude={product.farm_latitude}
+                        longitude={product.farm_longitude}
+                      />
+                    </p>
                   </div>
                   {product.farm_total_reviews > 0 && (
                     <div className="text-right">

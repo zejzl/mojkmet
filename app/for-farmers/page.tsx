@@ -66,7 +66,7 @@ export default function ForFarmersPage() {
     {
       name: 'Začetni paket',
       price: 'Brezplačno',
-      period: 'prvi 3 meseci',
+      period: 'prvi let',
       features: [
         'Do 20 izdelkov',
         '5% provizija na prodajo',

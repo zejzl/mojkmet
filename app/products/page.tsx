@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { useCart } from '@/lib/cart-context'
+import DistanceBadge from '@/components/DistanceBadge'
 
 interface Product {
   id: string
@@ -17,6 +18,8 @@ interface Product {
   image: string | null
   farm_name: string
   farm_city: string
+  farm_latitude?: number | null
+  farm_longitude?: number | null
   farm_verified: boolean
   farm_id: string
   category_name: string
@@ -307,6 +310,10 @@ function ProductsContent() {
                       )}
                       <span className="mx-1">-</span>
                       <span>{product.farm_city}</span>
+                      <DistanceBadge
+                        latitude={product.farm_latitude}
+                        longitude={product.farm_longitude}
+                      />
                     </div>
                     <div className="flex items-center justify-between">
                       <span

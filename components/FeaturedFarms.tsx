@@ -2,13 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import DistanceBadge from '@/components/DistanceBadge'
 
 interface Farm {
   id: string
   name: string
   description: string | null
   city: string
-  verified: boolean
+  latitude?: number | null
+  longitude?: number | null
+  is_verified: boolean
 }
 
 export default function FeaturedFarms() {
@@ -30,7 +33,7 @@ export default function FeaturedFarms() {
               name: 'Kmalu',
               description: 'Kmalu bomo dodali prve kmetije',
               city: 'Slovenija',
-              verified: false,
+              is_verified: false,
             },
           ])
         }
@@ -93,7 +96,7 @@ export default function FeaturedFarms() {
                 <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-6xl">
                   🏡
                 </div>
-                {farm.verified && (
+                {farm.is_verified && (
                   <div className="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path
@@ -134,13 +137,14 @@ export default function FeaturedFarms() {
                     />
                   </svg>
                   {farm.city}
+                  <DistanceBadge latitude={farm.latitude} longitude={farm.longitude} />
                 </div>
 
                 {farm.description && (
                   <p className="text-sm text-gray-600 mb-4 line-clamp-2">{farm.description}</p>
                 )}
 
-                {farm.verified ? (
+                {farm.is_verified ? (
                   <div className="text-sm text-green-600 font-semibold">Verificirana kmetija ✓</div>
                 ) : (
                   <div className="text-sm text-amber-600 font-semibold">Kmalu dostopna</div>

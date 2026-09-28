@@ -12,7 +12,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const product = await prisma.product.findUnique({
       where: { id: productId },
       include: {
-        farm: { select: { id: true, name: true, city: true, description: true, verified: true } },
+        farm: { select: { id: true, name: true, city: true, latitude: true, longitude: true, description: true, verified: true } },
         category: { select: { name: true, slug: true, icon: true } },
       },
     })
@@ -61,6 +61,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         farm_id: product.farm.id,
         farm_name: product.farm.name,
         farm_city: product.farm.city,
+        farm_latitude: product.farm.latitude,
+        farm_longitude: product.farm.longitude,
         farm_description: product.farm.description,
         farm_verified: product.farm.verified,
         category_name: product.category.name,

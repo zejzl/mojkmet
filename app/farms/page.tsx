@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import DistanceBadge from '@/components/DistanceBadge'
 
 interface Farm {
   id: string
@@ -8,6 +10,8 @@ interface Farm {
   slug: string
   description: string
   city: string
+  latitude?: number | null
+  longitude?: number | null
   rating: number
   total_reviews: number
   is_verified: boolean
@@ -85,7 +89,10 @@ export default function FarmsPage() {
                         <span className="font-semibold">{Number(farm.rating).toFixed(1)}</span>
                       </div>
                     </div>
-                    <p className="text-gray-600 mb-2">📍 {farm.city}</p>
+                    <p className="text-gray-600 mb-2">
+                      📍 {farm.city}{' '}
+                      <DistanceBadge latitude={farm.latitude} longitude={farm.longitude} />
+                    </p>
                     <p className="text-gray-700 text-sm mb-4 line-clamp-2">{farm.description}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-500">
@@ -117,9 +124,12 @@ export default function FarmsPage() {
             <p className="text-lg text-gray-600 mb-8">
               Pridružite se naši platformi in dosezite več strank neposredno
             </p>
-            <button className="bg-green-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-green-700 transition">
+            <Link
+              href="/for-farmers"
+              className="inline-block bg-green-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-green-700 transition"
+            >
               Registrirajte svojo kmetijo
-            </button>
+            </Link>
           </div>
         </div>
       </section>

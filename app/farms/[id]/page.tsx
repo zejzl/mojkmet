@@ -5,12 +5,15 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useCart } from '@/lib/cart-context'
 import Toast from '@/components/Toast'
+import DistanceBadge from '@/components/DistanceBadge'
 
 interface Farm {
   id: string
   name: string
   description: string
   city: string
+  latitude?: number | null
+  longitude?: number | null
   rating: number
   total_reviews: number
   is_verified: boolean
@@ -160,6 +163,7 @@ export default function FarmDetailPage() {
                 <div className="flex items-center text-gray-700 mb-6">
                   <span className="mr-2">📍</span>
                   <span className="text-lg">{farm.city}</span>
+                  <DistanceBadge latitude={farm.latitude} longitude={farm.longitude} />
                 </div>
 
                 {farm.description && (

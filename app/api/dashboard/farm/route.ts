@@ -61,10 +61,13 @@ export async function PUT(request: Request) {
         data,
       })
     } else {
+      // Novoustvarjena kmetija začne na TRIAL načrtu: 1. leto brezplačno.
       farm = await prisma.farm.create({
         data: {
           userId: session!.user!.id,
           ...data,
+          plan: 'TRIAL',
+          trialEndsAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
         },
       })
     }

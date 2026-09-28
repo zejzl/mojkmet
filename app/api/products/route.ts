@@ -7,7 +7,7 @@ export const maxDuration = 10
 
 async function getProducts(category: string | null, search: string | null) {
   const include = {
-    farm: { select: { name: true, city: true, verified: true } as const },
+    farm: { select: { name: true, city: true, latitude: true, longitude: true, verified: true } as const },
     category: { select: { name: true, slug: true, icon: true } as const },
   }
 
@@ -71,6 +71,8 @@ export async function GET(request: NextRequest) {
         farm_id: p.farmId,
         farm_name: p.farm.name,
         farm_city: p.farm.city,
+        farm_latitude: p.farm.latitude,
+        farm_longitude: p.farm.longitude,
         farm_verified: p.farm.verified,
         category_name: p.category.name,
         category_slug: p.category.slug,

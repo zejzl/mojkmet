@@ -13,6 +13,7 @@ export default function FarmPage() {
   const [saving, setSaving] = useState(false)
   const [isNew, setIsNew] = useState(false)
   const [message, setMessage] = useState({ type: '', text: '' })
+  const [plan, setPlan] = useState<{ plan: string; trialEndsAt: string | null } | null>(null)
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -36,6 +37,10 @@ export default function FarmPage() {
       .then((r) => r.json())
       .then((data) => {
         if (data.farm) {
+          setPlan({
+            plan: data.farm.plan || 'TRIAL',
+            trialEndsAt: data.farm.trialEndsAt || null,
+          })
           setFormData({
             name: data.farm.name || '',
             description: data.farm.description || '',
@@ -104,6 +109,18 @@ export default function FarmPage() {
       />
 
       <div className="max-w-2xl">
+        {plan && plan.plan === 'TRIAL' && plan.trialEndsAt && (
+          <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-6 text-sm text-green-900">
+            <span className="font-semibold">Brezplačni načrt.</span>{' '}
+            {new Date(plan.trialEndsAt).getTime() > Date.now()
+              ? `Vaša kmetija je brezplačna do ${new Date(plan.trialEndsAt).toLocaleDateString(
+                  'sl-SI',
+                  { day: 'numeric', month: 'long', year: 'numeric' }
+                )}.`
+              : 'Brezplačno obdobje se je izteklo.'}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-md p-6 space-y-6">
           {message.text && (
             <div

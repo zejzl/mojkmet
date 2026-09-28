@@ -67,6 +67,16 @@ export const orderStatusSchema = z.object({
   ]),
 })
 
+export const optionalCoord = (min: number, max: number) =>
+  z.preprocess(
+    (v) => {
+      if (v === '' || v === null || v === undefined) return undefined
+      const n = Number(v)
+      return Number.isFinite(n) ? n : v
+    },
+    z.number().min(min).max(max).optional()
+  )
+
 export const farmSchema = z.object({
   name: z.string().trim().min(1).max(120),
   description: z.string().max(4000).nullable().optional(),
@@ -76,8 +86,8 @@ export const farmSchema = z.object({
   phone: z.string().trim().max(30).optional(),
   website: z.union([z.string().trim().url().max(200), z.literal('')]).nullable().optional(),
   minOrder: z.coerce.number().min(0).max(100000).optional(),
-  latitude: z.coerce.number().min(-90).max(90).optional(),
-  longitude: z.coerce.number().min(-180).max(180).optional(),
+  latitude: optionalCoord(-90, 90),
+  longitude: optionalCoord(-180, 180),
 })
 
 const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/
