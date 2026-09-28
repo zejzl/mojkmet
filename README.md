@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# mojkmet.eu
+
+Local food marketplace: farms sell directly to shoppers, with payment and pickup coordination.
+
+- **Stack:** Next.js (App Router) + TypeScript, Prisma + Neon (PostgreSQL), NextAuth (credentials), Zod
+- **Deployment:** Vercel (app) + cPanel box `api.mojkmet.eu` (mock payment provider)
 
 ## Getting Started
 
-First, run the development server:
+1. Install dependencies:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+   ```bash
+   npm install
+   ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Create `.env.local` (gitignored) with at minimum:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+   ```
+   DATABASE_URL=postgresql://...            # Neon pooler connection string
+   NEXTAUTH_SECRET=<openssl rand -base64 32>
+   NEXTAUTH_URL=http://localhost:3000
+   PAYMENT_PROVIDER=mojkmet-mockpay
+   PAYMENT_MOCK_BASE_URL=http://localhost:8787
+   PAYMENT_MOCK_SECRET=<shared key from server config.php>
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. Regenerate the Prisma client (schema changes):
 
-## Learn More
+   ```bash
+   npx prisma generate
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+4. Payments need the local mock provider. In a second terminal:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   ```bash
+   node scripts/dev-payment-mock.mjs
+   # Mock payment provider on http://localhost:8787
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+5. Run the dev server:
 
-## Deploy on Vercel
+   ```bash
+   npm run dev
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+   Open [http://localhost:3000](http://localhost:3000).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Payments
+
+The app talks to a payment provider through the interface in `lib/payments/`. Currently the
+implementation is a **mock provider** (`lib/payments/mock.ts`) running against the deployed
+PHP endpoint on `api.mojkmet.eu`, or the local Node mock in `scripts/dev-payment-mock.mjs`
+for development.
+
+Flow: `POST /api/orders` initiates a payment and returns a `paymentUrl` → the checkout page
+redirects the customer to the hosted `/pay/<ref>` page → on success the provider calls
+`POST /api/webhooks/payments` (signed `X-Payment-Signature: HMAC-SHA256(body, secret)`,
+provider in `X-Payment-Provider`) → the order moves to `PAID` (idempotent via `PaymentEvent`,
+unique on `(provider, payment_ref)`). The result page is `/payment/result?order=<id>&ref=<ref>`.
+
+Unpaid orders are swept lazily on read paths (`lib/payments/reconcile.ts`): expired
+`AWAITING_PAYMENT` orders are cancelled and stock restored.
+
+Swapping mock → real Račun123 later is a config change inside `lib/payments/`, not a rewrite.
+
+## Database
+
+- Schema: `prisma/schema.prisma`
+- Migrations are applied with `prisma db execute --file <migration>/migration.sql`
+  (then `prisma migrate resolve --applied <folder>`), because the Neon setup has no shadow DB.
+
+## Docs
+
+- `PLAN.md` — phase-by-phase rollout plan and status
+- `VERCEL_ENV_SETUP.md` — required environment variables for deployment

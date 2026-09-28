@@ -1,6 +1,6 @@
 # ⚠️ Vercel Environment Variables - REQUIRED
 
-**For mojkmet.eu to work fully, you need these 3 environment variables:**
+**For mojkmet.eu to work fully, you need these 6 environment variables:**
 
 ## 1. Go to Vercel Dashboard
 https://vercel.com/dashboard
@@ -71,9 +71,66 @@ https://mojkmet.eu
 
 ---
 
+### D. PAYMENT_PROVIDER (Payment provider name)
+
+**Name:** `PAYMENT_PROVIDER`
+
+**Value:**
+```
+mojkmet-mockpay
+```
+
+**Environments:** All (Production, Preview, Development)
+
+**Purpose:** Named provider the app speaks to. Must match the value the provider puts in the
+`X-Payment-Provider` header / `provider` field of outgoing webhooks (both the local dev mock
+and the deployed `api.mojkmet.eu` mock send `mojkmet-mockpay`).
+
+---
+
+### E. PAYMENT_MOCK_BASE_URL (Mock provider endpoint)
+
+**Name:** `PAYMENT_MOCK_BASE_URL`
+
+**Value for Production:**
+```
+https://api.mojkmet.eu
+```
+
+**Value for Preview/Development:**
+```
+https://api.mojkmet.eu
+```
+
+**Environments:** All (Production, Preview, Development)
+
+**Purpose:** Base URL for the mock payment provider. For local development use
+`http://localhost:8787` with `scripts/dev-payment-mock.mjs` running (see README).
+
+---
+
+### F. PAYMENT_MOCK_SECRET (Shared webhook signing key)
+
+**Name:** `PAYMENT_MOCK_SECRET`
+
+**Value:**
+```
+<shared API key from /home/mojkmet/api.mojkmet.eu/config.php on the cPanel server>
+```
+
+**Environments:** All (Production, Preview, Development)
+
+**Purpose:** Authenticates `POST /v1/payments/*` calls (X-API-Key header) and signs webhook
+callbacks (`X-Payment-Signature: HMAC-SHA256(body, secret)`). The same value must exist on
+both the server's `config.php` and here — a mismatch makes the webhook route return 401.
+
+**⚠️ Security Note:** Never put this in a committed file. `.env.local` is gitignored.
+
+---
+
 ## 5. Redeploy
 
-After adding all 3 environment variables, go to **Deployments** and click **"Redeploy"** on the latest deployment.
+After adding all 6 environment variables, go to **Deployments** and click **"Redeploy"** on the latest deployment.
 
 ---
 
@@ -85,6 +142,9 @@ After deployment with all env vars:
 - [ ] **Register:** Visit https://mojkmet.eu/register → Create test account → Should redirect to homepage
 - [ ] **Login:** Visit https://mojkmet.eu/login → Login with test account → Should work
 - [ ] **Homepage:** Visit https://mojkmet.eu → Should show "Kmetija Vidmar" in farms section
+- [ ] **Payments:** Run a checkout → should redirect to the hosted `/pay/<ref>` page on
+      `api.mojkmet.eu` → settle → order shows as PAID (blocked until the LiteSpeed vhost serves
+      `api.mojkmet.eu` — see PLAN.md "Server infra & mock provider")
 
 ---
 
@@ -102,6 +162,13 @@ After deployment with all env vars:
 - ❌ Login redirects fail
 - ❌ OAuth callbacks break (if added later)
 
+**Missing PAYMENT_PROVIDER / PAYMENT_MOCK_BASE_URL:**
+- ❌ Order checkout fails to initiate payment (`order_not_found` / provider error path)
+
+**Missing / mismatched PAYMENT_MOCK_SECRET:**
+- ❌ Webhook route rejects callbacks with 401 `invalid_signature` → orders stay `AWAITING_PAYMENT`
+
 ---
 
-**Status:** ✅ All 3 variables have been added to Vercel (Feb 7, 2026)
+**Status:** ⏳ First 3 variables (DATABASE_URL, NEXTAUTH_SECRET, NEXTAUTH_URL) are on Vercel.
+The 3 `PAYMENT_*` variables still need to be added before the payment go-live (Step 3 PHASE-2 rollout).
