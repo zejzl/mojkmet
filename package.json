@@ -9,7 +9,11 @@
     "lint": "eslint",
     "format": "prettier --write .",
     "seed": "tsx prisma/seed.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "test": "vitest run",
+    "test:unit": "vitest run test/unit",
+    "test:watch": "vitest",
+    "test:db:migrate": "prisma migrate deploy --config prisma.test.config.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -45,6 +49,8 @@
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite": "^8.3.1",
+    "vitest": "^5.0.2"
   }
 }

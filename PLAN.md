@@ -251,7 +251,19 @@ Commits: `4967651` (scrub), `346ba0d` (reset flow), `8dc7b2b` (security fixes),
 - [ ] Migrate NextAuth v4 → Auth.js v5 (v4 maintenance mode)
 - [ ] Admin tooling (farm verification, moderation) — ADMIN role exists but unused
 - [ ] Profile email change requires re-verification
-- [ ] Tests: smoke tests for auth/order APIs minimum
+- [x] **Tests.** Vitest, two tiers (see README "Tests"): 63 unit tests (`test/unit/`) for
+      pure `lib/` logic (validation, geo, pickup-slots, image-upload, rate-limit); 19
+      integration tests (`test/integration/`) calling route handlers directly against a
+      dedicated test database (`neon-pink-book`/`ep-little-dust-ag4wbjxz` — a separate Neon
+      project from production, migrated fresh) — register, credentials `authorize()`
+      (extracted to `lib/auth.ts`'s `authorizeCredentials` for testability — NextAuth wraps
+      whatever's passed to `CredentialsProvider`, so the original inline version wasn't
+      reachable from a test), orders (stock/farm-grouping/min-order/pickup-time/payment-
+      failure-rollback), cart, reviews. `test/integration/setup.ts` refuses to run without
+      `TEST_DATABASE_URL` and refuses if it ever equals `DATABASE_URL`. CI runs unit tests
+      unconditionally; integration tests only if a `TEST_DATABASE_URL` secret is set (not yet
+      added to the GitHub repo — do that to turn CI integration tests on).
+      `test:unit`/`test`/`test:db:migrate` in `package.json`.
 - [ ] Delete retired `ep-divine-butterfly` Neon project entirely (creds already removed)
 
 ---

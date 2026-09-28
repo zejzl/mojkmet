@@ -125,6 +125,23 @@ that reports an error also reports it to Sentry. `SENTRY_ORG`/`SENTRY_PROJECT`/
 - Migrations are applied with `prisma db execute --file <migration>/migration.sql`
   (then `prisma migrate resolve --applied <folder>`), because the Neon setup has no shadow DB.
 
+## Tests
+
+Vitest, in two tiers (`vitest.config.mts`):
+
+- **Unit** (`test/unit/`) — pure `lib/` functions (Zod schemas, geo, pickup-slot timezone math,
+  image validation, rate limiter). No DB, no network. `npm run test:unit`.
+- **Integration** (`test/integration/`) — API route handlers called directly (no `next dev`
+  needed), auth faked via `vi.mock('next-auth')`, real Prisma queries against a **dedicated
+  test database** — never `DATABASE_URL`. Requires `TEST_DATABASE_URL` in `.env.test`
+  (gitignored); `test/integration/setup.ts` refuses to run if that's unset, or if it equals
+  `DATABASE_URL`. First-time setup / after adding a migration: `npm run test:db:migrate`.
+  `npm test` runs both tiers; file parallelism is off (`fileParallelism: false`) since tests
+  share one real database via prefix-based cleanup, not per-test transactions.
+
+CI runs unit tests on every push; integration tests only run if a `TEST_DATABASE_URL` repo
+secret is configured (`.github/workflows/ci.yml`).
+
 ## Docs
 
 - `PLAN.md` — phase-by-phase rollout plan and status (the living doc — check here first)
