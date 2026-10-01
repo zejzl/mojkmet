@@ -221,6 +221,50 @@ Commits: `4967651` (scrub), `346ba0d` (reset flow), `8dc7b2b` (security fixes),
 
 ---
 
+## Session Log — October 1–2, 2026 (UI polish, SEO, server-side catalog)
+
+All merged to `main` (commits `6197178`, `e4f6f04`, `c4066fd`, `ba484db`, `7046428`, `2c70dcb`,
+`d4cc33d`), CI green on each. Visual design was deliberately **kept as-is** (green/Inter): a full
+redesign was tried and rejected, so the work below is polish, correctness and SEO only.
+
+- **Accessibility/polish** (Header, Hero, Footer, Newsletter, FeaturedFarms, Categories,
+  HowItWorks, TrustBadges): visible keyboard focus, `prefers-reduced-motion`, labelled
+  inputs/buttons, live-region status/alert messages, darker small green/amber text for contrast.
+  Mobile menu now closes after tapping a link; Inter loads `latin-ext` (č/š/ž were falling back
+  to a system font); header greeting shows the first name only; Slovenian plural for the cart
+  label (`lib/plural-sl.ts`).
+- **SEO**: `lib/site.ts` (`pageMetadata()`, site URL), title template + Open Graph/Twitter,
+  per-page titles/descriptions, `generateMetadata` for farm/product pages, dynamic sitemap (all
+  farms + products, hourly), `robots.ts`, `X-Robots-Tag: noindex` for private pages, JSON-LD
+  (Organization/WebSite, LocalBusiness, Product), generated share image. See README "SEO".
+- **Shop-page bugs fixed**: single-farm checkout never loaded pickup slots (effect keyed on a
+  farm id only the multi-farm radio set); order submit cleared the *whole* cart instead of just
+  the ordered farm's items (`removeItems()`); product-detail "V košarico" had no handler; login
+  ignored `?redirect=` (now `safeRedirectPath()`); product cards didn't link to the detail page.
+- **Cart sync (`lib/cart-context.tsx`)**: error replies no longer blank the cart, replies are
+  applied in request order, and signing out resets to the guest cart.
+- **Server-side catalog**: `/farms`, `/farms/[id]`, `/products`, `/products/[id]` load on the
+  server through `lib/catalog.ts` (shared with the `/api/farms` and `/api/products` routes);
+  unknown ids are real 404s (`app/not-found.tsx`); images are served by
+  `/api/{farms,products}/[id]/image` (never embedded in HTML/JSON). Dev-only CSP `unsafe-eval`
+  added in `proxy.ts` to remove the dev overlay's "1 Issue" badge (production unchanged).
+- **CI**: `actions/checkout` and `actions/setup-node` v4 → v7, runner pinned to
+  `ubuntu-24.04` (clears the Node 20 and Ubuntu 26 migration warnings).
+- **`/deals` hidden**: it showed -10…-30% offers and discounted bundles with March 2026 dates,
+  but the app has no discount/coupon logic (cart/checkout always charge list price; bundle
+  buttons just link to `/products`). Unlinked from the Footer and left `noindex`; the page
+  file stays with a comment. Re-link only once discounts are real.
+- **Browser verification** (Claude in Chrome, against the local dev server): guest cart →
+  checkout → login redirect → pickup slots → pay button enable, product-page add to cart,
+  filters/search without page reload, 404 page, plural label. **Caveat: the local
+  `DATABASE_URL` is the production endpoint** (see Operational notes), so this touched
+  production data: it logged in as the two seeded accounts (`prisma/seed.ts`), created and then
+  deleted one Monday pickup window for Kmetija Vidmar (visible publicly for a few minutes), and
+  merged then emptied those two accounts' server carts (the consumer's cart was emptied without
+  first checking whether it already held anything). No orders were created and nothing else was
+  written. Not verified in a browser: placing an order from one of two farms (`removeItems`),
+  the image route with a real uploaded image, and failed/out-of-order cart replies.
+
 ## Next Steps (Prioritized) — beyond Phase 2
 
 - [ ] Payments go-live: **on hold** — needs a registered company before Račun123 (or any
@@ -241,7 +285,7 @@ Commits: `4967651` (scrub), `346ba0d` (reset flow), `8dc7b2b` (security fixes),
       `app/api/farms/[id]/reviews/route.ts`: public GET, POST gated to verified purchase
       (`Order.status` in `COLLECTED`/`COMPLETED` for that user+farm) and blocks `FARMER` role,
       upserts so a resubmit edits rather than duplicates. New `components/StarRating.tsx`
-      (read-only + interactive). UI: read-only review list on `app/farms/[id]/page.tsx`;
+      (read-only + interactive). UI: read-only review list on the farm detail page (now `app/farms/[id]/FarmDetail.tsx`, fed by a server `page.tsx`);
       submit/edit form on `app/dashboard/orders/page.tsx` for COLLECTED/COMPLETED orders
       (same inline-expand pattern as the existing pickup-change proposal UI). Existing
       rating aggregation (`prisma.review.groupBy`/`aggregate` in the farms/products routes)
@@ -251,8 +295,8 @@ Commits: `4967651` (scrub), `346ba0d` (reset flow), `8dc7b2b` (security fixes),
 - [ ] Migrate NextAuth v4 → Auth.js v5 (v4 maintenance mode)
 - [ ] Admin tooling (farm verification, moderation) — ADMIN role exists but unused
 - [ ] Profile email change requires re-verification
-- [x] **Tests.** Vitest, two tiers (see README "Tests"): 63 unit tests (`test/unit/`) for
-      pure `lib/` logic (validation, geo, pickup-slots, image-upload, rate-limit); 19
+- [x] **Tests.** Vitest, two tiers (see README "Tests"): 63 unit tests (75 as of 2026-10-02; 94 incl. integration) (`test/unit/`) for
+      pure `lib/` logic (validation, geo, pickup-slots, image-upload, rate-limit, plus later safe-redirect, plural-sl, image-response); 19
       integration tests (`test/integration/`) calling route handlers directly against a
       dedicated test database (`neon-pink-book`/`ep-little-dust-ag4wbjxz` — a separate Neon
       project from production, migrated fresh) — register, credentials `authorize()`
@@ -287,16 +331,40 @@ Commits: `4967651` (scrub), `346ba0d` (reset flow), `8dc7b2b` (security fixes),
       check it. Not urgent (email ownership isn't security-critical the way password reset
       is), but currently decorative.
 - [ ] No pagination on `/api/products` or `/api/farms` — both fetch everything unbounded.
-      Fine at today's scale (~10 farms), will degrade once real farmers sign up.
+      Fine at today's scale (~10 farms), will degrade once real farmers sign up. **More
+      pressing since 2026-10-02:** `/farms` and `/products` now render the full list on the
+      server on every request (`lib/catalog.ts`), so an unbounded list also means unbounded
+      HTML and DB work per page view.
 - [ ] No rate limiting on `/api/orders` — unlike auth/contact routes, a logged-in user could
       spam order creation, each one putting a 15-minute stock hold on real inventory. Low
       likelihood of abuse at current userbase size, but it's the one write-heavy route with
       zero rate limiting.
 - [ ] Image storage is a `data:` URL blob directly in Postgres (see Step 7) — deliberate
       tradeoff for now, but a scaling concern once farmers upload more/larger images; a real
-      blob store (Vercel Blob, R2) is the eventual fix.
+      blob store (Vercel Blob, R2) is the eventual fix. (Delivery is no longer the problem:
+      since 2026-10-02 pages and JSON never embed the `data:` URL; they use
+      `/api/{farms,products}/<id>/image?v=…`, cached immutably. Storage in Postgres and the
+      per-request DB read behind that route are what remain.)
 - [ ] No account deletion / data export flow — EU user data, worth having on the GDPR radar
       even at tiny scale.
+- [ ] **Local dev uses the production database.** `.env`/`.env.local` `DATABASE_URL` is the
+      `ep-royal-recipe-ag8s29y6` endpoint that these notes identify as production (one Neon
+      project, one branch). Create a Neon branch for development and point local `.env` at it.
+      (Note PLAN.md also calls `ep-little-dust-ag4wbjxz` the test DB in one place and
+      production's display name in another; the naming drift described below is why to verify.)
+- [ ] **Seed/demo data and accounts are in that database.** The seeded farms (10), products
+      (39) and two accounts from `prisma/seed.ts` (a consumer and a farmer) exist there, and
+      those accounts use the seed script's shared, known password. Before launch: remove the
+      demo data or replace it with real farms, and delete or re-password the seed accounts.
+      Until then the new sitemap publishes every demo farm/product URL to search engines.
+- [ ] Copy still describes home delivery in places (`/how-it-works`, `/shipping`: delivery,
+      shipping costs, "24-48 hours") while v1 is pickup-only with prepayment.
+- [ ] Real discounts/coupons (schema + cart/checkout) so `/deals` can come back; today it is
+      hidden and its content is placeholder.
+- [ ] Browser/e2e coverage: there is none. Things only verified by hand so far are listed in the
+      2026-10-02 session log (multi-farm `removeItems`, real image route, failed cart replies).
+- [ ] Minor: farm/product `layout.tsx` JSON-LD re-queries data the page already loaded
+      (`lib/seo-data.ts` vs `lib/catalog.ts`); fine at this scale, could share one cached fetch.
 
 ---
 
@@ -310,7 +378,8 @@ Commits: `4967651` (scrub), `346ba0d` (reset flow), `8dc7b2b` (security fixes),
 - **Always `git pull` before starting work** — external tools (openclaw etc.) can push
   to GitHub directly, causing drift
 - Vercel build uses `.npmrc` `legacy-peer-deps=true` (nodemailer 9 vs next-auth peer range)
-- Local dev: `npm run dev`; production parity check: `npm run build`
+- Local dev: `npm run dev`; production parity check: `npm run build`. **`npm run dev` currently
+  runs against the production database** (see Next Steps) — treat every write as production.
 - **Neon DB naming has drifted from reality before — always verify `DATABASE_URL` directly,
   don't trust cached names.** The production Neon project's *display name* has stayed
   `ep-little-dust-ag4wbjxz` since creation, but its actual compute endpoint hostname was

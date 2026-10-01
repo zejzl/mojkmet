@@ -203,6 +203,16 @@ resolve to real source. Not needed for runtime error capture to work.
 
 **Environments:** All (Production, Preview, Development)
 
+## Optional: Site URL (SEO)
+
+**Name:** `NEXT_PUBLIC_SITE_URL`
+
+**Purpose:** The canonical origin used for sitemap URLs, canonical links, Open Graph tags and
+structured data (`lib/site.ts`). Defaults to `https://mojkmet.eu`, so it only needs setting if
+the production domain ever changes (or to point a preview deployment's metadata at itself).
+
+**Environments:** Production (optional elsewhere)
+
 ---
 
 **Status:** ⏳ First 3 variables (DATABASE_URL, NEXTAUTH_SECRET, NEXTAUTH_URL) are on Vercel.

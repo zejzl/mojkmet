@@ -17,7 +17,10 @@ done vs. open — lives in `PLAN.md`; read that first for "why," this file is fo
 
 ## Commands
 
-- `npm run dev` — dev server (Turbopack)
+- `npm run dev` — dev server (Turbopack). **Heads-up: the local `DATABASE_URL` points at the
+  production Neon database** (see PLAN.md "Operational notes"), so anything you create, change
+  or delete while testing in the dev server is real production data. Prefer read-only checks,
+  don't run order/payment flows against it, and undo anything you write.
 - `npm run build` — production build (also runs typecheck)
 - `npx tsc --noEmit` — typecheck only
 - `npm run lint` — ESLint
@@ -68,6 +71,12 @@ done vs. open — lives in `PLAN.md`; read that first for "why," this file is fo
   (`FarmDetail`, `ProductsClient`, `ProductDetail`). Unknown IDs call `notFound()` for a real
   404. Don't reintroduce `useEffect` + `fetch` for the first load of these pages: crawlers
   wouldn't see the content.
+- **Page metadata goes through `pageMetadata()` in `lib/site.ts`**, not hand-built `openGraph`
+  (Next shallow-merges metadata, so a page-level `openGraph` drops the site name, locale and
+  share image). Next also resets the title template after every segment: a layout that has
+  child routes with their own titles (e.g. `/farms` → `/farms/[id]`) needs `passTemplate: true`.
+  Private/transactional routes are listed in `next.config.ts` (`X-Robots-Tag: noindex`) and
+  `app/robots.ts`; `/deals` is hidden (unlinked, noindex) until discounts actually exist.
 - **UI copy and user-facing error strings are Slovenian**; code comments are mixed — Slovenian
   for business-logic rationale, English for technical/framework notes. Follow whichever
   convention the surrounding code already uses in a given file.
