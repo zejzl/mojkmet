@@ -42,11 +42,6 @@ export default function Footer() {
                   Kategorije
                 </Link>
               </li>
-              <li>
-                <Link href="/deals" className="hover:text-white transition">
-                  Posebne ponudbe
-                </Link>
-              </li>
             </ul>
           </div>
 

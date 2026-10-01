@@ -1,5 +1,8 @@
 import Link from 'next/link'
 
+// HIDDEN: not linked from anywhere and sent noindex (see next.config.ts). The offers below are
+// placeholders: the app has no discount/coupon support, so cart and checkout always charge the
+// normal price. Don't re-link this page until discounts are real, and update the dates then.
 export default function DealsPage() {
   const seasonalDeals = [
     {
