@@ -1,4 +1,13 @@
+import { pageMetadata } from '@/lib/site'
+
 import Link from 'next/link'
+
+export const metadata = pageMetadata({
+  title: 'Kategorije izdelkov',
+  description:
+    'Brskajte po kategorijah: mlečni izdelki, jajca, zelenjava, sadje, meso, med in pekarna, neposredno od slovenskih kmetij.',
+  path: '/categories',
+})
 
 export default function CategoriesPage() {
   const categories = [

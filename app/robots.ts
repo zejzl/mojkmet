@@ -1,4 +1,5 @@
-import { MetadataRoute } from 'next'
+import type { MetadataRoute } from 'next'
+import { SITE_URL } from '@/lib/site'
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -6,9 +7,21 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/', '/dashboard/', '/login', '/register'],
+        disallow: [
+          '/api/',
+          '/dashboard/',
+          '/login',
+          '/register',
+          '/forgot-password',
+          '/reset-password',
+          '/cart',
+          '/checkout',
+          '/order-confirmation/',
+          '/payment/',
+        ],
       },
     ],
-    sitemap: 'https://mojkmet.eu/sitemap.xml',
+    sitemap: `${SITE_URL}/sitemap.xml`,
+    host: SITE_URL,
   }
 }

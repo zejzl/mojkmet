@@ -1,3 +1,11 @@
+import { pageMetadata } from '@/lib/site'
+
+export const metadata = pageMetadata({
+  title: 'Vračila in povračila',
+  description: 'Pravila za vračila in povračila naročil na mojkmet.eu.',
+  path: '/returns',
+})
+
 export default function ReturnsPage() {
   const returnReasons = [
     {

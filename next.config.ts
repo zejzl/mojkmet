@@ -11,6 +11,21 @@ const securityHeaders = [
   },
 ]
 
+// Pages that must never appear in search results: private/transactional flows, plus /deals
+// (hard-coded placeholder promotions with expired dates).
+const noindexPaths = [
+  '/dashboard/:path*',
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/reset-password',
+  '/cart',
+  '/checkout',
+  '/order-confirmation/:path*',
+  '/payment/:path*',
+  '/deals',
+]
+
 const nextConfig: NextConfig = {
   async headers() {
     return [
@@ -18,6 +33,10 @@ const nextConfig: NextConfig = {
         source: '/(.*)',
         headers: securityHeaders,
       },
+      ...noindexPaths.map((source) => ({
+        source,
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      })),
     ]
   },
 }

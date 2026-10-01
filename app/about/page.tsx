@@ -1,3 +1,12 @@
+import { pageMetadata } from '@/lib/site'
+
+export const metadata = pageMetadata({
+  title: 'O nas',
+  description:
+    'Spoznajte mojkmet.eu, spletno tržnico, ki slovenske kmete neposredno povezuje s kupci.',
+  path: '/about',
+})
+
 export default function AboutPage() {
   const values = [
     {

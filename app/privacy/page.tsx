@@ -1,3 +1,11 @@
+import { pageMetadata } from '@/lib/site'
+
+export const metadata = pageMetadata({
+  title: 'Politika zasebnosti',
+  description: 'Kako mojkmet.eu zbira, uporablja in varuje vaše osebne podatke.',
+  path: '/privacy',
+})
+
 export default function PrivacyPage() {
   return (
     <main className="flex-grow">

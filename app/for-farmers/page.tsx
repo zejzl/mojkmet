@@ -1,4 +1,13 @@
+import { pageMetadata } from '@/lib/site'
+
 import Link from 'next/link'
+
+export const metadata = pageMetadata({
+  title: 'Za kmete',
+  description:
+    'Prodajajte svoje pridelke neposredno kupcem. Odprite kmetijo na mojkmet.eu, objavite izdelke in določite termine prevzema.',
+  path: '/for-farmers',
+})
 
 export default function ForFarmersPage() {
   const benefits = [

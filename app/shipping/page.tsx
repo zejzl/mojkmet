@@ -1,3 +1,11 @@
+import { pageMetadata } from '@/lib/site'
+
+export const metadata = pageMetadata({
+  title: 'Dostava',
+  description: 'Informacije o dostavi in prevzemu naročil na mojkmet.eu.',
+  path: '/shipping',
+})
+
 export default function ShippingPage() {
   const deliveryZones = [
     {

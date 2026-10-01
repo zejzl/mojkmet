@@ -1,3 +1,12 @@
+import { pageMetadata } from '@/lib/site'
+
+export const metadata = pageMetadata({
+  title: 'Kako deluje',
+  description:
+    'Kako poteka nakup pri slovenskih kmetih na mojkmet.eu: izberite pridelke, oddajte naročilo in jih prevzemite.',
+  path: '/how-it-works',
+})
+
 export default function HowItWorksPage() {
   const steps = [
     {

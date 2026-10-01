@@ -1,3 +1,11 @@
+import { pageMetadata } from '@/lib/site'
+
+export const metadata = pageMetadata({
+  title: 'Pogoji uporabe',
+  description: 'Splošni pogoji uporabe platforme mojkmet.eu za kupce in kmete.',
+  path: '/terms',
+})
+
 export default function TermsPage() {
   return (
     <main className="flex-grow">
