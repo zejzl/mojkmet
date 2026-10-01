@@ -2,6 +2,7 @@ import { getErrorMessage } from '@/lib/errors'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrError } from '@/lib/auth-helpers'
+import { getFarmReviews } from '@/lib/catalog'
 import { reviewSchema, parseJson } from '@/lib/validation'
 
 export const dynamic = 'force-dynamic'
@@ -10,33 +11,13 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   try {
     const { id: farmId } = await params
 
-    const reviews = await prisma.review.findMany({
-      where: { farmId },
-      select: {
-        id: true,
-        rating: true,
-        comment: true,
-        createdAt: true,
-        updatedAt: true,
-        user: { select: { name: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 50,
-    })
-
-    return NextResponse.json({
-      reviews: reviews.map((r) => ({
-        id: r.id,
-        rating: r.rating,
-        comment: r.comment,
-        createdAt: r.createdAt,
-        updatedAt: r.updatedAt,
-        reviewerName: r.user.name || 'Kupec',
-      })),
-    })
+    return NextResponse.json({ reviews: await getFarmReviews(farmId) })
   } catch (error) {
     console.error('Reviews GET error:', error)
-    return NextResponse.json({ error: getErrorMessage(error, 'Napaka pri nalaganju ocen') }, { status: 500 })
+    return NextResponse.json(
+      { error: getErrorMessage(error, 'Napaka pri nalaganju ocen') },
+      { status: 500 }
+    )
   }
 }
 
@@ -82,7 +63,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     })
   } catch (error) {
     console.error('Reviews POST error:', error)
-    return NextResponse.json({ error: getErrorMessage(error, 'Napaka pri oddaji ocene') }, { status: 500 })
+    return NextResponse.json(
+      { error: getErrorMessage(error, 'Napaka pri oddaji ocene') },
+      { status: 500 }
+    )
   }
 }
 
@@ -96,6 +80,9 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     return NextResponse.json({ ok: true })
   } catch (error) {
     console.error('Reviews DELETE error:', error)
-    return NextResponse.json({ error: getErrorMessage(error, 'Napaka pri brisanju ocene') }, { status: 500 })
+    return NextResponse.json(
+      { error: getErrorMessage(error, 'Napaka pri brisanju ocene') },
+      { status: 500 }
+    )
   }
 }

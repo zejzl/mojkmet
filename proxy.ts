@@ -3,9 +3,12 @@ import type { NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 
 function contentSecurityPolicy(): string {
+  // React uses eval() in development only (to rebuild server error stacks in the browser).
+  // Without 'unsafe-eval' the dev overlay shows a CSP "1 Issue" badge; production never needs it.
+  const isDev = process.env.NODE_ENV === 'development'
   return [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://plausible.io",
+    `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://plausible.io`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https:",
     "font-src 'self' data:",

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { getFarmDetail } from '@/lib/catalog'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -9,84 +9,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   try {
     const { id: farmId } = await params
 
-    const farm = await prisma.farm.findUnique({
-      where: { id: farmId },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        city: true,
-        latitude: true,
-        longitude: true,
-        image: true,
-        verified: true,
-        minOrder: true,
-        createdAt: true,
-      },
-    })
-
-    if (!farm) {
+    const detail = await getFarmDetail(farmId)
+    if (!detail) {
       return NextResponse.json({ error: 'Farm not found' }, { status: 404 })
     }
 
-    const [ratingAgg, reviewCount, products, windows] = await Promise.all([
-      prisma.review.aggregate({ where: { farmId }, _avg: { rating: true } }),
-      prisma.review.count({ where: { farmId } }),
-      prisma.product.findMany({
-        where: { farmId },
-        select: {
-          id: true,
-          name: true,
-          description: true,
-          price: true,
-          unit: true,
-          image: true,
-          available: true,
-          category: { select: { name: true, icon: true } },
-        },
-        orderBy: [{ available: 'desc' }, { name: 'asc' }],
-      }),
-      prisma.pickupWindow.findMany({
-        where: { farmId, active: true },
-        select: { id: true, dayOfWeek: true, startTime: true, endTime: true, active: true },
-        orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }],
-      }),
-    ])
-
-    return NextResponse.json({
-      farm: {
-        id: farm.id,
-        name: farm.name,
-        description: farm.description,
-        city: farm.city,
-        latitude: farm.latitude,
-        longitude: farm.longitude,
-        image: farm.image,
-        is_verified: farm.verified,
-        createdAt: farm.createdAt,
-        rating: ratingAgg._avg.rating == null ? 0 : Math.round(ratingAgg._avg.rating * 10) / 10,
-        total_reviews: reviewCount,
-        minOrder: farm.minOrder ? farm.minOrder.toNumber() : null,
-        pickupWindows: windows.map((w) => ({
-          id: w.id,
-          dayOfWeek: w.dayOfWeek,
-          startTime: w.startTime,
-          endTime: w.endTime,
-          active: w.active,
-        })),
-      },
-      products: products.map((p) => ({
-        id: p.id,
-        name: p.name,
-        description: p.description,
-        price: p.price,
-        unit: p.unit,
-        image: p.image,
-        category: p.category.name,
-        category_icon: p.category.icon || '',
-        available: p.available,
-      })),
-    })
+    return NextResponse.json(detail)
   } catch (error) {
     console.error('Database error:', error)
     return NextResponse.json({ error: 'Failed to fetch farm details' }, { status: 500 })

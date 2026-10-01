@@ -1,44 +1,23 @@
-'use client'
-
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import DistanceBadge from '@/components/DistanceBadge'
+import { getFarmsList } from '@/lib/catalog'
+import { getErrorMessage } from '@/lib/errors'
 
-interface Farm {
-  id: string
-  name: string
-  slug: string
-  description: string
-  city: string
-  latitude?: number | null
-  longitude?: number | null
-  rating: number
-  total_reviews: number
-  is_verified: boolean
-  image: string | null
-}
+// Always render fresh on the server: the list changes whenever a farm joins or a review lands.
+export const dynamic = 'force-dynamic'
 
-export default function FarmsPage() {
-  const [farms, setFarms] = useState<Farm[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+export default async function FarmsPage() {
+  let farms: Awaited<ReturnType<typeof getFarmsList>>['farms'] = []
+  let error: string | null = null
 
-  useEffect(() => {
-    async function fetchFarms() {
-      try {
-        const response = await fetch('/api/farms')
-        if (!response.ok) throw new Error('Failed to fetch farms')
-        const data = await response.json()
-        setFarms(data.farms)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchFarms()
-  }, [])
+  try {
+    farms = (await getFarmsList()).farms
+  } catch (err) {
+    error = getErrorMessage(
+      err,
+      'Kmetij ni bilo mogoče naložiti. Osvežite stran in poskusite znova.'
+    )
+  }
 
   return (
     <main className="flex-grow">
@@ -55,24 +34,20 @@ export default function FarmsPage() {
       {/* Farms Grid */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          {loading && (
-            <div className="text-center text-gray-600">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
-              <p className="mt-4">Nalaganje kmetij...</p>
-            </div>
-          )}
-
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-              Napaka pri nalaganju kmetij: {error}
+            <div
+              role="alert"
+              className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded"
+            >
+              {error}
             </div>
           )}
 
-          {!loading && !error && farms.length === 0 && (
+          {!error && farms.length === 0 && (
             <div className="text-center text-gray-600">Trenutno ni aktivnih kmetij.</div>
           )}
 
-          {!loading && !error && farms.length > 0 && (
+          {!error && farms.length > 0 && (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {farms.map((farm) => (
                 <div
@@ -85,39 +60,44 @@ export default function FarmsPage() {
                       <img
                         src={farm.image}
                         alt={farm.name}
+                        loading="lazy"
                         className="absolute inset-0 h-full w-full object-cover"
                       />
                     ) : (
-                      '🌾'
+                      <span aria-hidden="true">🌾</span>
                     )}
                   </div>
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="text-xl font-bold text-gray-900">{farm.name}</h3>
-                      <div className="flex items-center text-amber-500">
-                        <span className="mr-1">⭐</span>
+                      <div className="flex items-center text-amber-600">
+                        <span className="mr-1" aria-hidden="true">
+                          ⭐
+                        </span>
                         <span className="font-semibold">{Number(farm.rating).toFixed(1)}</span>
                       </div>
                     </div>
                     <p className="text-gray-600 mb-2">
-                      📍 {farm.city}{' '}
+                      <span aria-hidden="true">📍</span> {farm.city}{' '}
                       <DistanceBadge latitude={farm.latitude} longitude={farm.longitude} />
                     </p>
-                    <p className="text-gray-700 text-sm mb-4 line-clamp-2">{farm.description}</p>
+                    {farm.description && (
+                      <p className="text-gray-700 text-sm mb-4 line-clamp-2">{farm.description}</p>
+                    )}
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-gray-600">
                         {farm.total_reviews} {farm.total_reviews === 1 ? 'ocena' : 'ocen'}
                       </span>
                       {farm.is_verified && (
-                        <span className="text-green-600 text-sm font-medium">✓ Verificirano</span>
+                        <span className="text-green-700 text-sm font-medium">✓ Verificirano</span>
                       )}
                     </div>
-                    <a
+                    <Link
                       href={`/farms/${farm.id}`}
                       className="block w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition mt-4 text-center"
                     >
                       Obišči kmetijo
-                    </a>
+                    </Link>
                   </div>
                 </div>
               ))}

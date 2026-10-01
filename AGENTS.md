@@ -57,7 +57,17 @@ done vs. open — lives in `PLAN.md`; read that first for "why," this file is fo
   in there later without touching call sites.
 - **Images are validated + canonicalized by `lib/image-upload.ts`** and stored as a `data:`
   URL directly in Postgres — there is no file/blob storage, and external image URLs are
-  rejected outright.
+  rejected outright. **Never put those `data:` URLs in HTML or list/detail API responses**
+  (up to 1.5 MB each): public catalog data comes from `lib/catalog.ts`, which never selects
+  the image column and returns `/api/{farms,products}/<id>/image?v=<updatedAt>` instead
+  (served by `lib/image-response.ts`, cached immutably). The `dashboard/*` endpoints still
+  return the raw `data:` URL because the edit forms need it.
+- **Public catalog pages (`/farms`, `/farms/[id]`, `/products`, `/products/[id]`) load data on
+  the server** via `lib/catalog.ts` (shared with the matching `app/api/**` routes, so the two
+  can't drift) and pass it as props to the interactive client component next to the page
+  (`FarmDetail`, `ProductsClient`, `ProductDetail`). Unknown IDs call `notFound()` for a real
+  404. Don't reintroduce `useEffect` + `fetch` for the first load of these pages: crawlers
+  wouldn't see the content.
 - **UI copy and user-facing error strings are Slovenian**; code comments are mixed — Slovenian
   for business-logic rationale, English for technical/framework notes. Follow whichever
   convention the surrounding code already uses in a given file.
