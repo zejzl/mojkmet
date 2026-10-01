@@ -65,7 +65,7 @@ export default function DistanceBadge({ latitude, longitude, className }: Distan
   if (location.coords && latitude != null && longitude != null) {
     const km = haversineKm(location.coords, { latitude, longitude })
     return (
-      <span className={`text-green-700 whitespace-nowrap ${className ?? ''}`}>
+      <span className={`ml-1 text-green-700 whitespace-nowrap ${className ?? ''}`}>
         · ≈ {formatDistanceKm(km)} stran
       </span>
     )
@@ -76,7 +76,7 @@ export default function DistanceBadge({ latitude, longitude, className }: Distan
       <button
         type="button"
         onClick={requestLocation}
-        className={`text-green-700 underline decoration-dotted underline-offset-2 hover:text-green-800 whitespace-nowrap ${className ?? ''}`}
+        className={`ml-1 text-green-700 underline decoration-dotted underline-offset-2 hover:text-green-800 whitespace-nowrap ${className ?? ''}`}
       >
         Uporabi mojo lokacijo
       </button>

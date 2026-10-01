@@ -4,15 +4,14 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { useCart } from '@/lib/cart-context'
+import { izdelekForm } from '@/lib/plural-sl'
 
 function CartLink({ count }: { count: number }) {
   return (
     <Link
       href="/cart"
       className="relative text-gray-700 hover:text-green-600 transition p-1"
-      aria-label={
-        count > 0 ? `Košarica, ${count} ${count === 1 ? 'izdelek' : 'izdelkov'}` : 'Košarica'
-      }
+      aria-label={count > 0 ? `Košarica, ${count} ${izdelekForm(count)}` : 'Košarica'}
     >
       <svg
         className="w-6 h-6"
