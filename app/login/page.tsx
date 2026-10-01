@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { safeRedirectPath } from '@/lib/safe-redirect'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -29,7 +30,10 @@ export default function LoginPage() {
       if (result?.error) {
         setError('Napačen email ali geslo')
       } else {
-        router.push('/')
+        // Checkout, products and payment/result send people here with ?redirect=<path>
+        // (the dashboard gate in proxy.ts uses ?callbackUrl=); go back where they came from.
+        const params = new URLSearchParams(window.location.search)
+        router.push(safeRedirectPath(params.get('redirect') ?? params.get('callbackUrl')))
         router.refresh()
       }
     } catch {

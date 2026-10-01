@@ -69,6 +69,8 @@ function SlotPicker({
                     key={slot.id}
                     type="button"
                     onClick={() => onSelect(slot)}
+                    aria-pressed={isSelected}
+                    aria-label={`${label}, ${slot.startTime} do ${slot.endTime}`}
                     className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition ${
                       isSelected
                         ? 'bg-green-600 border-green-600 text-white'
@@ -90,7 +92,7 @@ function SlotPicker({
 export default function CheckoutPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const { items, clearCart } = useCart()
+  const { items, removeItems } = useCart()
 
   const [formData, setFormData] = useState({
     phone: '',
@@ -130,26 +132,36 @@ export default function CheckoutPage() {
     farmGroups.reduce((a, b) => (b.items.length > a.items.length ? b : a), farmGroups[0])
 
   const total = activeGroup?.total ?? 0
+  // The farm whose pickup slots we show: the radio choice for multi-farm carts, otherwise the
+  // only farm in the cart. (Keying the effect on selectedFarmId alone never loaded slots for
+  // single-farm carts, because nothing sets it there.)
+  const activeFarmId = activeGroup?.farmId ?? null
 
   const belowMin =
     farmMeta?.minOrder != null && activeGroup != null && activeGroup.total < farmMeta.minOrder
 
   useEffect(() => {
-    if (!selectedFarmId) return
+    if (!activeFarmId) return
     setSlotsLoading(true)
     setSlotsError('')
     setSelectedSlot(null)
     setSlots([])
-    fetch(`/api/farms/${selectedFarmId}/pickup-slots?days=14`)
+    setFarmMeta(null)
+    fetch(`/api/farms/${activeFarmId}/pickup-slots?days=14`)
       .then(async (r) => {
         const data = await r.json()
         if (!r.ok) throw new Error(data.error || 'Napaka pri nalaganju terminov')
-        setFarmMeta({ id: data.farm.id, name: data.farm.name, minOrder: data.farm.minOrder, hasWindows: data.farm.hasWindows })
+        setFarmMeta({
+          id: data.farm.id,
+          name: data.farm.name,
+          minOrder: data.farm.minOrder,
+          hasWindows: data.farm.hasWindows,
+        })
         setSlots(data.slots || [])
       })
       .catch((err) => setSlotsError(err instanceof Error ? err.message : 'Napaka'))
       .finally(() => setSlotsLoading(false))
-  }, [selectedFarmId])
+  }, [activeFarmId])
 
   // Ce kosarica je prazna, preusmeri
   if (items.length === 0 && status !== 'loading') {
@@ -193,7 +205,9 @@ export default function CheckoutPage() {
     }
 
     if (farmMeta?.minOrder != null && activeGroup.total < farmMeta.minOrder) {
-      setError(`Minimalna vrednost naročila za ${farmMeta.name} je ${farmMeta.minOrder.toFixed(2)} EUR.`)
+      setError(
+        `Minimalna vrednost naročila za ${farmMeta.name} je ${farmMeta.minOrder.toFixed(2)} EUR.`
+      )
       return
     }
 
@@ -222,7 +236,8 @@ export default function CheckoutPage() {
         throw new Error(data.error || 'Napaka pri oddaji naročila')
       }
 
-      clearCart()
+      // Other farms' items stay in the cart (the summary tells the customer so)
+      await removeItems(activeGroup.items.map((item) => item.productId))
 
       if (data.paymentUrl) {
         // Preusmeri na gostiteljsko plačilno stran ponudnika; po plačilu
@@ -242,7 +257,11 @@ export default function CheckoutPage() {
   if (status === 'loading') {
     return (
       <main className="flex-grow bg-gray-50 py-16 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-green-600 border-t-transparent rounded-full animate-spin" />
+        <div
+          role="status"
+          aria-label="Nalaganje"
+          className="w-8 h-8 border-4 border-green-600 border-t-transparent rounded-full animate-spin"
+        />
       </main>
     )
   }
@@ -281,16 +300,19 @@ export default function CheckoutPage() {
               <h2 className="text-lg font-semibold text-gray-900">Prevzem</h2>
 
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                <div
+                  role="alert"
+                  className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm"
+                >
                   {error}
                 </div>
               )}
 
               {farmGroups.length > 1 && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                <fieldset>
+                  <legend className="block text-sm font-medium text-gray-700 mb-2">
                     Izberite kmetijo (naročilo vsebuje izdelke iz več kmetij)
-                  </label>
+                  </legend>
                   <div className="space-y-2">
                     {farmGroups.map((group) => (
                       <label
@@ -309,7 +331,9 @@ export default function CheckoutPage() {
                             onChange={() => setSelectedFarmId(group.farmId)}
                             className="accent-green-600"
                           />
-                          <span className="text-sm font-medium text-gray-900">{group.farmName}</span>
+                          <span className="text-sm font-medium text-gray-900">
+                            {group.farmName}
+                          </span>
                         </span>
                         <span className="text-sm text-gray-600">
                           {group.items.reduce((s, i) => s + i.quantity, 0)} izd. ·{' '}
@@ -318,26 +342,32 @@ export default function CheckoutPage() {
                       </label>
                     ))}
                   </div>
-                </div>
+                </fieldset>
               )}
 
               {farmGroups.length === 1 && activeGroup && (
                 <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-700">
-                  Prevzem pri: <span className="font-medium text-gray-900">{activeGroup.farmName}</span>
+                  Prevzem pri:{' '}
+                  <span className="font-medium text-gray-900">{activeGroup.farmName}</span>
                 </div>
               )}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div role="group" aria-labelledby="slot-heading">
+                <p id="slot-heading" className="block text-sm font-medium text-gray-700 mb-2">
                   Termin prevzema *
-                </label>
+                </p>
 
                 {slotsLoading && (
-                  <div className="py-3 text-sm text-gray-500">Nalagam termine…</div>
+                  <div className="py-3 text-sm text-gray-600" role="status">
+                    Nalagam termine…
+                  </div>
                 )}
 
                 {!slotsLoading && slotsError && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                  <div
+                    role="alert"
+                    className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm"
+                  >
                     {slotsError}
                   </div>
                 )}
@@ -348,26 +378,28 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
-                {!slotsLoading && !slotsError && farmMeta && farmMeta.hasWindows && slots.length === 0 && (
-                  <div className="py-3 text-sm text-gray-500">
-                    V naslednjih 14 dneh ni prostih terminov.
-                  </div>
-                )}
+                {!slotsLoading &&
+                  !slotsError &&
+                  farmMeta &&
+                  farmMeta.hasWindows &&
+                  slots.length === 0 && (
+                    <div className="py-3 text-sm text-gray-600">
+                      V naslednjih 14 dneh ni prostih terminov.
+                    </div>
+                  )}
 
                 {!slotsLoading && !slotsError && farmMeta?.hasWindows && slots.length > 0 && (
-                  <SlotPicker
-                    slots={slots}
-                    selected={selectedSlot}
-                    onSelect={setSelectedSlot}
-                  />
+                  <SlotPicker slots={slots} selected={selectedSlot} onSelect={setSelectedSlot} />
                 )}
 
-                {farmMeta?.minOrder != null && activeGroup && activeGroup.total < farmMeta.minOrder && (
-                  <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg text-sm mt-3">
-                    Minimalna vrednost naročila za {farmMeta.name} je{' '}
-                    {farmMeta.minOrder.toFixed(2)} EUR.
-                  </div>
-                )}
+                {farmMeta?.minOrder != null &&
+                  activeGroup &&
+                  activeGroup.total < farmMeta.minOrder && (
+                    <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg text-sm mt-3">
+                      Minimalna vrednost naročila za {farmMeta.name} je{' '}
+                      {farmMeta.minOrder.toFixed(2)} EUR.
+                    </div>
+                  )}
               </div>
 
               <div>
@@ -378,6 +410,7 @@ export default function CheckoutPage() {
                   id="phone"
                   name="phone"
                   type="tel"
+                  autoComplete="tel"
                   required
                   value={formData.phone}
                   onChange={handleChange}
@@ -404,7 +437,7 @@ export default function CheckoutPage() {
               <div className="pt-4 border-t border-gray-100">
                 <div className="bg-gray-50 rounded-lg p-4 mb-4">
                   <p className="text-sm font-medium text-gray-700 mb-1">Način plačila</p>
-                  <p className="text-sm text-gray-500">Spletno plačilo s kartico</p>
+                  <p className="text-sm text-gray-600">Spletno plačilo s kartico</p>
                 </div>
 
                 <button
@@ -418,6 +451,11 @@ export default function CheckoutPage() {
                       ? 'Prijavite se za nakup'
                       : `Plačaj ${total.toFixed(2)} EUR`}
                 </button>
+                {session && !selectedSlot && !submitting && (
+                  <p className="mt-2 text-center text-sm text-gray-600">
+                    Izberite termin prevzema, da lahko oddate naročilo.
+                  </p>
+                )}
               </div>
             </form>
           </div>
@@ -442,7 +480,7 @@ export default function CheckoutPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-gray-900 truncate">{item.name}</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-600">
                         {item.quantity} x {item.price.toFixed(2)} EUR
                       </p>
                     </div>
@@ -471,7 +509,7 @@ export default function CheckoutPage() {
               <div className="mt-4 pt-4 border-t border-gray-100">
                 <Link
                   href="/cart"
-                  className="text-sm text-gray-500 hover:text-green-600 transition"
+                  className="text-sm text-gray-600 hover:text-green-700 transition"
                 >
                   Uredi košarico
                 </Link>

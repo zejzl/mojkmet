@@ -20,6 +20,7 @@ interface CartContextType {
   items: CartItem[]
   addToCart: (item: Omit<CartItem, 'quantity'>) => void
   removeFromCart: (productId: string) => void
+  removeItems: (productIds: string[]) => Promise<void>
   updateQuantity: (productId: string, quantity: number) => void
   clearCart: () => void
   getCartTotal: () => number
@@ -37,6 +38,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Guards the one-time guest->server merge so it fires once per login, not on every render
   // while `status` stays 'authenticated'.
   const mergedRef = useRef(false)
+  // Server mutations can finish out of order (e.g. quickly tapping + several times). Every
+  // mutation takes a sequence number and a response is applied only if no newer response has
+  // been applied yet, so an older reply can never overwrite a newer cart.
+  const requestSeqRef = useRef(0)
+  const appliedSeqRef = useRef(0)
 
   useEffect(() => {
     if (status === 'unauthenticated') mergedRef.current = false
@@ -46,14 +52,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // existed. Skipped entirely once authenticated — see the sync effect below.
   useEffect(() => {
     if (status !== 'unauthenticated') return
+    // Always reset to what localStorage holds (or empty). Without the `[]` fallback, signing
+    // out kept the previous user's server cart in state and then wrote it to localStorage,
+    // leaking it to the next person on a shared device.
+    let guestItems: CartItem[] = []
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
-      if (saved) {
-        setItems(JSON.parse(saved))
-      }
+      if (saved) guestItems = JSON.parse(saved)
     } catch {
       // ignore parse errors
     }
+    setItems(guestItems)
     setInitialized(true)
   }, [status])
 
@@ -113,22 +122,39 @@ export function CartProvider({ children }: { children: ReactNode }) {
     syncServerCart()
   }, [status])
 
-  function applyServerResponse(res: Response) {
+  function applyServerResponse(res: Response, seq: number) {
+    // Error replies ({ error }, e.g. sold out / session expired) carry no `items`; applying
+    // them used to blank the cart. Keep the current cart instead.
+    if (!res.ok) return
     res
       .json()
-      .then((data) => setItems(data.items || []))
+      .then((data) => {
+        if (!Array.isArray(data.items) || seq < appliedSeqRef.current) return
+        appliedSeqRef.current = seq
+        setItems(data.items)
+      })
       .catch(() => {
         // ignore — cart state just stays whatever it was before this mutation
       })
   }
 
+  // Fire-and-apply for signed-in users: the reply carries the full server cart.
+  function sendToServer(url: string, init: RequestInit) {
+    const seq = ++requestSeqRef.current
+    fetch(url, init)
+      .then((res) => applyServerResponse(res, seq))
+      .catch(() => {
+        // network error: leave the cart as it was
+      })
+  }
+
   function addToCart(item: Omit<CartItem, 'quantity'>) {
     if (status === 'authenticated') {
-      fetch('/api/cart', {
+      sendToServer('/api/cart', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId: item.productId }),
-      }).then(applyServerResponse)
+      })
       return
     }
     setItems((prev) => {
@@ -146,7 +172,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   function removeFromCart(productId: string) {
     if (status === 'authenticated') {
-      fetch(`/api/cart/${productId}`, { method: 'DELETE' }).then(applyServerResponse)
+      sendToServer(`/api/cart/${productId}`, { method: 'DELETE' })
       return
     }
     setItems((prev) => prev.filter((i) => i.productId !== productId))
@@ -158,11 +184,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return
     }
     if (status === 'authenticated') {
-      fetch(`/api/cart/${productId}`, {
+      sendToServer(`/api/cart/${productId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ quantity }),
-      }).then(applyServerResponse)
+      })
       return
     }
     setItems((prev) =>
@@ -172,9 +198,29 @@ export function CartProvider({ children }: { children: ReactNode }) {
     )
   }
 
+  // Removes several items at once. For signed-in users the DELETEs run one after another:
+  // each response carries the full cart, so firing them in parallel could let an older
+  // response overwrite a newer one.
+  async function removeItems(productIds: string[]) {
+    if (status === 'authenticated') {
+      const seq = ++requestSeqRef.current
+      let last: Response | undefined
+      for (const productId of productIds) {
+        try {
+          last = await fetch(`/api/cart/${productId}`, { method: 'DELETE' })
+        } catch {
+          // keep going; the final response (if any) reflects the server's cart
+        }
+      }
+      if (last) applyServerResponse(last, seq)
+      return
+    }
+    setItems((prev) => prev.filter((i) => !productIds.includes(i.productId)))
+  }
+
   function clearCart() {
     if (status === 'authenticated') {
-      fetch('/api/cart', { method: 'DELETE' }).then(applyServerResponse)
+      sendToServer('/api/cart', { method: 'DELETE' })
       return
     }
     setItems([])
@@ -194,6 +240,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         items,
         addToCart,
         removeFromCart,
+        removeItems,
         updateQuantity,
         clearCart,
         getCartTotal,

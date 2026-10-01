@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import DistanceBadge from '@/components/DistanceBadge'
+import { useCart } from '@/lib/cart-context'
 
 interface Product {
   id: string
@@ -47,6 +48,23 @@ export default function ProductDetailPage() {
   const [relatedProducts, setRelatedProducts] = useState<RelatedProduct[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { addToCart } = useCart()
+  const [justAdded, setJustAdded] = useState(false)
+
+  function handleAddToCart(p: Product) {
+    addToCart({
+      productId: p.id,
+      name: p.name,
+      price: p.price,
+      unit: p.unit,
+      farmId: p.farm_id,
+      farmName: p.farm_name,
+      categoryIcon: p.category_icon,
+      maxStock: p.stock,
+    })
+    setJustAdded(true)
+    setTimeout(() => setJustAdded(false), 2500)
+  }
 
   useEffect(() => {
     async function fetchProduct() {
@@ -74,8 +92,11 @@ export default function ProductDetailPage() {
   if (loading) {
     return (
       <main className="flex-grow">
-        <div className="container mx-auto px-4 py-16 text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+        <div className="container mx-auto px-4 py-16 text-center" role="status">
+          <div
+            className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"
+            aria-hidden="true"
+          ></div>
           <p className="mt-4 text-gray-600">Nalaganje izdelka...</p>
         </div>
       </main>
@@ -86,9 +107,13 @@ export default function ProductDetailPage() {
     return (
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-16 text-center">
-          <div className="text-6xl mb-4">😞</div>
+          <div className="text-6xl mb-4" aria-hidden="true">
+            😞
+          </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Napaka</h1>
-          <p className="text-gray-600 mb-6">{error || 'Izdelek ni bil najden'}</p>
+          <p className="text-gray-600 mb-6" role="alert">
+            {error || 'Izdelek ni bil najden'}
+          </p>
           <Link
             href="/products"
             className="inline-block bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition"
@@ -112,23 +137,34 @@ export default function ProductDetailPage() {
       {/* Breadcrumbs */}
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-3">
-          <nav className="flex items-center text-sm text-gray-600">
-            <Link href="/" className="hover:text-green-600 transition">
+          <nav
+            className="flex flex-wrap items-center text-sm text-gray-600"
+            aria-label="Drobtinice"
+          >
+            <Link href="/" className="hover:text-green-700 transition">
               Domov
             </Link>
-            <span className="mx-2">&gt;</span>
-            <Link href="/products" className="hover:text-green-600 transition">
+            <span className="mx-2" aria-hidden="true">
+              &gt;
+            </span>
+            <Link href="/products" className="hover:text-green-700 transition">
               Izdelki
             </Link>
-            <span className="mx-2">&gt;</span>
+            <span className="mx-2" aria-hidden="true">
+              &gt;
+            </span>
             <Link
               href={`/products?category=${product.category_slug}`}
-              className="hover:text-green-600 transition"
+              className="hover:text-green-700 transition"
             >
               {product.category_name}
             </Link>
-            <span className="mx-2">&gt;</span>
-            <span className="text-gray-900 font-medium">{product.name}</span>
+            <span className="mx-2" aria-hidden="true">
+              &gt;
+            </span>
+            <span className="text-gray-900 font-medium" aria-current="page">
+              {product.name}
+            </span>
           </nav>
         </div>
       </div>
@@ -167,9 +203,10 @@ export default function ProductDetailPage() {
                 <div className="mb-4">
                   <Link
                     href={`/products?category=${product.category_slug}`}
-                    className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${stockStatus.color} hover:opacity-80 transition`}
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-50 text-green-700 hover:opacity-80 transition"
                   >
-                    {product.category_icon} {product.category_name}
+                    <span aria-hidden="true">{product.category_icon}</span>&nbsp;
+                    {product.category_name}
                   </Link>
                 </div>
 
@@ -195,11 +232,21 @@ export default function ProductDetailPage() {
                 )}
 
                 <button
+                  type="button"
+                  onClick={() => handleAddToCart(product)}
                   className="w-full bg-green-600 text-white px-8 py-4 rounded-lg text-lg font-bold hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={product.stock === 0}
+                  disabled={product.stock === 0 || !product.available || justAdded}
                 >
-                  🛒 V košarico
+                  {justAdded ? 'Dodano v košarico' : 'V košarico'}
                 </button>
+
+                <p className="mt-3 text-center text-sm" role="status" aria-live="polite">
+                  {justAdded && (
+                    <Link href="/cart" className="font-medium text-green-700 underline">
+                      Pojdi v košarico
+                    </Link>
+                  )}
+                </p>
 
                 {product.stock === 0 && (
                   <p className="text-sm text-red-600 mt-2 text-center">
@@ -211,7 +258,7 @@ export default function ProductDetailPage() {
 
             {/* Farm Info Card */}
             <div className="border-t border-gray-200 bg-gray-50 p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">🌾 O kmetiji</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">O kmetiji</h2>
               <div className="bg-white rounded-lg p-6 shadow-sm">
                 <div className="flex items-start justify-between mb-4">
                   <div>
@@ -230,7 +277,7 @@ export default function ProductDetailPage() {
                       </span>
                     )}
                     <p className="text-gray-600 mt-1">
-                      📍 {product.farm_city}{' '}
+                      <span aria-hidden="true">📍</span> {product.farm_city}{' '}
                       <DistanceBadge
                         latitude={product.farm_latitude}
                         longitude={product.farm_longitude}
@@ -239,8 +286,9 @@ export default function ProductDetailPage() {
                   </div>
                   {product.farm_total_reviews > 0 && (
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-yellow-500">
-                        ⭐ {product.farm_rating}
+                      <div className="text-2xl font-bold text-yellow-600">
+                        <span aria-hidden="true">⭐</span> {product.farm_rating}
+                        <span className="sr-only"> od 5</span>
                       </div>
                       <p className="text-sm text-gray-600">
                         {product.farm_total_reviews}{' '}

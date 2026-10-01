@@ -72,7 +72,14 @@ done vs. open — lives in `PLAN.md`; read that first for "why," this file is fo
   non-API/non-asset routes; `app/dashboard/layout.tsx`'s `useSession()` redirect is a
   client-side fallback on top of that, not the actual gate.
 
+- **The cart lives in `lib/cart-context.tsx`, backed by two stores.** Guests use
+  `localStorage`; signed-in users use the server cart (`CartItem` model, `app/api/cart/**`),
+  and a guest cart is merged into it once at login. Every server mutation replies with the
+  full cart; the context applies replies in request order and ignores error replies. To remove
+  several items use `removeItems()`, not repeated `removeFromCart()` calls.
+- **Login honors `?redirect=<path>` (and `?callbackUrl=`)**, validated by
+  `safeRedirectPath()` in `lib/safe-redirect.ts` so only same-site paths are followed.
+
 ## Known gaps (see PLAN.md for the authoritative list)
 
-- Cart state is `localStorage`-only (`lib/cart-context.tsx`), not synced server-side for
-  logged-in users.
+- None listed here right now; PLAN.md is the source of truth.

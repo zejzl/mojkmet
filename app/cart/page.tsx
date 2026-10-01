@@ -16,6 +16,7 @@ export default function CartPage() {
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
@@ -25,7 +26,7 @@ export default function CartPage() {
               />
             </svg>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Vaša košarica je prazna</h2>
-            <p className="text-gray-500 mb-8">
+            <p className="text-gray-600 mb-8">
               Dodajte izdelke iz naše ponudbe in začnite z nakupovanjem.
             </p>
             <Link
@@ -41,6 +42,8 @@ export default function CartPage() {
   }
 
   const total = getCartTotal()
+  const farmCount = new Set(items.map((i) => i.farmId)).size
+  const hasUnavailable = items.some((i) => i.available === false)
 
   return (
     <main className="flex-grow bg-gray-50 py-10">
@@ -48,12 +51,29 @@ export default function CartPage() {
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Košarica</h1>
           <button
-            onClick={clearCart}
-            className="text-sm text-gray-500 hover:text-red-600 transition underline"
+            onClick={() => {
+              if (window.confirm('Ste prepričani, da želite izprazniti košarico?')) clearCart()
+            }}
+            className="text-sm text-gray-600 hover:text-red-600 transition underline"
           >
             Izprazni košarico
           </button>
         </div>
+
+        {hasUnavailable && (
+          <p
+            role="alert"
+            className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          >
+            Nekateri izdelki niso več na voljo. Odstranite jih iz košarice pred plačilom.
+          </p>
+        )}
+        {farmCount > 1 && (
+          <p className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            V košarici imate izdelke iz več kmetij. Naročilo oddate za eno kmetijo naenkrat; ostali
+            izdelki ostanejo v košarici.
+          </p>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Item list */}
@@ -64,7 +84,10 @@ export default function CartPage() {
                 className="bg-white rounded-xl shadow-sm p-5 flex items-start gap-4 border border-gray-100"
               >
                 {/* Icon */}
-                <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center text-2xl flex-shrink-0">
+                <div
+                  className="w-14 h-14 rounded-lg bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center text-2xl flex-shrink-0"
+                  aria-hidden="true"
+                >
                   {item.categoryIcon}
                 </div>
 
@@ -78,7 +101,7 @@ export default function CartPage() {
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-500">{item.farmName}</p>
+                  <p className="text-sm text-gray-600">{item.farmName}</p>
                   <p className="text-sm text-green-700 font-medium mt-1">
                     {item.price.toFixed(2)} EUR / {item.unit}
                   </p>
@@ -88,15 +111,20 @@ export default function CartPage() {
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <button
                     onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                    aria-label={`Zmanjšaj količino: ${item.name}`}
                     className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:border-green-600 hover:text-green-600 transition font-bold"
                   >
                     -
                   </button>
-                  <span className="w-8 text-center font-semibold text-gray-900">
+                  <span
+                    className="w-8 text-center font-semibold text-gray-900"
+                    aria-label={`Količina: ${item.quantity}`}
+                  >
                     {item.quantity}
                   </span>
                   <button
                     onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                    aria-label={`Povečaj količino: ${item.name}`}
                     disabled={item.quantity >= item.maxStock}
                     className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:border-green-600 hover:text-green-600 transition font-bold disabled:opacity-40 disabled:cursor-not-allowed"
                   >
@@ -111,7 +139,8 @@ export default function CartPage() {
                   </p>
                   <button
                     onClick={() => removeFromCart(item.productId)}
-                    className="text-xs text-gray-400 hover:text-red-500 transition mt-1"
+                    aria-label={`Odstrani iz košarice: ${item.name}`}
+                    className="text-xs text-gray-600 hover:text-red-600 transition mt-1 underline"
                   >
                     Odstrani
                   </button>
@@ -143,7 +172,9 @@ export default function CartPage() {
                   <span className="font-semibold text-gray-900">Skupaj</span>
                   <span className="font-bold text-green-700 text-lg">{total.toFixed(2)} EUR</span>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Dostava ni vkljucena</p>
+                <p className="text-xs text-gray-600 mt-1">
+                  Prevzem na kmetiji. Termin izberete na blagajni.
+                </p>
               </div>
 
               <Link
@@ -155,7 +186,7 @@ export default function CartPage() {
 
               <Link
                 href="/products"
-                className="block w-full text-center text-sm text-gray-500 hover:text-green-600 mt-4 transition"
+                className="block w-full text-center text-sm text-gray-600 hover:text-green-700 mt-4 transition"
               >
                 Nadaljuj z nakupovanjem
               </Link>

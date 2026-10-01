@@ -1,10 +1,11 @@
 'use client'
 
 import { Suspense, useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { useCart } from '@/lib/cart-context'
+import { getErrorMessage } from '@/lib/errors'
 import DistanceBadge from '@/components/DistanceBadge'
 
 interface Product {
@@ -44,6 +45,7 @@ export default function ProductsPage() {
 }
 
 function ProductsContent() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const categorySlug = searchParams.get('category')
   const searchQuery = searchParams.get('search')
@@ -59,6 +61,8 @@ function ProductsContent() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set())
   const [togglingFav, setTogglingFav] = useState<string | null>(null)
   const [addedToCart, setAddedToCart] = useState<string | null>(null)
+  // Announced to screen readers; the button text change alone is not
+  const [addedMessage, setAddedMessage] = useState('')
 
   useEffect(() => {
     async function fetchProducts() {
@@ -74,7 +78,12 @@ function ProductsContent() {
         setProducts(data.products)
         setCategories(data.categories)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error')
+        setError(
+          getErrorMessage(
+            err,
+            'Izdelkov ni bilo mogoče naložiti. Osvežite stran in poskusite znova.'
+          )
+        )
       } finally {
         setLoading(false)
       }
@@ -98,11 +107,10 @@ function ProductsContent() {
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
-    if (search.trim()) {
-      window.location.href = `/products?search=${encodeURIComponent(search.trim())}`
-    } else {
-      window.location.href = '/products'
-    }
+    // Client-side navigation: no full page reload, the products effect refetches on the new query
+    router.push(
+      search.trim() ? `/products?search=${encodeURIComponent(search.trim())}` : '/products'
+    )
   }
 
   function handleAddToCart(product: Product) {
@@ -117,12 +125,14 @@ function ProductsContent() {
       maxStock: product.stock,
     })
     setAddedToCart(product.id)
+    setAddedMessage(`${product.name} je dodan v košarico`)
     setTimeout(() => setAddedToCart(null), 1500)
   }
 
   async function handleToggleFavorite(productId: string) {
     if (!session) {
-      window.location.href = '/login?redirect=/products'
+      // Come back to the same filtered list after logging in
+      router.push(`/login?redirect=${encodeURIComponent(`/products${window.location.search}`)}`)
       return
     }
     setTogglingFav(productId)
@@ -162,7 +172,7 @@ function ProductsContent() {
           <p className="text-lg opacity-90">
             {activeCategory
               ? `${products.length} izdelkov v kategoriji`
-              : `${products.length} svezih izdelkov od lokalnih kmetov`}
+              : `${products.length} svežih izdelkov od lokalnih kmetov`}
           </p>
         </div>
       </section>
@@ -170,13 +180,14 @@ function ProductsContent() {
       {/* Search */}
       <section className="bg-gray-50 py-6 border-b">
         <div className="container mx-auto px-4">
-          <form onSubmit={handleSearch} className="max-w-2xl mx-auto flex gap-3">
+          <form onSubmit={handleSearch} role="search" className="max-w-2xl mx-auto flex gap-3">
             <input
-              type="text"
+              type="search"
+              aria-label="Iskanje proizvodov"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Išči proizvode..."
-              className="flex-1 px-5 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-600"
+              className="flex-1 min-w-0 px-5 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-600"
             />
             <button
               type="submit"
@@ -189,11 +200,12 @@ function ProductsContent() {
       </section>
 
       {/* Category Filter Pills */}
-      <section className="py-4 border-b bg-white">
+      <section className="py-4 border-b bg-white" aria-label="Kategorije">
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap gap-2 justify-center">
             <Link
               href="/products"
+              aria-current={!categorySlug ? 'page' : undefined}
               className={`px-4 py-2 rounded-full text-sm font-medium transition ${
                 !categorySlug
                   ? 'bg-green-600 text-white'
@@ -206,6 +218,7 @@ function ProductsContent() {
               <Link
                 key={cat.slug}
                 href={`/products?category=${cat.slug}`}
+                aria-current={categorySlug === cat.slug ? 'page' : undefined}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition ${
                   categorySlug === cat.slug
                     ? 'bg-green-600 text-white'
@@ -222,24 +235,37 @@ function ProductsContent() {
       {/* Products Grid */}
       <section className="py-12">
         <div className="container mx-auto px-4">
+          <p className="sr-only" role="status" aria-live="polite">
+            {addedMessage}
+          </p>
+
           {loading && (
-            <div className="text-center text-gray-600 py-16">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+            <div className="text-center text-gray-600 py-16" role="status">
+              <div
+                className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"
+                aria-hidden="true"
+              ></div>
               <p className="mt-4">Nalaganje izdelkov...</p>
             </div>
           )}
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded max-w-lg mx-auto">
-              Napaka: {error}
+            <div
+              role="alert"
+              className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded max-w-lg mx-auto"
+            >
+              {error}
             </div>
           )}
 
           {!loading && !error && products.length === 0 && (
             <div className="text-center text-gray-500 py-16">
-              <p className="text-4xl mb-4">?</p>
               <p className="text-xl">Ni najdenih izdelkov</p>
-              <Link href="/products" className="text-green-600 hover:underline mt-2 inline-block">
+              <p className="mt-1 text-sm">Poskusite z drugim iskanjem ali kategorijo.</p>
+              <Link
+                href="/products"
+                className="text-green-700 hover:underline mt-3 inline-block font-medium"
+              >
                 Poglej vse izdelke
               </Link>
             </div>
@@ -253,30 +279,40 @@ function ProductsContent() {
                   className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition border border-gray-100"
                 >
                   <div className="bg-gradient-to-br from-gray-50 to-gray-100 h-40 flex items-center justify-center text-7xl relative">
-                    {product.image ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="absolute inset-0 h-full w-full object-cover"
-                      />
-                    ) : (
-                      product.category_icon
-                    )}
+                    {/* Image links to the detail page; the name link below is the keyboard/screen-reader target */}
+                    <Link
+                      href={`/products/${product.id}`}
+                      tabIndex={-1}
+                      aria-hidden="true"
+                      className="absolute inset-0 flex items-center justify-center"
+                    >
+                      {product.image ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={product.image}
+                          alt=""
+                          className="absolute inset-0 h-full w-full object-cover"
+                        />
+                      ) : (
+                        product.category_icon
+                      )}
+                    </Link>
                     {/* Favorite button */}
                     <button
                       onClick={() => handleToggleFavorite(product.id)}
                       disabled={togglingFav === product.id}
-                      className="absolute top-2 right-2 p-1.5 rounded-full bg-white shadow hover:shadow-md transition"
-                      title={
+                      aria-pressed={favorites.has(product.id)}
+                      aria-label={
                         favorites.has(product.id)
-                          ? 'Odstrani iz priljubljenih'
-                          : 'Dodaj med priljubljene'
+                          ? `Odstrani ${product.name} iz priljubljenih`
+                          : `Dodaj ${product.name} med priljubljene`
                       }
+                      className="absolute top-2 right-2 p-1.5 rounded-full bg-white shadow hover:shadow-md transition"
                     >
                       <svg
+                        aria-hidden="true"
                         className={`w-5 h-5 transition-colors ${
-                          favorites.has(product.id) ? 'text-red-500 fill-red-500' : 'text-gray-400'
+                          favorites.has(product.id) ? 'text-red-500 fill-red-500' : 'text-gray-500'
                         }`}
                         fill={favorites.has(product.id) ? 'currentColor' : 'none'}
                         stroke="currentColor"
@@ -293,8 +329,13 @@ function ProductsContent() {
                   </div>
                   <div className="p-5">
                     <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-bold text-gray-900 text-lg leading-tight">
-                        {product.name}
+                      <h3 className="font-bold text-lg leading-tight">
+                        <Link
+                          href={`/products/${product.id}`}
+                          className="text-gray-900 hover:text-green-700 hover:underline"
+                        >
+                          {product.name}
+                        </Link>
                       </h3>
                       <div className="text-green-700 font-bold text-lg whitespace-nowrap ml-3">
                         {product.price.toFixed(2)} EUR
@@ -306,18 +347,25 @@ function ProductsContent() {
                         {product.description}
                       </p>
                     )}
-                    <div className="flex items-center text-sm text-gray-500 mb-3">
-                      <span className="mr-1 text-base">*</span>
-                      <span>{product.farm_name}</span>
+                    <div className="flex flex-wrap items-center text-sm text-gray-600 mb-3">
+                      <Link
+                        href={`/farms/${product.farm_id}`}
+                        className="hover:text-green-700 hover:underline"
+                      >
+                        {product.farm_name}
+                      </Link>
                       {product.farm_verified && (
                         <span
-                          className="ml-1 text-green-600 font-bold"
+                          className="ml-1 text-green-700 font-bold"
                           title="Verificirana kmetija"
                         >
-                          v
+                          <span aria-hidden="true">✓</span>
+                          <span className="sr-only">Verificirana kmetija</span>
                         </span>
                       )}
-                      <span className="mx-1">-</span>
+                      <span className="mx-1" aria-hidden="true">
+                        ·
+                      </span>
                       <span>{product.farm_city}</span>
                       <DistanceBadge
                         latitude={product.farm_latitude}
@@ -337,11 +385,12 @@ function ProductsContent() {
                         {product.stock > 10
                           ? 'Na zalogi'
                           : product.stock > 0
-                            ? `Se ${product.stock} na zalogi`
+                            ? `Še ${product.stock} na zalogi`
                             : 'Razprodano'}
                       </span>
                       <button
                         onClick={() => handleAddToCart(product)}
+                        aria-label={`${addedToCart === product.id ? 'Dodano' : 'V košarico'}: ${product.name}`}
                         disabled={product.stock === 0 || addedToCart === product.id}
                         className={`px-4 py-2 rounded-lg text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed ${
                           addedToCart === product.id
