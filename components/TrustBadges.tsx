@@ -36,7 +36,9 @@ export default function TrustBadges() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
           {stats.map((stat) => (
             <div key={stat.label} className="text-center">
-              <div className="text-5xl mb-2">{stat.icon}</div>
+              <div className="text-5xl mb-2" aria-hidden="true">
+                {stat.icon}
+              </div>
               <div className="text-4xl font-bold mb-2">{stat.value}</div>
               <div className="text-green-100">{stat.label}</div>
             </div>
@@ -47,7 +49,10 @@ export default function TrustBadges() {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((feature) => (
             <div key={feature.title} className="bg-white/10 backdrop-blur rounded-xl p-6">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-2xl font-bold mb-4">
+              <div
+                className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-2xl font-bold mb-4"
+                aria-hidden="true"
+              >
                 {feature.icon}
               </div>
               <h3 className="text-xl font-bold mb-2">{feature.title}</h3>

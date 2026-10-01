@@ -51,8 +51,12 @@ export default function FeaturedFarms() {
     return (
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="text-4xl mb-4">⏳</div>
-          <p className="text-gray-600">Nalagam kmetije...</p>
+          <div className="text-4xl mb-4" aria-hidden="true">
+            ⏳
+          </div>
+          <p className="text-gray-600" role="status">
+            Nalagam kmetije...
+          </p>
         </div>
       </section>
     )
@@ -62,8 +66,12 @@ export default function FeaturedFarms() {
     return (
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="text-4xl mb-4">😔</div>
-          <p className="text-gray-600">{error}</p>
+          <div className="text-4xl mb-4" aria-hidden="true">
+            😔
+          </div>
+          <p className="text-gray-600" role="alert">
+            {error}
+          </p>
         </div>
       </section>
     )
@@ -79,7 +87,7 @@ export default function FeaturedFarms() {
           </div>
           <Link
             href="/farms"
-            className="hidden md:inline-block text-green-600 hover:text-green-700 font-semibold"
+            className="hidden md:inline-block text-green-700 hover:text-green-800 font-semibold"
           >
             Poglej vse →
           </Link>
@@ -89,7 +97,8 @@ export default function FeaturedFarms() {
           {farms.map((farm) => (
             <Link
               key={farm.id}
-              href={`/farms/${farm.id}`}
+              // The "Kmalu" placeholder has no detail page, so send it to the farm list
+              href={farm.id.startsWith('mock-') ? '/farms' : `/farms/${farm.id}`}
               className="bg-white rounded-2xl overflow-hidden hover:shadow-xl transition group"
             >
               {/* Farm Image */}
@@ -102,9 +111,12 @@ export default function FeaturedFarms() {
                     className="absolute inset-0 h-full w-full object-cover"
                   />
                 ) : (
-                <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-6xl">
-                  🏡
-                </div>
+                  <div
+                    className="absolute inset-0 flex items-center justify-center text-gray-400 text-6xl"
+                    aria-hidden="true"
+                  >
+                    🏡
+                  </div>
                 )}
                 {farm.is_verified && (
                   <div className="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
@@ -155,9 +167,9 @@ export default function FeaturedFarms() {
                 )}
 
                 {farm.is_verified ? (
-                  <div className="text-sm text-green-600 font-semibold">Verificirana kmetija ✓</div>
+                  <div className="text-sm text-green-700 font-semibold">Verificirana kmetija ✓</div>
                 ) : (
-                  <div className="text-sm text-amber-600 font-semibold">Kmalu dostopna</div>
+                  <div className="text-sm text-amber-700 font-semibold">Kmalu dostopna</div>
                 )}
               </div>
             </Link>
@@ -167,7 +179,7 @@ export default function FeaturedFarms() {
         <div className="mt-8 text-center md:hidden">
           <Link
             href="/farms"
-            className="inline-block text-green-600 hover:text-green-700 font-semibold"
+            className="inline-block text-green-700 hover:text-green-800 font-semibold"
           >
             Poglej vse kmetije →
           </Link>

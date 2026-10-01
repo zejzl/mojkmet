@@ -35,7 +35,10 @@ export default function HowItWorks() {
             <div key={step.number} className="relative">
               {/* Connector Line */}
               {step.number < 3 && (
-                <div className="hidden md:block absolute top-16 left-1/2 w-full h-0.5 bg-gradient-to-r from-green-300 to-transparent" />
+                <div
+                  className="hidden md:block absolute top-16 left-1/2 w-full h-0.5 bg-gradient-to-r from-green-300 to-transparent"
+                  aria-hidden="true"
+                />
               )}
 
               <div className="relative bg-gradient-to-br from-green-50 to-amber-50 rounded-2xl p-8 text-center hover:shadow-lg transition">
@@ -45,7 +48,9 @@ export default function HowItWorks() {
                 </div>
 
                 {/* Icon */}
-                <div className="text-6xl mb-4">{step.icon}</div>
+                <div className="text-6xl mb-4" aria-hidden="true">
+                  {step.icon}
+                </div>
 
                 {/* Title */}
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">{step.title}</h3>

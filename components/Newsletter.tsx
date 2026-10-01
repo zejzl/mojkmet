@@ -39,8 +39,10 @@ export default function Newsletter() {
   return (
     <section className="py-20 bg-gradient-to-br from-amber-50 via-green-50 to-blue-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-3xl shadow-2xl p-12 text-center transform hover:scale-105 transition-all duration-300">
-          <div className="text-7xl mb-6 animate-bounce">🚀</div>
+        <div className="bg-white rounded-3xl shadow-2xl p-12 text-center transform motion-safe:hover:scale-105 transition-all duration-300">
+          <div className="text-7xl mb-6 motion-safe:animate-bounce" aria-hidden="true">
+            🚀
+          </div>
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Pridružite se listi čakanja
           </h2>
@@ -50,8 +52,13 @@ export default function Newsletter() {
           </p>
 
           {subscribed ? (
-            <div className="bg-gradient-to-r from-green-100 to-green-200 text-green-800 px-8 py-6 rounded-2xl inline-flex items-center gap-3 text-lg font-semibold">
-              <span className="text-3xl">✓</span>
+            <div
+              role="status"
+              className="bg-gradient-to-r from-green-100 to-green-200 text-green-800 px-8 py-6 rounded-2xl inline-flex items-center gap-3 text-lg font-semibold"
+            >
+              <span className="text-3xl" aria-hidden="true">
+                ✓
+              </span>
               Hvala! Na listi ste. Kmalu vas obvestimo o odprtju.
             </div>
           ) : (
@@ -60,6 +67,8 @@ export default function Newsletter() {
                 <div className="flex flex-col sm:flex-row gap-3">
                   <input
                     type="email"
+                    aria-label="E-poštni naslov"
+                    autoComplete="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="vaš@email.si"
@@ -78,14 +87,22 @@ export default function Newsletter() {
               </form>
 
               {error && (
-                <div className="bg-red-100 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
+                <div
+                  role="alert"
+                  className="bg-red-100 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm"
+                >
                   {error}
                 </div>
               )}
 
-              <div className="flex items-center justify-center gap-6 text-sm text-gray-600">
+              <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-gray-600">
                 <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                  <svg
+                    className="w-5 h-5 text-green-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    aria-hidden="true"
+                  >
                     <path
                       fillRule="evenodd"
                       d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -95,7 +112,12 @@ export default function Newsletter() {
                   Brez spam-a
                 </div>
                 <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                  <svg
+                    className="w-5 h-5 text-green-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    aria-hidden="true"
+                  >
                     <path
                       fillRule="evenodd"
                       d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -105,7 +127,12 @@ export default function Newsletter() {
                   Ekskluzivne ugodnosti
                 </div>
                 <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                  <svg
+                    className="w-5 h-5 text-green-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    aria-hidden="true"
+                  >
                     <path
                       fillRule="evenodd"
                       d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"

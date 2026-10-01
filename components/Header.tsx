@@ -5,26 +5,65 @@ import { useState } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { useCart } from '@/lib/cart-context'
 
+function CartLink({ count }: { count: number }) {
+  return (
+    <Link
+      href="/cart"
+      className="relative text-gray-700 hover:text-green-600 transition p-1"
+      aria-label={
+        count > 0 ? `Košarica, ${count} ${count === 1 ? 'izdelek' : 'izdelkov'}` : 'Košarica'
+      }
+    >
+      <svg
+        className="w-6 h-6"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+        />
+      </svg>
+      {count > 0 && (
+        <span
+          className="absolute -top-1 -right-1 bg-green-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold"
+          aria-hidden="true"
+        >
+          {count > 99 ? '99+' : count}
+        </span>
+      )}
+    </Link>
+  )
+}
+
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { data: session, status } = useSession()
   const { getCartCount } = useCart()
   const cartCount = getCartCount()
+  const firstName = session?.user?.name?.trim().split(/\s+/)[0]
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-green-600 to-green-800 rounded-lg flex items-center justify-center">
+          <Link href="/" className="flex items-center space-x-2" aria-label="mojkmet.eu, domov">
+            <div
+              className="w-10 h-10 bg-gradient-to-br from-green-600 to-green-800 rounded-lg flex items-center justify-center"
+              aria-hidden="true"
+            >
               <span className="text-white font-bold text-xl">MK</span>
             </div>
             <span className="text-xl font-bold text-gray-900">mojkmet.eu</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center space-x-8" aria-label="Glavna navigacija">
             <Link href="/products" className="text-gray-700 hover:text-green-600 transition">
               Proizvodi
             </Link>
@@ -41,33 +80,19 @@ export default function Header() {
 
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            {/* Cart */}
-            <Link
-              href="/cart"
-              className="relative text-gray-700 hover:text-green-600 transition p-1"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-green-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
-                  {cartCount > 99 ? '99+' : cartCount}
-                </span>
-              )}
-            </Link>
+            <CartLink count={cartCount} />
 
             {status === 'loading' ? (
-              <div className="text-gray-500">Nalaganje...</div>
+              <div className="text-gray-500" role="status">
+                Nalaganje...
+              </div>
             ) : session ? (
               <div className="flex items-center space-x-4">
-                <span className="text-gray-700">
-                  Pozdravljeni, {session.user?.name || session.user?.email}
-                </span>
+                {firstName && (
+                  <span className="hidden lg:inline max-w-40 truncate text-gray-700">
+                    Pozdravljeni, {firstName}
+                  </span>
+                )}
                 <Link href="/dashboard" className="text-gray-700 hover:text-green-600 transition">
                   Nadzorna plošča
                 </Link>
@@ -95,27 +120,22 @@ export default function Header() {
 
           {/* Mobile right side: cart + menu */}
           <div className="md:hidden flex items-center space-x-3">
-            <Link
-              href="/cart"
-              className="relative text-gray-700 hover:text-green-600 transition p-1"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-green-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
-                  {cartCount > 99 ? '99+' : cartCount}
-                </span>
-              )}
-            </Link>
+            <CartLink count={cartCount} />
 
-            <button className="text-gray-700" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button
+              className="text-gray-700 p-1"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-menu"
+              aria-label={mobileMenuOpen ? 'Zapri meni' : 'Odpri meni'}
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
                 {mobileMenuOpen ? (
                   <path
                     strokeLinecap="round"
@@ -136,10 +156,14 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Mobile menu */}
+        {/* Mobile menu. Header persists across navigations, so close it on any tap inside. */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200">
-            <nav className="flex flex-col space-y-4">
+          <div id="mobile-menu" className="md:hidden py-4 border-t border-gray-200">
+            <nav
+              className="flex flex-col space-y-4"
+              aria-label="Mobilna navigacija"
+              onClick={() => setMobileMenuOpen(false)}
+            >
               <Link href="/products" className="text-gray-700 hover:text-green-600 transition">
                 Proizvodi
               </Link>

@@ -3,7 +3,7 @@ import Link from 'next/link'
 export default function Categories() {
   const categories = [
     {
-      name: 'Mleko in mlecni izdelki',
+      name: 'Mleko in mlečni izdelki',
       slug: 'mlecni-izdelki',
       icon: '🥛',
       color: 'from-blue-100 to-blue-200',
@@ -13,7 +13,7 @@ export default function Categories() {
     { name: 'Sadje', slug: 'sadje', icon: '🍎', color: 'from-red-100 to-red-200' },
     { name: 'Meso', slug: 'meso', icon: '🥩', color: 'from-pink-100 to-pink-200' },
     {
-      name: 'Med in cebelji izdelki',
+      name: 'Med in čebelji izdelki',
       slug: 'med',
       icon: '🍯',
       color: 'from-amber-100 to-amber-200',
@@ -36,7 +36,9 @@ export default function Categories() {
               href={`/products?category=${category.slug}`}
               className={`bg-gradient-to-br ${category.color} rounded-2xl p-6 text-center hover:scale-105 transition group`}
             >
-              <div className="text-5xl mb-3 group-hover:scale-110 transition">{category.icon}</div>
+              <div className="text-5xl mb-3 group-hover:scale-110 transition" aria-hidden="true">
+                {category.icon}
+              </div>
               <h3 className="font-semibold text-gray-900 mb-1 text-sm">{category.name}</h3>
             </Link>
           ))}

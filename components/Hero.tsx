@@ -67,14 +67,19 @@ export default function Hero() {
             </p>
 
             {/* Search Bar */}
-            <form onSubmit={submitSearch} className="bg-white rounded-xl shadow-lg p-2 mb-6">
+            <form
+              onSubmit={submitSearch}
+              role="search"
+              className="bg-white rounded-xl shadow-lg p-2 mb-6"
+            >
               <div className="flex gap-2">
                 <input
-                  type="text"
+                  type="search"
+                  aria-label="Iskanje pridelkov"
                   placeholder="Kaj iščete? (npr. mleko, jajca)"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="flex-1 min-w-0 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
                 <button
                   type="submit"
@@ -98,7 +103,7 @@ export default function Hero() {
                 <Link
                   key={cat.slug}
                   href={`/products?category=${cat.slug}`}
-                  className="text-sm bg-white px-3 py-1 rounded-full hover:bg-green-50 transition border border-gray-200"
+                  className="text-sm bg-white px-3 py-1.5 rounded-full hover:bg-green-50 transition border border-gray-200"
                 >
                   {cat.label}
                 </Link>
@@ -120,7 +125,9 @@ export default function Hero() {
                     key={item.label}
                     className="flex flex-col items-center justify-center bg-white/80 backdrop-blur rounded-xl p-6 text-center shadow-sm border border-white"
                   >
-                    <div className="text-5xl mb-2">{item.emoji}</div>
+                    <div className="text-5xl mb-2" aria-hidden="true">
+                      {item.emoji}
+                    </div>
                     <p className="text-sm font-medium text-gray-700">{item.label}</p>
                   </div>
                 ))}
@@ -128,14 +135,14 @@ export default function Hero() {
             </div>
 
             {/* Floating Stats Cards */}
-            <div className="absolute -bottom-6 -left-6 bg-white rounded-xl shadow-lg p-4">
+            <div className="absolute -bottom-6 -left-2 md:-left-6 bg-white rounded-xl shadow-lg p-4">
               <div className="text-3xl font-bold text-green-600">
                 {statsLoading ? '...' : `${stats?.farmCount || 0}+`}
               </div>
               <div className="text-sm text-gray-600">Kmetij</div>
             </div>
 
-            <div className="absolute -top-6 -right-6 bg-white rounded-xl shadow-lg p-4">
+            <div className="absolute -top-6 -right-2 md:-right-6 bg-white rounded-xl shadow-lg p-4">
               <div className="text-3xl font-bold text-amber-600">
                 {statsLoading ? '...' : `${stats?.orderCount || 0}+`}
               </div>
